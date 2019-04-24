@@ -1,14 +1,15 @@
-const { Router } = require('express')
-const createLogger = require('./logger.js')
-const cityMetadata = require('../cityMetadata.json')
+import { Router } from 'express'
+import morgan from 'morgan'
+import createLogger from './logger'
+import cityMetadata from '../cityMetadata.json'
 
-const Connection = require('./db/connection.js')
-const Lines = require('./lines/index.js')
-const Search = require('./stops/search.js')
-const Station = require('./stops/station.js')
-const StopsNZAKL = require('./stops/regions/nz-akl.js')
-const StopsNZWLG = require('./stops/regions/nz-wlg.js')
-const Realtime = require('./realtime/index.js')
+import Connection from './db/connection'
+import Lines from './lines/index'
+import Search from './stops/search'
+import Station from './stops/station'
+import StopsNZAKL from './stops/regions/nz-akl'
+import StopsNZWLG from './stops/regions/nz-wlg'
+import Realtime from './realtime/index'
 
 class WakaWorker {
   constructor(config) {
@@ -175,4 +176,4 @@ class WakaWorker {
     router.post('/vehicle_location', realtime.vehicleLocation)
   }
 }
-module.exports = WakaWorker
+export default WakaWorker

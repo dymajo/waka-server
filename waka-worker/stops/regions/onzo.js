@@ -1,5 +1,5 @@
 // TODO: this is not implemented.
-const Request = require('request')
+import Request from 'request'
 
 const onzos = [{ onzo: { bike: 1 } }]
 
@@ -31,4 +31,4 @@ const onzo = {
   },
 }
 
-module.exports = onzo
+export default onzo

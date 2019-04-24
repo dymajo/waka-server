@@ -1,7 +1,7 @@
 // TODO: make into a class
-const cache = require('../../cache.js')
-const log = require('../../../server-common/logger.js')
-const queries = require('../queries.js')
+import cache from '../../cache'
+import log from '../../../server-common/logger'
+import queries from '../queries'
 
 const friendlyNames = {
   Orbiter: 'The Orbiter',
@@ -15,13 +15,14 @@ const sortLines = lineGroups => {
       const parsedB = parseInt(b)
       if (isNaN(parsedA) && isNaN(parsedB)) {
         return a.localeCompare(b)
-      } else if (isNaN(parsedA)) {
-        return -1
-      } else if (isNaN(parsedB)) {
-        return 1
-      } else {
-        return parsedA - parsedB
       }
+      if (isNaN(parsedA)) {
+        return -1
+      }
+      if (isNaN(parsedB)) {
+        return 1
+      }
+      return parsedA - parsedB
     })
   })
 }
@@ -113,7 +114,7 @@ const lineGroups = [
   },
 ]
 
-module.exports = {
+export default {
   allLines,
   friendlyNames,
   lineColors,

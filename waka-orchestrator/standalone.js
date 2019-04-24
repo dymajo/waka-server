@@ -1,8 +1,9 @@
-const Express = require('express')
-const bodyParser = require('body-parser')
-const ConfigManager = require('./configManager.js')
-const WakaOrchestrator = require('./index.js')
-const logger = require('./logger.js')
+import Express from 'express'
+import bodyParser from 'body-parser'
+import morgan from 'morgan'
+import ConfigManager from './configManager'
+import WakaOrchestrator from './index'
+import logger from './logger'
 
 const start = async () => {
   const app = new Express()

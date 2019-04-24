@@ -1,6 +1,8 @@
-module.exports = {
+import 'dotenv'
+
+export default {
   // agencies that you want workers to be managed automatically.
-  autoupdate: ['nz-akl', 'nz-wlg'],
+  autoupdate: ['au-syd', 'au-cbr', 'fr-par'],
 
   // how many minutes till first pull
   firstpull: 5,

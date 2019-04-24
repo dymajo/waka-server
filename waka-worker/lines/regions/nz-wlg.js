@@ -1,4 +1,4 @@
-const DataAccess = require('../dataAccess.js')
+import DataAccess from '../dataAccess'
 
 const groups = [
   {
@@ -130,4 +130,4 @@ class LinesNZWLG {
     return `#${retValue}`
   }
 }
-module.exports = LinesNZWLG
+export default LinesNZWLG

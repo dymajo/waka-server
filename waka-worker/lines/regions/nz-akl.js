@@ -1,6 +1,6 @@
-const DataAccess = require('../dataAccess.js')
-const lineGroups = require('./nz-akl-groups.json')
-const allLines = require('./nz-akl-lines.json')
+import DataAccess from '../dataAccess'
+import lineGroups from './nz-akl-groups.json'
+import allLines from './nz-akl-lines.json'
 
 const getColor = (agencyId, code) => {
   switch (agencyId) {
@@ -204,4 +204,4 @@ class LinesNZAKL {
   }
 }
 
-module.exports = LinesNZAKL
+export default LinesNZAKL

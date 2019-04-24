@@ -1,4 +1,4 @@
-const sql = require('mssql')
+import sql from 'mssql'
 
 class StopsDataAccess {
   constructor(props) {
@@ -32,8 +32,8 @@ class StopsDataAccess {
       .input('stop_code', sql.VarChar, stopCode)
 
     const result = await sqlRequest.query(`
-      SELECT 
-        stops.stop_code as stop_id, 
+      SELECT
+        stops.stop_code as stop_id,
         stops.stop_name,
         stops.stop_desc,
         stops.stop_lat,
@@ -49,9 +49,9 @@ class StopsDataAccess {
       LEFT JOIN
         stop_times
       ON stop_times.id = (
-          SELECT TOP 1 id 
+          SELECT TOP 1 id
           FROM    stop_times
-          WHERE 
+          WHERE
           stop_times.stop_id = stops.stop_id
       )
       LEFT JOIN trips ON trips.trip_id = stop_times.trip_id
@@ -124,7 +124,7 @@ class StopsDataAccess {
         JOIN trips ON trips.trip_id = stop_times.trip_id
         JOIN routes ON routes.route_id = trips.route_id
       WHERE stop_times.stop_id = @stop_id
-      GROUP BY 
+      GROUP BY
         route_short_name,
         trip_headsign,
         direction_id
@@ -155,7 +155,7 @@ class StopsDataAccess {
     if (filteredStopCodes.length > 0) {
       // TODO: This isn't SQL Injection Proof, but it shouldn't be hit from there anyway.
       // This should also be a stored procedure.
-      const stopCodesQuery = `('${filteredStopCodes.join("','")}')`
+      const stopCodesQuery = `('${filteredStopCodes.join('\',\'')}')`
 
       const sqlRequest = connection.get().request()
       const result = await sqlRequest.query(`
@@ -175,7 +175,7 @@ class StopsDataAccess {
           JOIN #stops on stop_times.stop_id = #stops.stop_id
           JOIN trips ON trips.trip_id = stop_times.trip_id
           JOIN routes ON routes.route_id = trips.route_id
-        GROUP BY 
+        GROUP BY
           #stops.stop_code,
           route_short_name,
           trip_headsign,
@@ -210,4 +210,4 @@ class StopsDataAccess {
     return routesContainer
   }
 }
-module.exports = StopsDataAccess
+export default StopsDataAccess

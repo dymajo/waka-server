@@ -1,4 +1,4 @@
-const logger = require('../logger.js')
+import logger from '../logger'
 
 // seeing as I'm on the kubes team at work,
 // I should probaby get this to also work with kubes.
@@ -7,4 +7,4 @@ class GatewayKubernetes {
     logger.error('Kubernetes Gateway Not Implemented!')
   }
 }
-module.exports = GatewayKubernetes
+export default GatewayKubernetes

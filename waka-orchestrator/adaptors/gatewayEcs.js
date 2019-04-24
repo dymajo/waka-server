@@ -1,8 +1,8 @@
-const logger = require('../logger.js')
+import logger from '../logger'
 
 class GatewayEcs {
   start() {
     logger.info('ECS Gateway Started.')
   }
 }
-module.exports = GatewayEcs
+export default GatewayEcs

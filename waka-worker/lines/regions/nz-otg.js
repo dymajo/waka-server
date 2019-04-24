@@ -1,6 +1,6 @@
 // TODO: make into a class
-const connection = require('../../db/connection.js')
-const cache = require('../../cache.js')
+import connection from '../../db/connection'
+import cache from '../../cache'
 
 const agencyFilter = line => {
   line = line.toLowerCase()
@@ -12,7 +12,7 @@ const agencyFilter = line => {
 
 const getColor = (agency, line) => {
   if (agency === 'QTN') {
-    return lineColors['QTN' + line] || '#000'
+    return lineColors[`QTN${line}`] || '#000'
   }
   return lineColors[line] || '#000'
 }
@@ -49,7 +49,7 @@ const getLines = () => {
         const route_code = route_code_prefix + record.route_short_name
         if (!(route_code in allLines)) {
           allLines[route_code] = [[record.route_long_name]]
-          lineColors[route_code] = '#' + record.route_color.toLowerCase()
+          lineColors[route_code] = `#${record.route_color.toLowerCase()}`
 
           if (route_code !== record.route_short_name) {
             friendlyNumbers[route_code] = record.route_short_name
@@ -68,13 +68,13 @@ const getLines = () => {
 }
 cache.ready.push(getLines)
 
-module.exports = {
-  agencyFilter: agencyFilter,
-  getColor: getColor,
-  lineColors: lineColors,
-  lineGroups: lineGroups,
+export default {
+  agencyFilter,
+  getColor,
+  lineColors,
+  lineGroups,
   friendlyNames: {},
-  friendlyNumbers: friendlyNumbers,
-  allLines: allLines,
+  friendlyNumbers,
+  allLines,
   lineOperators: {},
 }

@@ -1,12 +1,12 @@
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const extract = require('extract-zip')
-const fetch = require('node-fetch')
-const csvparse = require('csv-parse')
-const transform = require('stream-transform')
-const moment = require('moment-timezone')
-const logger = require('../logger.js')
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import extract from 'extract-zip'
+import fetch from 'node-fetch'
+import csvparse from 'csv-parse'
+import transform from 'stream-transform'
+import moment from 'moment-timezone'
+import logger from '../logger'
 
 class BasicUpdater {
   constructor(props) {
@@ -138,4 +138,4 @@ class BasicUpdater {
     clearTimeout(this.timeout)
   }
 }
-module.exports = BasicUpdater
+export default BasicUpdater

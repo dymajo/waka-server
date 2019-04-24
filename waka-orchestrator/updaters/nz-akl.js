@@ -1,6 +1,6 @@
-const fetch = require('node-fetch')
-const moment = require('moment-timezone')
-const logger = require('../logger.js')
+import fetch from 'node-fetch'
+import moment from 'moment-timezone'
+import logger from '../logger'
 
 class ATUpdater {
   constructor(props) {
@@ -77,4 +77,4 @@ class ATUpdater {
     clearTimeout(this.timeout)
   }
 }
-module.exports = ATUpdater
+export default ATUpdater

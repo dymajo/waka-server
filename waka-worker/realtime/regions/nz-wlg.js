@@ -1,6 +1,6 @@
-const fetch = require('node-fetch')
-const sql = require('mssql')
-const moment = require('moment-timezone')
+import fetch from 'node-fetch'
+import sql from 'mssql'
+import moment from 'moment-timezone'
 
 const tripsUrl = 'https://www.metlink.org.nz/api/v1/StopDepartures/'
 const serviceLocation = 'https://www.metlink.org.nz/api/v1/ServiceLocation/'
@@ -133,13 +133,13 @@ class RealtimeNZWLG {
     const tripId = req.body.trips[0]
 
     const sqlRequest = connection.get().request()
-    sqlRequest.input('trip_id', sql.VarChar(50), tripId)
+    sqlRequest.input('trip_id', sql.stop_idVarChar(50), tripId)
     try {
       const result = await sqlRequest.query(
         `
       SELECT TOP 1
         route_short_name, direction_id
-      FROM trips 
+      FROM trips
       INNER JOIN routes ON
         routes.route_id = trips.route_id
       WHERE
@@ -202,4 +202,4 @@ class RealtimeNZWLG {
     }
   }
 }
-module.exports = RealtimeNZWLG
+export default RealtimeNZWLG

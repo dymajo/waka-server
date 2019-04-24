@@ -1,10 +1,8 @@
-const Express = require('express')
-const dotenv = require('dotenv')
-const bodyParser = require('body-parser')
-const EnvMapper = require('../envMapper.js')
-const WakaWorker = require('./index.js')
-
-dotenv.config()
+import Express from 'express'
+import 'dotenv'
+import bodyParser from 'body-parser'
+import EnvMapper from '../envMapper'
+import WakaWorker from './index'
 
 const { PREFIX, VERSION, PORT } = process.env
 

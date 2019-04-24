@@ -1,4 +1,4 @@
-const fetch = require('node-fetch')
+import fetch from 'node-fetch'
 
 const pricingHtml = `
 <ul class="trip-content" style="padding: 0; min-height: 0;">
@@ -229,4 +229,4 @@ class StopsNZAKL {
   }
 }
 
-module.exports = StopsNZAKL
+export default StopsNZAKL

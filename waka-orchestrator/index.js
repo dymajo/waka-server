@@ -1,12 +1,12 @@
-const { Router } = require('express')
+import { Router } from 'express'
 
-const WakaProxy = require('../waka-proxy/index.js')
-const GatewayLocal = require('./adaptors/gatewayLocal.js')
-const GatewayEcs = require('./adaptors/gatewayEcs.js')
-const GatewayKubernetes = require('./adaptors/gatewayKubernetes.js')
-const UpdateManager = require('./updaters/index.js')
-const VersionManager = require('./versionManager.js')
-const PrivateApi = require('./api/index.js')
+import WakaProxy from '../waka-proxy'
+import GatewayLocal from './adaptors/gatewayLocal'
+import GatewayEcs from './adaptors/gatewayEcs'
+import GatewayKubernetes from './adaptors/gatewayKubernetes'
+import UpdateManager from './updaters'
+import VersionManager from './versionManager'
+import PrivateApi from './api'
 
 class WakaOrchestrator {
   constructor(config) {
@@ -51,4 +51,4 @@ class WakaOrchestrator {
     }
   }
 }
-module.exports = WakaOrchestrator
+export default WakaOrchestrator
