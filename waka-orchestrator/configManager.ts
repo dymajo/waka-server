@@ -1,11 +1,37 @@
 import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
+import { NumberResults } from 'aws-sdk/clients/clouddirectory'
 
 class ConfigManager {
+  config: {
+    port: number
+    gateway: string
+    keyvalue: string
+    keyvaluePrefix: string
+    keyvalueRegion: string
+    storageService: string
+    emulatedStorage: boolean
+    connectionTimeout: number
+    requestTimeout: number
+    api: {
+      [api: string]: any
+    }
+    db: {
+      local: {
+        server: string
+        user: string
+        password: string
+      }
+    }
+    updaters: {
+      [updater: string]: boolean
+    }
+  }
+  meta: KeyvalueDynamo
   constructor() {
     const config = {
-      port: process.env.PORT || 9001,
+      port: Number.parseInt(process.env.PORT) || 9001,
       gateway: process.env.GATEWAY || 'local',
       keyvalue: process.env.KEYVALUE || 'local',
       keyvaluePrefix: process.env.KEYVALUE_PREFIX || 'waka',
