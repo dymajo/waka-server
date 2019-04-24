@@ -1,8 +1,8 @@
-const path = require('path')
-const express = require('express')
-const logger = require('../logger.js')
-const KeyvalueLocal = require('../adaptors/keyvalueLocal.js')
-const KeyvalueDynamo = require('../adaptors/keyvalueDynamo.js')
+import path from 'path'
+import express from 'express'
+import logger from '../logger'
+import KeyvalueLocal from '../adaptors/keyvalueLocal'
+import KeyvalueDynamo from '../adaptors/keyvalueDynamo'
 
 const { Router } = express
 
@@ -137,4 +137,4 @@ class PrivateApi {
     router.use('/', express.static(path.join(__dirname, '/dist')))
   }
 }
-module.exports = PrivateApi
+export default PrivateApi

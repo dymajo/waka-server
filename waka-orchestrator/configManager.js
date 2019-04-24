@@ -1,6 +1,6 @@
-const logger = require('./logger.js')
-const KeyvalueLocal = require('./adaptors/keyvalueLocal.js')
-const KeyvalueDynamo = require('./adaptors/keyvalueDynamo.js')
+import logger from './logger'
+import KeyvalueLocal from './adaptors/keyvalueLocal'
+import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 
 class ConfigManager {
   constructor() {
@@ -57,4 +57,4 @@ class ConfigManager {
     return mergedConfig
   }
 }
-module.exports = ConfigManager
+export default ConfigManager

@@ -1,12 +1,12 @@
-const sql = require('mssql')
-const Storage = require('../db/storage.js')
+import sql from 'mssql'
+import Storage from '../db/storage'
 
-const cityMetadata = require('../../cityMetadata.json')
-const StopsDataAccess = require('../stops/dataAccess.js')
+import cityMetadata from '../../cityMetadata.json'
+import StopsDataAccess from '../stops/dataAccess'
 
-const LinesAUSYD = require('./regions/au-syd.js')
-const LinesNZAKL = require('./regions/nz-akl.js')
-const LinesNZWLG = require('./regions/nz-wlg.js')
+import LinesAUSYD from './regions/au-syd'
+import LinesNZAKL from './regions/nz-akl'
+import LinesNZWLG from './regions/nz-wlg'
 
 const regions = {
   // 'au-syd': LinesAUSYD,
@@ -262,7 +262,7 @@ class Lines {
         sqlRequest.input('agency_id', sql.VarChar(50), agencyId)
       }
     }
-    sqlRequest.input('route_short_name', sql.VarChar(50), lineId)
+    sqlRequest.input('route_short_name', sql.stopsDataAccessVarChar(50), lineId)
 
     const query = `
       SELECT
@@ -592,4 +592,4 @@ class Lines {
   }
 }
 
-module.exports = Lines
+export default Lines

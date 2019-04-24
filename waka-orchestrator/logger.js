@@ -1,8 +1,8 @@
-const bunyan = require('bunyan')
+import bunyan from 'bunyan'
 
 const logger = bunyan.createLogger({
   name: 'waka-orchestrator',
   serializers: bunyan.stdSerializers,
 })
 
-module.exports = logger
+export default logger

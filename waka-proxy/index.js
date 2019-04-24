@@ -1,9 +1,9 @@
-const express = require('express')
-const WorkerDiscovery = require('./workerDiscovery.js')
+import { Router } from 'express'
+import WorkerDiscovery from './workerDiscovery'
 
 class WakaProxy {
   constructor(props) {
-    this.router = express.Router()
+    this.router = Router()
     this.discovery = new WorkerDiscovery({
       endpoint: props.endpoint,
     })
@@ -45,7 +45,7 @@ class WakaProxy {
     this.discovery.start()
   }
 }
-module.exports = WakaProxy
+export default WakaProxy
 
 /**
  * @api {get} /regions Get Available Regions

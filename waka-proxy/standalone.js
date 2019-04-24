@@ -1,6 +1,7 @@
-const Express = require('express')
-const WakaProxy = require('./index.js')
-const logger = require('./logger.js')
+import Express from 'express'
+import WakaProxy from './index'
+import logger from './logger'
+import 'dotenv'
 
 const app = new Express()
 app.use((req, res, next) => {

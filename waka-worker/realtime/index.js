@@ -1,6 +1,6 @@
-const RealtimeAUSYD = require('./regions/au-syd')
-const RealtimeNZAKL = require('./regions/nz-akl')
-const RealtimeNZWLG = require('./regions/nz-wlg')
+import RealtimeAUSYD from './regions/au-syd'
+import RealtimeNZAKL from './regions/nz-akl'
+import RealtimeNZWLG from './regions/nz-wlg'
 
 const regions = {
   'au-syd': RealtimeAUSYD,
@@ -208,4 +208,4 @@ class Realtime {
     }
   }
 }
-module.exports = Realtime
+export default Realtime

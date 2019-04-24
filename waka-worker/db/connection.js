@@ -1,4 +1,4 @@
-const sql = require('mssql')
+import { ConnectionPool } from 'mssql'
 
 class Connection {
   constructor(props) {
@@ -18,7 +18,7 @@ class Connection {
   }
 
   open() {
-    this.pool = new sql.ConnectionPool(this.db, err => {
+    this.pool = new ConnectionPool(this.db, err => {
       if (err) {
         this.logger.error(err)
         return this.readyReject()
@@ -29,4 +29,4 @@ class Connection {
     return this.ready
   }
 }
-module.exports = Connection
+export default Connection

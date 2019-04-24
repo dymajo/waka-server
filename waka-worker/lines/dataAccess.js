@@ -1,4 +1,4 @@
-const sql = require('mssql')
+import sql from 'mssql'
 
 class DataAccess {
   constructor(props) {
@@ -26,12 +26,12 @@ class DataAccess {
       `
       SELECT top(1)
         agency_id
-      FROM routes 
-      WHERE 
+      FROM routes
+      WHERE
         route_short_name = @route_short_name
     `
     )
     return data
   }
 }
-module.exports = DataAccess
+export default DataAccess

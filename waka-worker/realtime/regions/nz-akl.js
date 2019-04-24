@@ -1,6 +1,6 @@
-const fetch = require('node-fetch')
-const sql = require('mssql')
-const doubleDeckers = require('./nz-akl-doubledecker.json')
+import fetch from 'node-fetch'
+import sql from 'mssql'
+import doubleDeckers from './nz-akl-doubledecker.json'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
@@ -240,7 +240,7 @@ class RealtimeNZAKL {
       )
       // this is good enough because data comes from auckland transport
       const tripIds = trips.map(entity => entity.vehicle.trip.trip_id)
-      const escapedTripIds = `'${tripIds.join("', '")}'`
+      const escapedTripIds = `'${tripIds.join('\', \'')}'`
       const sqlTripIdRequest = connection.get().request()
       const tripIdRequest = await sqlTripIdRequest.query(`
         SELECT *
@@ -272,4 +272,4 @@ class RealtimeNZAKL {
     }
   }
 }
-module.exports = RealtimeNZAKL
+export default RealtimeNZAKL

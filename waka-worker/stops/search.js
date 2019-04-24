@@ -1,4 +1,4 @@
-const sql = require('mssql')
+import sql from 'mssql'
 
 class Search {
   constructor(props) {
@@ -210,15 +210,15 @@ class Search {
     const { connection, prefix, _stopsFilter } = this
     const latDist = distance / 100000
     const lonDist = distance / 65000
-    const stop_lat_gt = lat - latDist
-    const stop_lat_lt = lat + latDist
-    const stop_lng_gt = lon - lonDist
-    const stop_lng_lt = lon + lonDist
+    const stopLatGt = lat - latDist
+    const stopLatLt = lat + latDist
+    const stopLngGt = lon - lonDist
+    const stopLngLt = lon + lonDist
     const sqlRequest = connection.get().request()
-    sqlRequest.input('stop_lat_gt', sql.Decimal(10, 6), stop_lat_gt)
-    sqlRequest.input('stop_lat_lt', sql.Decimal(10, 6), stop_lat_lt)
-    sqlRequest.input('stop_lon_gt', sql.Decimal(10, 6), stop_lng_gt)
-    sqlRequest.input('stop_lon_lt', sql.Decimal(10, 6), stop_lng_lt)
+    sqlRequest.input('stop_lat_gt', sql.Decimal(10, 6), stopLatGt)
+    sqlRequest.input('stop_lat_lt', sql.Decimal(10, 6), stopLatLt)
+    sqlRequest.input('stop_lon_gt', sql.Decimal(10, 6), stopLngGt)
+    sqlRequest.input('stop_lon_lt', sql.Decimal(10, 6), stopLngLt)
     const result = await sqlRequest.query(
       `
       SELECT
@@ -257,4 +257,4 @@ class Search {
     return stops
   }
 }
-module.exports = Search
+export default Search

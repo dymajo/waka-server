@@ -1,7 +1,8 @@
-const GtfsRealtimeBindings = require('gtfs-realtime-bindings')
-const fetch = require('node-fetch')
-const request = require('request')
-const protobuf = require('protobufjs')
+import GtfsRealtimeBindings from 'gtfs-realtime-bindings'
+import fetch from 'node-fetch'
+import axios from 'axios'
+import request from 'request'
+import protobuf from 'protobufjs'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
@@ -127,4 +128,4 @@ class RealtimeAUSYD {
   }
 }
 
-module.exports = RealtimeAUSYD
+export default RealtimeAUSYD

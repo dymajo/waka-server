@@ -29,6 +29,7 @@
     "extract-zip": "^1.6.7",
     "gtfs-realtime-bindings": "0.0.4",
     "moment-timezone": "^0.5.23",
+    "morgan": "^1.9.1",
     "mssql": "^4.1.0",
     "node-fetch": "^2.3.0",
     "protobufjs": "^6.8.8",

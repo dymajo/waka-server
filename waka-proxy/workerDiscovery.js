@@ -1,6 +1,6 @@
-const fetch = require('node-fetch')
-const cityMetadata = require('../cityMetadata.json')
-const logger = require('./logger.js')
+import fetch from 'node-fetch'
+import cityMetadata from '../cityMetadata.json'
+import logger from './logger'
 
 class WorkerDiscovery {
   constructor(props) {
@@ -89,4 +89,4 @@ class WorkerDiscovery {
     return availableRegions
   }
 }
-module.exports = WorkerDiscovery
+export default WorkerDiscovery

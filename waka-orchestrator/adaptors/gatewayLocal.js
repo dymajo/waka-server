@@ -1,6 +1,6 @@
-const { Router } = require('express')
-const logger = require('../logger.js')
-const WakaWorker = require('../../waka-worker/index.js')
+import { Router } from 'express'
+import logger from '../logger'
+import WakaWorker from '../../waka-worker/index'
 
 class GatewayLocal {
   constructor() {
@@ -40,4 +40,4 @@ class GatewayLocal {
     logger.info({ prefix }, 'Local Gateway Stopped.')
   }
 }
-module.exports = GatewayLocal
+export default GatewayLocal

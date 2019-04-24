@@ -1,6 +1,6 @@
-const path = require('path')
-const fs = require('fs').promises
-const logger = require('../logger.js')
+import path from 'path'
+import { promises as fs } from 'fs'
+import logger from '../logger'
 
 // this is designed to be slow af to emulate the dynamoDB lag
 const filePath = path.join(__dirname, '../../cache/keyvalue-')
@@ -61,4 +61,4 @@ class KeyvalueLocal {
     return data
   }
 }
-module.exports = KeyvalueLocal
+export default KeyvalueLocal
