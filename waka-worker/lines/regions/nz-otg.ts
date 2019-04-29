@@ -34,7 +34,14 @@ const lineGroups = [
 const getLines = () => {
   const sqlRequest = connection.get().request()
   sqlRequest
-    .query(
+    .query<{
+      route_id: string
+      route_short_name: string
+      route_long_name: string
+      agency_id: string
+      route_type: string
+      route_color: string
+    }>(
       `
     SELECT
       route_id, route_short_name, route_long_name, agency_id, route_type, route_color

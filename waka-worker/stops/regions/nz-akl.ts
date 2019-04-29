@@ -221,7 +221,7 @@ class StopsNZAKL extends BaseStops {
     if (code in this.carparks) {
       return this.carparks[code]
     }
-    throw Error({ message: 'Carpark Not Found!' })
+    throw Error('Carpark Not Found!')
   }
 
   getTimes(code: string) {

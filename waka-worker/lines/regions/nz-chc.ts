@@ -1,4 +1,6 @@
-const DataAccess = require('../dataAccess.js')
+import BaseLines from './BaseLines'
+
+import DataAccess from '../dataAccess'
 
 const friendlyNames = {
   Orbiter: 'The Orbiter',
@@ -45,7 +47,7 @@ const lineColors = {
   '820': 'rgb(70, 186, 124)',
 }
 
-class LinesNZCHC {
+class LinesNZCHC extends BaseLines {
   constructor(props) {
     const { logger, connection } = props
     this.logger = logger

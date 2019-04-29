@@ -1,8 +1,11 @@
-import { Router } from 'express'
+import * as path from 'path'
+import { static as _static, Router } from 'express'
 import WorkerDiscovery from './workerDiscovery'
 
 class WakaProxy {
-  constructor(props) {
+  router: Router
+  discovery: WorkerDiscovery
+  constructor(props: { endpoint: string }) {
     this.router = Router()
     this.discovery = new WorkerDiscovery({
       endpoint: props.endpoint,

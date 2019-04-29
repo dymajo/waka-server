@@ -1,5 +1,5 @@
 import DataAccess from '../dataAccess'
-import BaseLines from './BaseLines';
+import BaseLines from './BaseLines'
 
 const groups = [
   {
@@ -38,7 +38,14 @@ groups.forEach((data, index) => {
 })
 
 class LinesNZWLG extends BaseLines {
+  connection: any
+  dataAccess: DataAccess
+  lineColors: {}
+  lineGroups: {}
+  allLines: {}
+  lineOperators: {}
   constructor(props) {
+    super({})
     const { logger, connection } = props
     this.logger = logger
     this.connection = connection

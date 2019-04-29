@@ -2,7 +2,7 @@ import BaseStops from './BaseStops'
 
 class StopsNZWLG extends BaseStops {
   badStops: string[]
-  constructor() {
+  constructor(props) {
     super()
     this.badStops = [
       'WATE',

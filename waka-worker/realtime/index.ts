@@ -1,7 +1,8 @@
 import RealtimeAUSYD from './regions/au-syd'
 import RealtimeNZAKL from './regions/nz-akl'
 import RealtimeNZWLG from './regions/nz-wlg'
-
+import Connection from '../db/connection'
+import * as Logger from 'bunyan'
 const regions = {
   'au-syd': RealtimeAUSYD,
   'nz-akl': RealtimeNZAKL,
@@ -9,6 +10,10 @@ const regions = {
 }
 
 class Realtime {
+  connection: Connection
+  logger: Logger
+  prefix: any
+  fn: any
   constructor(props) {
     const { connection, logger, prefix, api } = props
     this.connection = connection

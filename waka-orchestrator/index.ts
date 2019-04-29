@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 
 import WakaProxy from '../waka-proxy'
 import GatewayLocal from './adaptors/gatewayLocal'
@@ -51,7 +51,7 @@ class WakaOrchestrator {
 
   bindRoutes() {
     const { gateway, router, privateApi, proxy, config } = this
-    router.get('/ping', (req, res) => res.send('pong'))
+    router.get('/ping', (req: Request, res: Response) => res.send('pong'))
     router.use('/private', privateApi.router)
 
     if (config.gateway === 'local') {

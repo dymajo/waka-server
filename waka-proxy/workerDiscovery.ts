@@ -3,9 +3,21 @@ import cityMetadata from '../cityMetadata.json'
 import logger from './logger'
 
 class WorkerDiscovery {
+  endpoint: string
+  interval: NodeJS.Timeout
+  responseMap: Map<
+    string,
+    {
+      prefix: string
+      bounds: {
+        lat: { max: number; min: number }
+        lon: { max: number; min: number }
+      }
+    }
+  >
   constructor(props) {
     this.endpoint = props.endpoint
-    this.interval = 0
+    this.interval = null
     this.responseMap = new Map()
 
     this.checkCities = this.checkCities.bind(this)
@@ -24,7 +36,7 @@ class WorkerDiscovery {
     Object.keys(cityMetadata).forEach(prefix => this.checkCity(prefix))
   }
 
-  async checkCity(prefix) {
+  async checkCity(prefix: string) {
     const request = await fetch(`${this.endpoint}/${prefix}/info`)
     let message = null
     if (request.status === 200) {
@@ -38,7 +50,7 @@ class WorkerDiscovery {
     logger.info({ prefix, status: request.status }, message)
   }
 
-  getRegionByBounds(lat, lon) {
+  getRegionByBounds(lat: number, lon: number) {
     let region = 'nz-akl' // default
     this.responseMap.forEach(response => {
       const { prefix, bounds } = response

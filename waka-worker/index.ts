@@ -2,7 +2,7 @@ import { Router } from 'express'
 import * as morgan from 'morgan'
 import createLogger from './logger'
 import cityMetadata from '../cityMetadata.json'
-
+import * as Logger from 'bunyan'
 import Connection from './db/connection'
 import Lines from './lines/index'
 import Search from './stops/search'
@@ -12,7 +12,20 @@ import StopsNZWLG from './stops/regions/nz-wlg'
 import Realtime from './realtime/index'
 
 class WakaWorker {
-  constructor(config) {
+  config: any
+  logger: Logger
+  connection: Connection
+  router: any
+  realtime: Realtime
+  stopsExtras: any
+  search: Search
+  lines: Lines
+  station: Station
+  bounds: {
+    lat: { min: number; max: number }
+    lon: { min: number; max: number }
+  }
+  constructor(config: any) {
     const {
       prefix,
       version,

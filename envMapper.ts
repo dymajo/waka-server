@@ -39,7 +39,7 @@ class EnvMapper {
     return base
   }
 
-  fromEnvironmental(env) {
+  fromEnvironmental(env: NodeJS.ProcessEnv) {
     const {
       PREFIX,
       VERSION,
