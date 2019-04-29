@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import axios from 'axios'
 import * as request from 'request'
 import * as protobuf from 'protobufjs'
+import BaseRealtime from './BaseRealtime'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
@@ -16,8 +17,20 @@ const modes = [
   'sydneytrains',
 ]
 
-class RealtimeAUSYD {
+class RealtimeAUSYD extends BaseRealtime {
+  connection: any
+  logger: any
+  apiKey: any
+  lastUpdate: any
+  lastVehicleUpdate: any
+  currentData: {}
+  currentDataFails: number
+  currentVehicleData: {}
+  currentVehicleDataFails: any
+  tripUpdateOptions: { url: string; headers: { Authorization: any } }
+  vehicleLocationOptions: { url: string; headers: { Authorization: any } }
   constructor(props) {
+    super()
     const { apiKey, connection, logger } = props
     this.connection = connection
     this.logger = logger
