@@ -78,10 +78,7 @@ class Lines {
 
   stop() {}
 
-  getColor(agencyId, routeShortName, routeColor) {
-    if (routeColor) {
-      return `#${routeColor}`
-    }
+  getColor(agencyId: string, routeShortName: string) {
     const { lineData } = this
     if (lineData.getColor) {
       return lineData.getColor(agencyId, routeShortName)
@@ -316,9 +313,7 @@ class Lines {
         route_id: route.route_id,
         route_long_name: route.route_long_name,
         route_short_name: route.route_short_name,
-        route_color:
-          route.route_color ||
-          this.getColor(route.agency_id, route.route_short_name),
+        route_color: this.getColor(route.agency_id, route.route_short_name),
         route_icon: this.getIcon(route.agency_id, route.route_short_name),
         direction_id: route.direction_id,
         shape_id: route.shape_id,
