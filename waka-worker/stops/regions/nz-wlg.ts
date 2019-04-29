@@ -1,5 +1,9 @@
-class StopsNZWLG {
+import BaseStops from './BaseStops'
+
+class StopsNZWLG extends BaseStops {
+  badStops: string[]
   constructor() {
+    super()
     this.badStops = [
       'WATE',
       'WOBU',
@@ -26,9 +30,9 @@ class StopsNZWLG {
     return Promise.resolve([])
   }
 
-  filter(recordset, mode = 'nothing') {
-    const { badStops } = this.badStops
-    recordset
+  filter(recordset: { stop_id: string }[], mode = 'nothing') {
+    const { badStops } = this
+    return recordset
       .filter(item => {
         if (
           mode !== 'keep' &&
@@ -50,4 +54,4 @@ class StopsNZWLG {
   }
 }
 
-module.exports = StopsNZWLG
+export default StopsNZWLG
