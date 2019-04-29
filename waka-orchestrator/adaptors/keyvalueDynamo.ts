@@ -15,7 +15,7 @@ class KeyvalueDynamo {
     this.fattenObject = this.fattenObject.bind(this)
   }
 
-  flattenObject(obj) {
+  flattenObject(obj: DynamoDB.AttributeMap) {
     const { flattenObject } = this
     const response = {}
     Object.keys(obj)
@@ -23,6 +23,9 @@ class KeyvalueDynamo {
       .forEach(key => {
         if (obj[key].M) {
           response[key] = flattenObject(obj[key].M)
+        } else if (obj[key].L) {
+          // little bit of a hack to use the flatten object for lists
+          response[key] = obj[key].L.map(i => flattenObject({ i }).i)
         } else {
           response[key] = parseFloat(obj[key].N) || obj[key].S
         }
@@ -39,13 +42,18 @@ class KeyvalueDynamo {
       } else if (typeof obj[key] === 'string') {
         response[key] = { S: obj[key] }
       } else if (typeof obj[key] === 'object') {
-        response[key] = { M: fattenObject(obj[key]) }
+        if (obj[key].constructor === Array) {
+          // little bit of a hack to use the fatten object for lists
+          response[key] = { L: obj[key].map(i => fattenObject({ i }).i) }
+        } else {
+          response[key] = { M: fattenObject(obj[key]) }
+        }
       }
     })
     return response
   }
 
-  async get(key) {
+  async get(key: string) {
     const { name, dynamo, flattenObject } = this
     const params = {
       Key: {
@@ -56,16 +64,14 @@ class KeyvalueDynamo {
       TableName: name,
     }
     logger.debug(params)
-    return new Promise(resolve => {
-      dynamo.getItem(params, (err, data) => {
-        if (err) {
-          logger.warn({ err }, 'Could not get DynamoDB Item')
-          return resolve({})
-        }
-        const response = data.Item || {}
-        return resolve(flattenObject(response))
-      })
-    })
+    try {
+      const result = await dynamo.getItem(params).promise()
+      const response = result.Item || {}
+      return flattenObject(response)
+    } catch (err) {
+      logger.warn({ err }, 'Could not get DynamoDB Item')
+      return {}
+    }
   }
 
   async set(key, value) {
