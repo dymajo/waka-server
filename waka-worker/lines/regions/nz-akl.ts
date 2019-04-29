@@ -1,6 +1,6 @@
 import DataAccess from '../dataAccess'
-import lineGroups from './nz-akl-groups'
-import allLines from './nz-akl-lines'
+import lineGroups from './nz-akl-groups.json'
+import allLines from './nz-akl-lines.json'
 import BaseLines from './BaseLines'
 
 const getColor = (agencyId, code) => {
