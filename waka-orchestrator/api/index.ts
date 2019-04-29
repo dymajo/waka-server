@@ -3,10 +3,13 @@ import { Router } from 'express'
 import logger from '../logger'
 import KeyvalueLocal from '../adaptors/keyvalueLocal'
 import KeyvalueDynamo from '../adaptors/keyvalueDynamo'
-
-const { Router } = express
+import VersionManager from '../versionManager'
 
 class PrivateApi {
+  versionManager: VersionManager
+  router: Router
+  meta: KeyvalueDynamo | KeyvalueLocal
+
   constructor(props) {
     const { config, versionManager } = props
     this.versionManager = versionManager

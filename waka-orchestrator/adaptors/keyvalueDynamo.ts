@@ -4,6 +4,8 @@ import { DynamoDB } from 'aws-sdk'
 import logger from '../logger'
 
 class KeyvalueDynamo {
+  name: string
+  dynamo: DynamoDB
   constructor(props) {
     const { name, region } = props
     this.name = name

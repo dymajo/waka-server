@@ -9,6 +9,12 @@ import * as moment from 'moment-timezone'
 import logger from '../logger'
 
 class BasicUpdater {
+  prefix: any
+  callback: any
+  delay: any
+  interval: number
+  url: any
+  timeout: NodeJS.Timeout
   constructor(props) {
     const { prefix, callback, delay, interval, url } = props
     this.prefix = prefix
@@ -17,7 +23,7 @@ class BasicUpdater {
     this.interval = interval || 1440
     this.url = url
 
-    this.timeout = 0
+    this.timeout = null
     this.start = this.start.bind(this)
     this.check = this.check.bind(this)
     this.download = this.download.bind(this)

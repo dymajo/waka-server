@@ -1,14 +1,17 @@
 import { Router } from 'express'
 import logger from '../logger'
 import WakaWorker from '../../waka-worker/index'
+import { IWakaConfig } from '../configManager'
 
 class GatewayLocal {
+  router: Router
+  workers: {}
   constructor() {
     this.router = Router()
     this.workers = {}
   }
 
-  start(prefix, config) {
+  start(prefix: string, config: IWakaConfig) {
     const { router, workers } = this
     const oldWorker = workers[prefix]
     const newWorker = new WakaWorker(config)

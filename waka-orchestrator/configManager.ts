@@ -3,31 +3,34 @@ import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 import { NumberResults } from 'aws-sdk/clients/clouddirectory'
 
-class ConfigManager {
-  config: {
-    port: number
-    gateway: string
-    keyvalue: string
-    keyvaluePrefix: string
-    keyvalueRegion: string
-    storageService: string
-    emulatedStorage: boolean
-    connectionTimeout: number
-    requestTimeout: number
-    api: {
-      [api: string]: any
-    }
-    db: {
-      local: {
-        server: string
-        user: string
-        password: string
-      }
-    }
-    updaters: {
-      [updater: string]: boolean
+export interface IWakaConfig {
+  port: number
+  gateway: string
+  keyvalue: string
+  keyvaluePrefix: string
+  keyvalueRegion: string
+  storageService: string
+  emulatedStorage: boolean
+  connectionTimeout: number
+  requestTimeout: number
+  api: {
+    [api: string]: any
+  }
+  db: {
+    local: {
+      server: string
+      user: string
+      password: string
     }
   }
+  // not how it's used
+  updaters: {
+    [updater: string]: boolean
+  }
+}
+
+class ConfigManager {
+  config: IWakaConfig
   meta: KeyvalueDynamo
   constructor() {
     const config = {
