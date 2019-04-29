@@ -1,11 +1,11 @@
-import fs from 'fs'
-import os from 'os'
-import path from 'path'
+import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
 import extract from 'extract-zip'
 import fetch from 'node-fetch'
-import csvparse from 'csv-parse'
+import * as csvparse from 'csv-parse'
 import transform from 'stream-transform'
-import moment from 'moment-timezone'
+import * as moment from 'moment-timezone'
 import logger from '../logger'
 
 class BasicUpdater {

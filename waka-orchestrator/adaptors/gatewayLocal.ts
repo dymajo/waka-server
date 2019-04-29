@@ -4,7 +4,7 @@ import WakaWorker from '../../waka-worker/index'
 
 class GatewayLocal {
   constructor() {
-    this.router = new Router()
+    this.router = Router()
     this.workers = {}
   }
 

@@ -1,12 +1,12 @@
-import Express from 'express'
-import bodyParser from 'body-parser'
-import morgan from 'morgan'
+import * as express from 'express'
+import * as bodyParser from 'body-parser'
+import * as morgan from 'morgan'
 import ConfigManager from './configManager'
 import WakaOrchestrator from './index'
 import logger from './logger'
 
 const start = async () => {
-  const app = new Express()
+  const app = express()
   app.use(bodyParser.json())
   app.use((req, res, next) => {
     res.setHeader('X-Powered-By', 'waka-orchestrator')

@@ -1,9 +1,9 @@
-import Express from 'express'
+import * as express from 'express'
 import WakaProxy from './index'
 import logger from './logger'
 import 'dotenv'
 
-const app = new Express()
+const app = express()
 app.use((req, res, next) => {
   res.setHeader('X-Powered-By', 'waka-proxy')
   next()

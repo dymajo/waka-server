@@ -1,7 +1,7 @@
-const logger = require('../logger.js')
-const BasicUpdater = require('./basic.js')
-const ATUpdater = require('./nz-akl.js')
-const TfNSWUpdater = require('./au-syd.js')
+import logger from '../logger.js'
+import BasicUpdater from './basic.js'
+import ATUpdater from './nz-akl.js'
+import TfNSWUpdater from './au-syd.js'
 
 class UpdateManager {
   constructor(props) {
