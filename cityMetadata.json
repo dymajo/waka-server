@@ -1,4 +1,21 @@
 {
+  "au-cbr": {
+    "name": "Canberra",
+    "secondaryName": "ACT",
+    "longName": "Canberra, ACT",
+    "initialLocation": [-35.293056, 149.126944],
+    "showInCityList": true,
+    "bounds": {
+      "lat": {
+        "min": -35.476552,
+        "max": -35.148476
+      },
+      "lon": {
+        "min": 149.002975,
+        "max": 149.190288
+      }
+    }
+  },
   "au-syd": {
     "name": "Sydney",
     "secondaryName": "New South Wales",
@@ -49,6 +66,12 @@
     "longName": "Te Whanganui-a-Tara, Wellington",
     "initialLocation": [-41.278366, 174.779359],
     "showInCityList": true
+  },
+  "fr-par": {
+    "name": "Paris",
+    "secondaryName": "Paris",
+    "longName": "Paris",
+    "initialLocation": [48.8567, 2.3508],
+    "showInCityList": true
   }
 }
-
