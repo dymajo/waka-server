@@ -1,7 +1,16 @@
 import * as moment from 'moment-timezone'
 import StopsDataAccess from './dataAccess'
+import Connection from '../db/connection'
+import * as Logger from 'bunyan'
 
 class Station {
+  logger: Logger
+  connection: Connection
+  prefix: string
+  regionSpecific: any
+  lines: any
+  realtimeTimes: any
+  dataAccess: StopsDataAccess
   constructor(props) {
     const {
       logger,
@@ -89,7 +98,8 @@ class Station {
       stopCode = `${stopCode}1`
     }
 
-    let data = { message: 'Station not found.' }
+    const notFound = { message: 'Station not found.' }
+    let data
     try {
       data = await dataAccess.getStopInfo(stopCode)
       if (override) {
@@ -105,7 +115,7 @@ class Station {
           // couldn't get any carpark
         }
       }
-      res.status(404).send(data)
+      res.status(404).send(notFound)
     }
     return data
   }
@@ -199,7 +209,12 @@ class Station {
       }
     }
 
-    const sending = {
+    const sending: {
+      provider: string
+      currentTime?: number
+      trips?: any[]
+      realtime?: any
+    } = {
       provider: 'sql-server',
     }
 
@@ -209,7 +224,7 @@ class Station {
     if (req.params.time) {
       const split = req.params.time.split(':')
       const tentativeDate = new Date(Date.UTC(1970, 0, 1, split[0], split[1]))
-      if (tentativeDate.toString !== 'Invalid Date') {
+      if (tentativeDate.toString() !== 'Invalid Date') {
         currentTime = tentativeDate
         midnightOverride = true
       }

@@ -1,7 +1,10 @@
+import * as Logger from 'bunyan'
+
 abstract class BaseLines {
   getColors: any
   abstract start(): void
-  constructor({ props }) {
+  logger: Logger
+  constructor(props) {
     const { getColors } = props
     this.getColors = getColors
   }

@@ -198,9 +198,15 @@ class StopsDataAccess {
     return routes
   }
 
-  async getRoutesForMultipleStops(stopCodes) {
+  async getRoutesForMultipleStops(stopCodes: string[]) {
     const { connection } = this
-    const routesContainer = {}
+    const routesContainer: {
+      [stopCode: string]: {
+        route_short_name: string
+        trip_headsign: string
+        direction_id: number
+      }[]
+    } = {}
     const filteredStopCodes = stopCodes.filter(stopCode => {
       const cachedRoutes = this.stopRouteCache.get(stopCode)
       if (cachedRoutes !== undefined) {

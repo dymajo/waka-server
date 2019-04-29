@@ -19,6 +19,8 @@ const start = async () => {
   app.use(orchestrator.router)
 
   const listener = app.listen(config.port, () => {
+    // find out why there is a bug
+
     logger.info(
       { port: listener.address().port },
       'waka-orchestrator listening'

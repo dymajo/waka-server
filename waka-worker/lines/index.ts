@@ -4,14 +4,14 @@ import { Request, Response } from 'express'
 import cityMetadata from '../../cityMetadata.json'
 import StopsDataAccess from '../stops/dataAccess'
 
-import LinesAUSYD from './regions/au-syd'
+// import LinesAUSYD from './regions/au-syd'
 import LinesNZAKL from './regions/nz-akl'
 import LinesNZCHC from './regions/nz-chc'
 import LinesNZWLG from './regions/nz-wlg'
 import Connection from '../db/connection'
 import BaseLines from './regions/BaseLines'
 import Search from '../stops/search'
-
+import * as Logger from 'bunyan'
 const regions = {
   // 'au-syd': LinesAUSYD,
   'nz-akl': LinesNZAKL,
@@ -20,7 +20,7 @@ const regions = {
 }
 
 class Lines {
-  logger: Console
+  logger: Logger
   connection: Connection
   prefix: string
   version: string
@@ -70,7 +70,7 @@ class Lines {
       await lineDataSource.start()
 
       // the second element in the array is default, if it is not exported from the source
-      const requiredProps = [
+      const requiredProps: Array<[string, {} | []]> = [
         ['lineColors', {}],
         ['lineIcons', {}],
         ['friendlyNames', {}],
@@ -178,7 +178,7 @@ class Lines {
    *     }
    *
    */
-  getLines(req, res) {
+  getLines(req: Request, res: Response) {
     res.send(this._getLines())
   }
 
@@ -275,7 +275,7 @@ class Lines {
         sqlRequest.input('agency_id', sql.VarChar(50), agencyId)
       }
     }
-    sqlRequest.input('route_short_name', sql.stopsDataAccessVarChar(50), lineId)
+    sqlRequest.input('route_short_name', sql.VarChar(50), lineId)
 
     const query = `
       SELECT

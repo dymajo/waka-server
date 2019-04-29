@@ -25,7 +25,9 @@ export interface IWakaConfig {
   }
   // not how it's used
   updaters: {
-    [updater: string]: boolean
+    [updater: string]: boolean | {
+      delay:number,prefix:string, dbconfig:string,interval:number,shapesContainer:string,type:string,shapesRegion: string, url:string
+    }
   }
 }
 

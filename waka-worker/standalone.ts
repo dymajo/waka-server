@@ -1,12 +1,12 @@
-import Express from 'express'
+import * as express from 'express'
 import 'dotenv'
-import bodyParser from 'body-parser'
+import * as bodyParser from 'body-parser'
 import EnvMapper from '../envMapper'
 import WakaWorker from './index'
 
 const { PREFIX, VERSION, PORT } = process.env
 
-const app = new Express()
+const app = express()
 app.use(bodyParser.json())
 app.use((req, res, next) => {
   res.setHeader('X-Powered-By', `waka-worker-${PREFIX}-${VERSION}`)
@@ -19,6 +19,6 @@ app.use(`/a/${PREFIX}`, worker.router)
 app.use(worker.router)
 
 const listener = app.listen(PORT, () => {
-  worker.logger.info({ port: listener.address().port }, 'waka-worker listening')
+  worker.logger.info({ port: PORT }, 'waka-worker listening')
   worker.start()
 })

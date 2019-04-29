@@ -1,6 +1,6 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
-import * as AWS from 'aws-sdk'
+import { ECS } from 'aws-sdk'
 import logger from '../logger'
 import EnvMapper from '../../envMapper'
 
@@ -8,6 +8,11 @@ const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())
 
 class GatewayEcs {
+  servicePrefix: any
+  serviceSuffix: any
+  replicas: any
+  envMapper: EnvMapper
+  ecs: ECS
   constructor(config) {
     const { cluster, region, servicePrefix, serviceSuffix, replicas } = config
     this.servicePrefix = servicePrefix || ''
@@ -20,7 +25,7 @@ class GatewayEcs {
       return
     }
 
-    this.ecs = new AWS.ECS({ region, params: { cluster } })
+    this.ecs = new ECS({ region, params: { cluster } })
   }
 
   async start(prefix, config) {
