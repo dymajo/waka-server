@@ -1,6 +1,7 @@
 import fetch from 'node-fetch'
-import sql from 'mssql'
-import doubleDeckers from './nz-akl-doubledecker.json'
+import * as sql from 'mssql'
+import doubleDeckers from './nz-akl-doubledecker'
+import BaseRealtime from './BaseRealtime'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
@@ -74,6 +75,7 @@ class RealtimeNZAKL {
         this.currentData = newData
         this.currentDataFails = 0
         this.lastUpdate = new Date()
+        logger.info('Pulled AT Trip Updates Data.')
         setTimeout(this.schedulePull, schedulePullTimeout)
       } else {
         logger.warn({ response: data }, 'Could not get AT Data')
@@ -81,9 +83,9 @@ class RealtimeNZAKL {
     } catch (err) {
       this.currentDataFails += 1
       logger.warn({ err }, 'Could not get AT Data')
+    }
       setTimeout(this.schedulePull, schedulePullTimeout)
     }
-  }
 
   async scheduleLocationPull() {
     const { logger, vehicleLocationsOptions } = this
@@ -94,6 +96,7 @@ class RealtimeNZAKL {
       this.currentVehicleData = data.response
       this.currentDataFails = 0
       this.lastVehicleUpdate = new Date()
+      logger.info('Pulled AT Location Data.')
     } catch (err) {
       this.currentVehicleDataFails += 1
       logger.error({ err }, 'Could not get AT Data')
