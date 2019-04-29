@@ -1,6 +1,13 @@
 import * as sql from 'mssql'
+import Connection from '../db/connection'
+import BaseStops from './regions/BaseStops'
 
 class Search {
+  logger: any
+  connection: Connection
+  prefix: string
+  regionSpecific: BaseStops
+  stopsRouteType: {}
   constructor(props) {
     const { logger, connection, prefix, stopsExtras } = props
     this.logger = logger
@@ -24,7 +31,7 @@ class Search {
 
   stop() {}
 
-  _stopsFilter(recordset, mode) {
+  _stopsFilter(recordset: { stop_id: string }[], mode?: string) {
     const { prefix, regionSpecific } = this
     if (prefix === 'nz-wlg') {
       return regionSpecific.filter(recordset, mode)
@@ -77,7 +84,10 @@ class Search {
     const { logger, connection, stopsRouteType, _stopsFilter } = this
     try {
       const sqlRequest = connection.get().request()
-      const result = await sqlRequest.query(
+      const result = await sqlRequest.query<{
+        stop_id: string
+        stop_name: string
+      }>(
         `
         SELECT
           stop_code as stop_id,
@@ -91,6 +101,7 @@ class Search {
           stop_code
       `
       )
+
       return {
         route_types: stopsRouteType,
         items: _stopsFilter(result.recordset, 'delete'),
@@ -105,7 +116,10 @@ class Search {
     const { logger, connection } = this
     const sqlRequest = connection.get().request()
     try {
-      const result = await sqlRequest.query(
+      const result = await sqlRequest.query<{
+        stop_id: string
+        route_type: string
+      }>(
         `
         SELECT DISTINCT stops.stop_code AS stop_id, routes.route_type
         FROM stops
@@ -231,7 +245,13 @@ class Search {
       (location_type = 0 and parent_station is null)
     )`
         : '(location_type = 0 OR location_type IS NULL)'
-    const result = await sqlRequest.query(
+    const result = await sqlRequest.query<{
+      stop_id: string
+      stop_name: string
+      stop_lat: number
+      stop_lon: number
+      location_type: number
+    }>(
       `
       SELECT
         stop_code AS stop_id,

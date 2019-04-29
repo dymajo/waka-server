@@ -1,6 +1,8 @@
 import * as sql from 'mssql'
+import Connection from '../db/connection'
 
 class DataAccess {
+  connection: Connection
   constructor(props) {
     const { connection } = props
     this.connection = connection
@@ -9,7 +11,13 @@ class DataAccess {
   async getRoutes() {
     const { connection } = this
     const sqlRequest = connection.get().request()
-    const data = await sqlRequest.query(`
+    const data = await sqlRequest.query<{
+      route_short_name: string
+      route_long_name: string
+      agency_id: string
+      route_type: number
+      route_color: string
+    }>(`
       SELECT
         route_short_name, route_long_name, agency_id, route_type, route_color
       FROM routes
@@ -22,7 +30,7 @@ class DataAccess {
     const { connection } = this
     const sqlRequest = connection.get().request()
     sqlRequest.input('route_short_name', sql.VarChar(50), route)
-    const data = await sqlRequest.query(
+    const data = await sqlRequest.query<{ agency_id: string }>(
       `
       SELECT top(1)
         agency_id

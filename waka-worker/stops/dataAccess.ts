@@ -1,7 +1,16 @@
-import sql from 'mssql'
+import * as sql from 'mssql'
+import Connection from '../db/connection'
+
+interface IStopsDataAccess {
+  connection: Connection
+  prefix: string
+}
 
 class StopsDataAccess {
-  constructor(props) {
+  connection: Connection
+  prefix: string
+  stopRouteCache: Map<string, any>
+  constructor(props: IStopsDataAccess) {
     const { connection, prefix } = props
     this.connection = connection
     this.prefix = prefix
@@ -12,7 +21,12 @@ class StopsDataAccess {
   async getBounds() {
     const { connection } = this
     const sqlRequest = connection.get().request()
-    const result = await sqlRequest.query(`
+    const result = await sqlRequest.query<{
+      lat_min: number
+      lat_max: number
+      lon_min: number
+      lon_max: number
+    }>(`
       SELECT
         MIN(stop_lat) as lat_min,
         MAX(stop_lat) as lat_max,
@@ -24,14 +38,26 @@ class StopsDataAccess {
     return data
   }
 
-  async getStopInfo(stopCode) {
+  async getStopInfo(stopCode: string) {
     const { connection, prefix } = this
     const sqlRequest = connection
       .get()
       .request()
       .input('stop_code', sql.VarChar, stopCode)
 
-    const result = await sqlRequest.query(`
+    const result = await sqlRequest.query<{
+      stop_id: string
+      stop_name: string
+      stop_desc: string
+      stop_lat: number
+      stop_lon: number
+      zone_id: string
+      location_type: number
+      parent_station: string
+      stop_timezone: string
+      wheelchair_boarding: number
+      route_type: number
+    }>(`
       SELECT
         stops.stop_code as stop_id,
         stops.stop_name,
@@ -59,8 +85,7 @@ class StopsDataAccess {
       WHERE
         stops.stop_code = @stop_code
     `)
-    const data = result.recordset[0]
-    data.prefix = prefix
+    const data = { ...result.recordset[0], prefix }
     return data
   }
 
@@ -73,7 +98,24 @@ class StopsDataAccess {
       .input('departure_time', sql.Time, time)
       .input('date', sql.Date, date)
 
-    const result = await sqlRequest.execute(procedure)
+    const result = await sqlRequest.execute<{
+      trip_id: string
+      stop_sequence: number
+      departure_time: Date
+      departure_time_24: Date
+      stop_id: string
+      trip_headsign: string
+      shape_id: string
+      direction_id: number
+      start_date: Date
+      end_date: Date
+      route_short_name: string
+      route_long_name: string
+      route_type: number
+      agency_id: string
+      route_color: string
+      stop_name: string
+    }>(procedure)
     return result.recordset
   }
 
@@ -93,11 +135,23 @@ class StopsDataAccess {
       .input('date', sql.Date, date)
       .input('direction', sql.Int, direction)
 
-    const result = await sqlRequest.execute(procedure)
+    const result = await sqlRequest.execute<{
+      trip_id: string
+      service_id: string
+      shape_id: string
+      trip_headsign: string
+      direction_id: number
+      stop_sequence: string
+      departure_time: Date
+      departure_time_24: Date
+      route_id: string
+      route_long_name: string
+      agency_id: string
+    }>(procedure)
     return result.recordset
   }
 
-  async getRoutesForStop(stopCode) {
+  async getRoutesForStop(stopCode: string) {
     const { connection } = this
     const cachedRoutes = this.stopRouteCache.get(stopCode)
     if (cachedRoutes !== undefined) {
@@ -109,7 +163,11 @@ class StopsDataAccess {
       .request()
       .input('stop_code', sql.VarChar, stopCode)
 
-    const result = await sqlRequest.query(`
+    const result = await sqlRequest.query<{
+      route_short_name: string
+      trip_headsign: string
+      direction_id: number
+    }>(`
       DECLARE @stop_id varchar(200)
 
       SELECT @stop_id = stop_id
@@ -155,10 +213,15 @@ class StopsDataAccess {
     if (filteredStopCodes.length > 0) {
       // TODO: This isn't SQL Injection Proof, but it shouldn't be hit from there anyway.
       // This should also be a stored procedure.
-      const stopCodesQuery = `('${filteredStopCodes.join('\',\'')}')`
+      const stopCodesQuery = `('${filteredStopCodes.join("','")}')`
 
       const sqlRequest = connection.get().request()
-      const result = await sqlRequest.query(`
+      const result = await sqlRequest.query<{
+        stop_code: string
+        route_short_name: string
+        trip_headsign: string
+        direction_id: number
+      }>(`
         DECLARE @stop_id varchar(200)
 
         SELECT stop_id, stop_code

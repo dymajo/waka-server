@@ -2,12 +2,13 @@ import fetch from 'node-fetch'
 import * as sql from 'mssql'
 import doubleDeckers from './nz-akl-doubledecker'
 import BaseRealtime from './BaseRealtime'
+import Connection from '../../db/connection'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
 
 class RealtimeNZAKL extends BaseRealtime {
-  connection: any
+  connection: Connection
   logger: any
   apiKey: string
   lastUpdate: Date
@@ -248,7 +249,7 @@ class RealtimeNZAKL extends BaseRealtime {
     try {
       const sqlRouteIdRequest = connection.get().request()
       sqlRouteIdRequest.input('route_short_name', sql.VarChar(50), line)
-      const routeIdResult = await sqlRouteIdRequest.query(
+      const routeIdResult = await sqlRouteIdRequest.query<{ route_id: string }>(
         `
         SELECT route_id
         FROM routes
@@ -263,7 +264,10 @@ class RealtimeNZAKL extends BaseRealtime {
       const tripIds = trips.map(entity => entity.vehicle.trip.trip_id)
       const escapedTripIds = `'${tripIds.join("', '")}'`
       const sqlTripIdRequest = connection.get().request()
-      const tripIdRequest = await sqlTripIdRequest.query(`
+      const tripIdRequest = await sqlTripIdRequest.query<{
+        trip_id: string
+        direction_id: number
+      }>(`
         SELECT *
         FROM trips
         WHERE trip_id IN (${escapedTripIds})
