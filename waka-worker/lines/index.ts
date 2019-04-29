@@ -1,6 +1,6 @@
 import * as sql from 'mssql'
 import Storage from '../db/storage'
-
+import { Request, Response } from 'express'
 import cityMetadata from '../../cityMetadata.json'
 import StopsDataAccess from '../stops/dataAccess'
 
@@ -8,6 +8,9 @@ import LinesAUSYD from './regions/au-syd'
 import LinesNZAKL from './regions/nz-akl'
 import LinesNZCHC from './regions/nz-chc'
 import LinesNZWLG from './regions/nz-wlg'
+import Connection from '../db/connection'
+import BaseLines from './regions/BaseLines'
+import Search from '../stops/search'
 
 const regions = {
   // 'au-syd': LinesAUSYD,
@@ -17,6 +20,16 @@ const regions = {
 }
 
 class Lines {
+  logger: Console
+  connection: Connection
+  prefix: string
+  version: string
+  search: Search
+  stopsDataAccess: StopsDataAccess
+  storageSvc: Storage
+  lineData: any
+  lineDataSource: any
+  config: any
   constructor(props) {
     const { logger, connection, prefix, version, config, search } = props
     this.logger = logger
@@ -293,7 +306,17 @@ class Lines {
       ORDER BY
         shape_score desc`
 
-    const result = await sqlRequest.query(query)
+    const result = await sqlRequest.query<{
+      route_id: string
+      agency_id: string
+      route_short_name: string
+      route_long_name: string
+      route_type: number
+      shape_id: string
+      trip_headsign: string
+      direction_id: string
+      shape_score: number
+    }>(query)
     const versions = {}
     const results = []
     result.recordset.forEach(route => {
@@ -501,7 +524,15 @@ class Lines {
     const sqlRequest = connection.get().request()
     sqlRequest.input('trip_id', sql.VarChar(100), req.params.tripId)
     try {
-      const result = await sqlRequest.query(`
+      const result = await sqlRequest.query<{
+        stop_id: string
+        stop_name: string
+        stop_lat: number
+        stop_lon: number
+        departure_time: Date
+        departure_time_24: Date
+        stop_sequence: Date
+      }>(`
         SELECT
           stops.stop_code as stop_id,
           stops.stop_name,
@@ -576,7 +607,7 @@ class Lines {
     const sqlRequest = connection.get().request()
     sqlRequest.input('shape_id', sql.VarChar(100), req.params.shapeId)
     try {
-      const result = await sqlRequest.query(
+      const result = await sqlRequest.query<{ trip_id: string }>(
         'SELECT TOP(1) trip_id FROM trips WHERE trips.shape_id = @shape_id'
       )
 
