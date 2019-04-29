@@ -58,6 +58,8 @@ class WakaOrchestrator {
     if (config.gateway === 'local') {
       router.use(gateway.router)
       router.use(proxy.router)
+    } else {
+      router.get('/', (req: Request, res: Response) => res.redirect('/private'))
     }
   }
 }

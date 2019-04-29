@@ -62,6 +62,7 @@ class ConfigManager {
         'nz-wlg': false,
         'au-syd': false,
       },
+      importer: {},
     }
     this.config = config
 
