@@ -18,6 +18,7 @@ class WakaProxy {
     router.get('/regions', (req, res) => {
       res.send(discovery.getRegions())
     })
+    router.use('/docs', _static(path.join(__dirname, '../dist/docs/')))
     router.all('/:prefix', smartRedirect)
     router.all('/:prefix/*', smartRedirect)
   }
