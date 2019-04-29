@@ -1,14 +1,24 @@
 {
   "name": "waka-server",
-  "version": "0.1.0",
-  "description": "Waka Server",
+  "version": "2.0.0",
+  "description": "The API that powers Waka.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node ./waka-orchestrator/standalone.js | bunyan -L -o short",
+    "document": "apidoc -i waka-orchestrator -i waka-proxy -i waka-worker -o dist/docs"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dymajo/waka-server.git"
+  },
+  "apidoc": {
+    "name": "Waka",
+    "title": "Waka API",
+    "header": {
+      "filename": "dist/header.md"
+    },
+    "url": "https://waka.app/a",
+    "sampleUrl": "/a"
   },
   "keywords": [],
   "author": "Dymajo Ltd.",
@@ -27,6 +37,7 @@
     "@types/node": "^11.13.7",
     "@types/node-fetch": "^2.3.2",
     "@types/request": "^2.48.1",
+    "apidoc": "^0.17.7",
     "aws-sdk": "^2.313.0",
     "axios": "^0.18.0",
     "azure-storage": "^2.10.1",
@@ -55,7 +66,7 @@
     "eslint-config": "^0.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^3.6.0",
-    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "prettier": "^1.16.4",
