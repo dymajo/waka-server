@@ -26,12 +26,11 @@ class WakaOrchestrator {
     if (gateway === 'local') {
       this.gateway = new GatewayLocal()
       this.proxy = new WakaProxy({ endpoint: `http://localhost:${port}` })
+    } else if (gateway === 'ecs') {
+      this.gateway = new GatewayEcs(config.gatewayConfig.ecs)
+    } else if (gateway === 'kubernetes') {
+      this.gateway = new GatewayKubernetes(config.gatewayConfig.kubernetes)
     }
-    //  else if (gateway === 'ecs') {
-    //   this.gateway = new GatewayEcs()
-    // } else if (gateway === 'kubernetes') {
-    //   this.gateway = new GatewayKubernetes()
-    // }
     const versionManager = new VersionManager({ config, gateway: this.gateway })
     this.versionManager = versionManager
     this.privateApi = new PrivateApi({ config, versionManager })
