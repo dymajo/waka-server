@@ -63,6 +63,11 @@ class ConfigManager {
         'au-syd': false,
       },
       importer: {},
+      gatewayConfig: {
+        // local doesn't need config
+        ecs: {},
+        kubernetes: {},
+      },
     }
     this.config = config
 
