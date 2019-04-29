@@ -1,4 +1,5 @@
 import fetch from 'node-fetch'
+import BaseStops from './BaseStops'
 
 const pricingHtml = `
 <ul class="trip-content" style="padding: 0; min-height: 0;">
@@ -41,7 +42,9 @@ const pricingHtmlRonwood = `
 </ul>
 `
 
-const additionalData = {
+const additionalData: {
+  [carpark: string]: { url: string; twitter: string; html: string }
+} = {
   'downtown-carpark': {
     url:
       'https://at.govt.nz/driving-parking/parking-in-auckland/downtown-car-park/',
@@ -75,12 +78,31 @@ const agenda21mapper = {
   Ronwood: 'ronwood-ave-carpark',
 }
 
-class StopsNZAKL {
-  constructor(props) {
+class StopsNZAKL extends BaseStops {
+  logger: any
+  apiKey: string
+  interval: NodeJS.Timeout
+  carparks: {
+    [carpark: string]: {
+      stop_id: string
+      stop_lat: number
+      stop_lon: number
+      stop_lng: number // lng is deprecated
+      stop_region: string
+      route_type: number
+      stop_name: string
+      description: string
+      timestamp: Date
+      availableSpaces: number
+      maxSpaces: number
+    }
+  }
+  constructor(props: { logger: any; apiKey: string }) {
+    super()
     const { logger, apiKey } = props
     this.logger = logger
     this.apiKey = apiKey
-    this.interval = 0
+    this.interval = null
 
     this.pullCarparkData = this.pullCarparkData.bind(this)
 
@@ -202,9 +224,18 @@ class StopsNZAKL {
     throw Error({ message: 'Carpark Not Found!' })
   }
 
-  getTimes(code) {
+  getTimes(code: string) {
     if (code in this.carparks) {
-      let obj = {
+      const carpark = this.carparks[code]
+      const additionalDatem = additionalData[code]
+      interface ObjectType {
+        provider: string
+        trips: undefined[]
+        availableSpaces?: number
+        maxSpaces?: number
+        html?: string
+      }
+      let obj: ObjectType = {
         provider: 'carpark-bot',
         trips: [], // not used but won't crash older versions of client
       }
