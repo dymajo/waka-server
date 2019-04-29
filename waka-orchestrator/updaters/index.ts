@@ -1,11 +1,23 @@
+import logger from '../logger'
+import BasicUpdater from './basic'
+import ATUpdater from './nz-akl'
+import TfNSWUpdater from './au-syd'
+import VersionManager from '../versionManager'
+import { IWakaConfig } from '../configManager'
 import Fargate from './fargate'
+
+interface IUpdateManagerProps {
+  config: any
+  versionManager: VersionManager
+}
 
 class UpdateManager {
   config: any
-  versionManager: any
+  versionManager: VersionManager
   updaters: {}
   interval: NodeJS.Timeout
   fargate: Fargate
+  constructor(props: IUpdateManagerProps) {
     const { config, versionManager } = props
     this.config = config
     this.versionManager = versionManager
@@ -31,8 +43,6 @@ class UpdateManager {
     }
 
     regions.forEach(prefix => {
-      logger.info({ prefix, type: updaters[prefix].type }, 'Starting Updater')
-
       const { url, delay, interval, type } = updaters[prefix]
       logger.info({ prefix, type }, 'Starting Updater')
 
@@ -72,6 +82,7 @@ class UpdateManager {
 
   async callback(prefix, version, adjustMapping) {
     const { config, versionManager } = this
+    // don't understand this
     const { shapesContainer, shapesRegion, dbconfig } = config.updaters[prefix]
 
     // the id should be the same as the one generated from addVersion
@@ -118,6 +129,7 @@ class UpdateManager {
         )
       }
       // checkVersions() running on the interval will pick this up
+      // we can't run it because if callback is run twice, it'll start all the tasks twice probably
     } else if (
       (adjustMapping === true && newStatus === 'imported') ||
       newStatus === 'imported-willmap'
