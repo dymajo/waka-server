@@ -13,7 +13,7 @@ class WakaOrchestrator {
     const { gateway, port } = config
     this.config = config
 
-    this.router = new Router()
+    this.router = Router()
     if (gateway === 'local') {
       this.gateway = new GatewayLocal()
       this.proxy = new WakaProxy({ endpoint: `http://localhost:${port}` })

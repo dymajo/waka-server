@@ -79,4 +79,4 @@ class EnvMapper {
     }
   }
 }
-module.exports = EnvMapper
+export default EnvMapper

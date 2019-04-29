@@ -1,8 +1,8 @@
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings'
 import fetch from 'node-fetch'
 import axios from 'axios'
-import request from 'request'
-import protobuf from 'protobufjs'
+import * as request from 'request'
+import * as protobuf from 'protobufjs'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000

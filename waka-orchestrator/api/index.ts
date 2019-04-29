@@ -1,5 +1,5 @@
-import path from 'path'
-import express from 'express'
+import * as path from 'path'
+import { Router } from 'express'
 import logger from '../logger'
 import KeyvalueLocal from '../adaptors/keyvalueLocal'
 import KeyvalueDynamo from '../adaptors/keyvalueDynamo'
@@ -11,7 +11,7 @@ class PrivateApi {
     const { config, versionManager } = props
     this.versionManager = versionManager
 
-    this.router = new Router()
+    this.router = Router()
     this.bindRoutes()
 
     const kvPrefix = config.keyvaluePrefix

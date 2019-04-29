@@ -1,4 +1,4 @@
-import sql from 'mssql'
+import * as sql from 'mssql'
 
 class DataAccess {
   constructor(props) {

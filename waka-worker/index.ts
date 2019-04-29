@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import morgan from 'morgan'
+import * as morgan from 'morgan'
 import createLogger from './logger'
 import cityMetadata from '../cityMetadata.json'
 
@@ -30,7 +30,7 @@ class WakaWorker {
     const connection = new Connection({ logger, db })
     this.connection = connection
 
-    this.router = new Router()
+    this.router = Router()
     this.realtime = new Realtime({ logger, connection, prefix, api })
 
     this.stopsExtras = null
