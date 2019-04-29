@@ -6,8 +6,26 @@ import BaseRealtime from './BaseRealtime'
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
 
-class RealtimeNZAKL {
+class RealtimeNZAKL extends BaseRealtime {
+  connection: any
+  logger: any
+  apiKey: string
+  lastUpdate: Date
+  lastVehicleUpdate: Date
+
+  currentData: any
+  currentVehicleData: any
+
+  currentDataFails: number
+  currentVehicleDataFails: number
+
+  tripUpdatesOptions: { url: string; headers: { [header: string]: string } }
+  vehicleLocationsOptions: {
+    url: string
+    headers: { [header: string]: string }
+  }
   constructor(props) {
+    super()
     const { logger, connection, apiKey } = props
     this.connection = connection
     this.logger = logger
@@ -37,11 +55,11 @@ class RealtimeNZAKL {
     this.scheduleLocationPull = this.scheduleLocationPull.bind(this)
   }
 
-  isDoubleDecker(vehicle) {
+  isDoubleDecker(vehicle: string) {
     return doubleDeckers.includes(vehicle)
   }
 
-  isEV(vehicle) {
+  isEV(vehicle: string) {
     return ['2840', '2841'].includes(vehicle)
   }
 
@@ -84,8 +102,8 @@ class RealtimeNZAKL {
       this.currentDataFails += 1
       logger.warn({ err }, 'Could not get AT Data')
     }
-      setTimeout(this.schedulePull, schedulePullTimeout)
-    }
+    setTimeout(this.schedulePull, schedulePullTimeout)
+  }
 
   async scheduleLocationPull() {
     const { logger, vehicleLocationsOptions } = this
@@ -243,7 +261,7 @@ class RealtimeNZAKL {
       )
       // this is good enough because data comes from auckland transport
       const tripIds = trips.map(entity => entity.vehicle.trip.trip_id)
-      const escapedTripIds = `'${tripIds.join('\', \'')}'`
+      const escapedTripIds = `'${tripIds.join("', '")}'`
       const sqlTripIdRequest = connection.get().request()
       const tripIdRequest = await sqlTripIdRequest.query(`
         SELECT *
