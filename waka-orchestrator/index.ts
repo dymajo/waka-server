@@ -7,9 +7,18 @@ import GatewayKubernetes from './adaptors/gatewayKubernetes'
 import UpdateManager from './updaters'
 import VersionManager from './versionManager'
 import PrivateApi from './api'
+import { IWakaConfig } from './configManager'
 
 class WakaOrchestrator {
-  constructor(config) {
+  config: IWakaConfig
+  router: Router
+  gateway: GatewayLocal // | GatewayEcs | GatewayKubernetes
+  proxy: WakaProxy
+  versionManager: VersionManager
+  privateApi: PrivateApi
+  updateManager: UpdateManager
+
+  constructor(config: IWakaConfig) {
     const { gateway, port } = config
     this.config = config
 
@@ -17,11 +26,12 @@ class WakaOrchestrator {
     if (gateway === 'local') {
       this.gateway = new GatewayLocal()
       this.proxy = new WakaProxy({ endpoint: `http://localhost:${port}` })
-    } else if (gateway === 'ecs') {
-      this.gateway = new GatewayEcs()
-    } else if (gateway === 'kubernetes') {
-      this.gateway = new GatewayKubernetes()
     }
+    //  else if (gateway === 'ecs') {
+    //   this.gateway = new GatewayEcs()
+    // } else if (gateway === 'kubernetes') {
+    //   this.gateway = new GatewayKubernetes()
+    // }
     const versionManager = new VersionManager({ config, gateway: this.gateway })
     this.versionManager = versionManager
     this.privateApi = new PrivateApi({ config, versionManager })

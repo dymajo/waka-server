@@ -38,6 +38,12 @@ const tfnswmodes = {
 }
 
 class TfNSWUpdater {
+  apiKey: any
+  callback: any
+  delay: any
+  interval: any
+  prefix: string
+  timeout: NodeJS.Timeout
   constructor(props) {
     const { apiKey, callback, delay, interval } = props
     this.apiKey = apiKey
@@ -46,7 +52,7 @@ class TfNSWUpdater {
     this.interval = interval || 1440
     this.prefix = 'au-syd'
 
-    this.timeout = 0
+    this.timeout = null
     this.start = this.start.bind(this)
     this.check = this.check.bind(this)
     this.checkApi = this.checkApi.bind(this)

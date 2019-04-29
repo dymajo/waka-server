@@ -4,6 +4,10 @@ import ATUpdater from './nz-akl.js'
 import TfNSWUpdater from './au-syd.js'
 
 class UpdateManager {
+  config: any
+  versionManager: any
+  updaters: {}
+  interval: NodeJS.Timeout
   constructor(props) {
     const { config, versionManager } = props
     this.config = config
@@ -138,4 +142,4 @@ class UpdateManager {
     })
   }
 }
-module.exports = UpdateManager
+export default UpdateManager

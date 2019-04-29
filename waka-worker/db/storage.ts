@@ -9,7 +9,15 @@ const azuretestcreds = [
 ]
 
 class Storage {
-  constructor(props) {
+  backing: string
+  blobSvc: any
+  s3: AWS.S3
+  constructor(props: {
+    backing: string
+    local: boolean
+    endpoint: string
+    region: string
+  }) {
     this.backing = props.backing
     if (this.backing === 'azure') {
       const creds = props.local ? azuretestcreds : []

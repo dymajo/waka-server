@@ -5,6 +5,7 @@ import logger from '../logger'
 // this is designed to be slow af to emulate the dynamoDB lag
 const filePath = path.join(__dirname, '../../cache/keyvalue-')
 class KeyvalueLocal {
+  name: string
   constructor(props) {
     const { name } = props
     this.name = name
@@ -14,7 +15,8 @@ class KeyvalueLocal {
     const { name } = this
     try {
       const content = await fs.readFile(`${filePath}${name}.json`)
-      const data = JSON.parse(content)
+      const jsonstring = content.toString()
+      const data = JSON.parse(jsonstring)
       return data
     } catch (err) {
       return {}
@@ -26,13 +28,13 @@ class KeyvalueLocal {
     await fs.writeFile(`${filePath}${name}.json`, JSON.stringify(data, ' ', 2))
   }
 
-  async get(key) {
+  async get(key: string) {
     const data = await this.read()
     const value = data[key]
     return value || {}
   }
 
-  async set(key, value) {
+  async set(key: string, value: any) {
     const data = await this.read()
     data[key] = value
     try {
@@ -44,7 +46,7 @@ class KeyvalueLocal {
     }
   }
 
-  async delete(key) {
+  async delete(key: string) {
     const data = await this.read()
     delete data[key]
     try {

@@ -2,9 +2,21 @@ import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 import EnvMapper from '../envMapper'
+import { IWakaConfig } from './configManager'
+import GatewayLocal from './adaptors/gatewayLocal'
+
+interface IVersionManager {
+  gateway: GatewayLocal
+  config: IWakaConfig
+}
 
 class VersionManager {
-  constructor(props) {
+  config: IWakaConfig
+  gateway: GatewayLocal
+  envMapper: EnvMapper
+  versions: KeyvalueDynamo
+  mappings: KeyvalueDynamo
+  constructor(props: IVersionManager) {
     const { gateway, config } = props
     this.config = config
     this.gateway = gateway

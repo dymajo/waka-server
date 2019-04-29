@@ -1,6 +1,20 @@
 import { ConnectionPool } from 'mssql'
 
+interface Logger {
+  debug(primaryMessage: string, ...supportingData: any[]): void
+  warn(primaryMessage: string, ...supportingData: any[]): void
+  error(primaryMessage: string, ...supportingData: any[]): void
+  info(primaryMessage: string, ...supportingData: any[]): void
+  log(primaryMessage: string, ...supportingData: any[]): void
+}
+
 class Connection {
+  db: string
+  logger: Logger
+  pool: ConnectionPool
+  ready: Promise<{}>
+  readyResolve: (value?: {} | PromiseLike<{}>) => void
+  readyReject: (reason?: any) => void
   constructor(props) {
     const { logger, db } = props
     this.db = db
