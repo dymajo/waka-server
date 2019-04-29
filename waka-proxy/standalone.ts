@@ -15,7 +15,7 @@ app.use(proxy.router)
 
 const listener = app.listen(process.env.PORT || 9001, () => {
   logger.info(
-    { port: listener.address().port, endpoint },
+    { port: listener.address()['port'], endpoint },
     'waka-proxy listening'
   )
   proxy.start()
