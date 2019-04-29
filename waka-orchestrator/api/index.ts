@@ -71,6 +71,17 @@ class PrivateApi {
       }
     })
 
+    router.post('/worker/recycle', async (req, res) => {
+      const { versionManager } = this
+      try {
+        versionManager.recycleGateway(req.body.prefix)
+        res.send({ message: 'Recycled worker.' })
+      } catch (err) {
+        logger.error({ err }, 'Error recycling app.')
+        res.status(500).send(err)
+      }
+    })
+
     router.post('/worker/docker', async (req, res) => {
       const { versionManager } = this
       try {
