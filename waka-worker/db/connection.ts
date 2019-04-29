@@ -35,7 +35,12 @@ class Connection {
     this.pool = new ConnectionPool(this.db, err => {
       if (err) {
         this.logger.error(err)
-        return this.readyReject()
+        this.logger.info('Retrying connection in 30s.')
+        setTimeout(() => {
+          this.logger.info('Trying to open DB connection.')
+          this.open()
+        }, 30000)
+        // never reject, just retry
       }
       this.readyResolve()
       return this.ready
