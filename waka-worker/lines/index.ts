@@ -12,6 +12,7 @@ import Connection from '../db/connection'
 import BaseLines from './regions/BaseLines'
 import Search from '../stops/search'
 import * as Logger from 'bunyan'
+import BaseRealtime from '../realtime/regions/BaseRealtime'
 const regions = {
   // 'au-syd': LinesAUSYD,
   'nz-akl': LinesNZAKL,

@@ -86,8 +86,18 @@ class RealtimeAUSYD extends BaseRealtime {
         (err, res, body) => {
           if (!err && res.statusCode === 200) {
             try {
-              const feed = FeedMessage.decode(body)
-
+              const feedUnknown = <unknown>FeedMessage.decode(body)
+              const feed = <
+                {
+                  entity: {
+                    trip_update: {
+                      trip: {
+                        trip_id: string
+                      }
+                    }
+                  }[]
+                }
+              >feedUnknown
               // const feed = GtfsRealtimeBindings.TripUpdate.decode(buffer)
               feed.entity.forEach(trip => {
                 if (trip.trip_update) {

@@ -1,6 +1,10 @@
+import Connection from '../../db/connection'
+import * as Logger from 'bunyan'
 abstract class BaseRealtime {
-  abstract scheduleLocationPull(): Promise<void>
-  abstract schedulePull(): Promise<void>
+  connection: Connection
+  logger: Logger
+  scheduleLocationPull?(): Promise<void>
+  schedulePull?(): Promise<void>
 
   abstract start(): void
 }
