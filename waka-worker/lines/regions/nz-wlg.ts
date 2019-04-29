@@ -1,5 +1,6 @@
 import DataAccess from '../dataAccess'
 import BaseLines from './BaseLines'
+import Connection from '../../db/connection'
 
 const groups = [
   {
@@ -38,7 +39,7 @@ groups.forEach((data, index) => {
 })
 
 class LinesNZWLG extends BaseLines {
-  connection: any
+  connection: Connection
   dataAccess: DataAccess
   lineColors: {}
   lineGroups: {}

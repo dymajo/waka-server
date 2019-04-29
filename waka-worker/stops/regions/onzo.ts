@@ -6,9 +6,10 @@ const onzos = [{ onzo: { bike: 1 } }]
 const onzo = {
   getBikes(lat, lon, dis) {
     return new Promise((resolve, reject) => {
-      const options = {}
-      options.url = `https://app.onzo.co.nz/nearby/${lat}/${lon}/${dis}`
-      options.json = true
+      const options = {
+        url: `https://app.onzo.co.nz/nearby/${lat}/${lon}/${dis}`,
+        json: true,
+      }
       Request(options, (error, response, body) => {
         if (error) {
           return

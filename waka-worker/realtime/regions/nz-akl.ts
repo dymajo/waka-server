@@ -8,8 +8,6 @@ const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
 
 class RealtimeNZAKL extends BaseRealtime {
-  connection: Connection
-  logger: any
   apiKey: string
   lastUpdate: Date
   lastVehicleUpdate: Date
