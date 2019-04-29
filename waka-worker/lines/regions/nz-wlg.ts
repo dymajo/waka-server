@@ -1,4 +1,5 @@
 import DataAccess from '../dataAccess'
+import BaseLines from './BaseLines';
 
 const groups = [
   {
@@ -36,7 +37,7 @@ groups.forEach((data, index) => {
   regionEnum[data.id] = index
 })
 
-class LinesNZWLG {
+class LinesNZWLG extends BaseLines {
   constructor(props) {
     const { logger, connection } = props
     this.logger = logger
