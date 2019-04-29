@@ -19,6 +19,9 @@ app.use(`/a/${PREFIX}`, worker.router)
 app.use(worker.router)
 
 const listener = app.listen(PORT, () => {
-  worker.logger.info({ port: PORT }, 'waka-worker listening')
+  worker.logger.info(
+    { port: listener.address()['port'] },
+    'waka-worker listening'
+  )
   worker.start()
 })
