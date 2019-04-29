@@ -6,11 +6,13 @@ import StopsDataAccess from '../stops/dataAccess'
 
 import LinesAUSYD from './regions/au-syd'
 import LinesNZAKL from './regions/nz-akl'
+import LinesNZCHC from './regions/nz-chc'
 import LinesNZWLG from './regions/nz-wlg'
 
 const regions = {
   // 'au-syd': LinesAUSYD,
   'nz-akl': LinesNZAKL,
+  'nz-chc': LinesNZCHC,
   'nz-wlg': LinesNZWLG,
 }
 
