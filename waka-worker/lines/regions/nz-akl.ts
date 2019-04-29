@@ -1,10 +1,11 @@
 import DataAccess from '../dataAccess'
 import lineGroups from './nz-akl-groups'
 import allLines from './nz-akl-lines'
+import BaseLines from './BaseLines'
 
 const getColor = (agencyId, code) => {
   // First for our fancy services.
-      switch (code) {
+  switch (code) {
     case 'CTY': // City Link
       return '#ef3c34'
     case 'INN': // Inner Link
@@ -14,22 +15,22 @@ const getColor = (agencyId, code) => {
     case 'TMK':
       return '#038fcc'
     case 'WEST': // Western Line
-          return '#84bd00'
-        case 'STH': // South Line
-          return '#da291c'
-        case 'EAST': // East Line
-          return '#ed8b00'
-        case 'PUK': // South Line
-          return '#da291c'
-        case 'ONE': // ONE Line
-          return '#00a6d6'
+      return '#84bd00'
+    case 'STH': // South Line
+      return '#da291c'
+    case 'EAST': // East Line
+      return '#ed8b00'
+    case 'PUK': // South Line
+      return '#da291c'
+    case 'ONE': // ONE Line
+      return '#00a6d6'
     case 'NX1': // Northern Express 1
       return '#123f90'
     case 'NX2': // Northern Express 2
       return '#008540'
-        default:
+    default:
     // do nothing
-      }
+  }
   switch (agencyId) {
     case 'AM': // Auckland Metro
       return '#00254b'
@@ -44,10 +45,10 @@ const getColor = (agencyId, code) => {
       return '#4CAF50'
 
     case 'NZB': // NZ Bus - metrolink
-          return '#0759b0'
+      return '#0759b0'
 
     case 'NZBML': // NZ Bus - metrolink
-          return '#0759b0'
+      return '#0759b0'
 
     case 'NZBNS': // NZ Bus - North Star
       return '#f39c12'
@@ -62,7 +63,7 @@ const getColor = (agencyId, code) => {
       return '#b2975b'
 
     case 'RTH': // Ritchies
-          return '#ff6f2c'
+      return '#ff6f2c'
 
     case 'TZG': // Tranzit
       return '#008540'
@@ -131,8 +132,19 @@ const friendlyNames = {
   '321': 'Hospitals',
 }
 
-class LinesNZAKL {
-  constructor(props) {
+class LinesNZAKL extends BaseLines {
+  logger: any
+  connection: any
+  dataAccess: DataAccess
+  lineIcons: any
+  lineGroups: typeof lineGroups
+  friendlyNames: any
+  allLines: typeof allLines
+  getColor: any
+  lineOperators: {}
+  lineColors: {}
+  constructor(props: { logger: any; connection: any }) {
+    super({})
     const { logger, connection } = props
     this.logger = logger
     this.connection = connection
@@ -152,7 +164,7 @@ class LinesNZAKL {
   }
 
   async cacheOperatorsAndShapes() {
-    const { logger, dataAccess } = this
+    const { logger, dataAccess, allLines } = this
     const routes = Object.keys(allLines)
     const lineOperators = {}
     const lineColors = {}
