@@ -1,6 +1,7 @@
-import fetch from 'node-fetch'
 import * as moment from 'moment-timezone'
 import logger from '../logger'
+import axios from 'axios'
+import UpdateManager from '.'
 
 const tfnswmodes = {
   buses1: { endpoint: 'buses/SMBSC001' },
@@ -38,10 +39,10 @@ const tfnswmodes = {
 }
 
 class TfNSWUpdater {
-  apiKey: any
-  callback: any
-  delay: any
-  interval: any
+  apiKey: string
+  callback: UpdateManager['callback']
+  delay: number
+  interval: number
   prefix: string
   timeout: NodeJS.Timeout
   constructor(props) {
@@ -73,34 +74,47 @@ class TfNSWUpdater {
   }
 
   async check() {
-    const { callback, check, interval, checkApi } = this
+    const { callback, check, interval, checkApi, prefix } = this
+    let newest = new Date(0)
     try {
       for (const mode in tfnswmodes) {
         const { endpoint } = tfnswmodes[mode]
         const version = await checkApi(endpoint)
-        console.log(version)
+        if (newest < version) {
+          newest = version
+        }
       }
+      const newVersion = `${newest.getFullYear()}${newest
+        .getMonth()
+        .toString()
+        .padStart(2, '0')}${newest
+        .getDate()
+        .toString()
+        .padStart(2, '0')}`
+      callback(prefix, newVersion, true)
     } catch (err) {
       logger.error({ err }, 'Could not update.')
     }
   }
 
-  async checkApi(endpoint) {
+  async checkApi(endpoint: string) {
     const { apiKey } = this
     const options = {
       url: `https://api.transport.nsw.gov.au/v1/gtfs/schedule/${endpoint}`,
       headers: {
         Authorization: apiKey,
       },
-      method: 'HEAD',
     }
-    const response = await fetch(options.url, {
-      method: options.method,
-      headers: options.headers,
-    })
+    try {
+      const res = await axios.head(options.url, {
+        headers: options.headers,
+      })
 
-    // return response.headers['last-modified']
-    return new Date(response.headers.get('last-modified')).getTime()
+      return new Date(res.headers['last-modified'])
+    } catch (err) {
+      logger.error({ err }, 'Could not reach api')
+      return new Date(0)
+    }
   }
 
   stop() {
