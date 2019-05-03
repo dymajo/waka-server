@@ -30,7 +30,6 @@
   "dependencies": {
     "apidoc": "^0.17.7",
     "aws-sdk": "^2.313.0",
-    "axios": "^0.18.0",
     "azure-storage": "^2.10.1",
     "body-parser": "^1.18.3",
     "bunyan": "^1.8.12",
@@ -46,6 +45,7 @@
     "node-fetch": "^2.3.0",
     "protobufjs": "^6.8.8",
     "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
     "rimraf": "^2.6.2",
     "stream-transform": "^1.0.2"
   },

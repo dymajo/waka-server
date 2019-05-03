@@ -151,6 +151,8 @@ class PrivateApi {
       process.exit()
     })
 
+    router.get('/realtime', (req, res) => {})
+
     router.use('/', express.static(path.join(__dirname, '/dist')))
   }
 }

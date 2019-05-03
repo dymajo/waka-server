@@ -9,6 +9,7 @@ const Station = require('./stops/station.js')
 const StopsNZAKL = require('./stops/regions/nz-akl.js')
 const StopsNZWLG = require('./stops/regions/nz-wlg.js')
 const Realtime = require('./realtime/index.js')
+const Stats = require('./stats')
 
 class WakaWorker {
   constructor(config) {
@@ -28,9 +29,9 @@ class WakaWorker {
     this.logger = logger
     const connection = new Connection({ logger, db })
     this.connection = connection
-
+    const realtime = new Realtime({ logger, connection, prefix, api })
     this.router = new Router()
-    this.realtime = new Realtime({ logger, connection, prefix, api })
+    this.realtime = realtime
 
     this.stopsExtras = null
     if (prefix === 'nz-akl') {
@@ -39,7 +40,7 @@ class WakaWorker {
       this.stopsExtras = new StopsNZWLG({ logger })
     }
     const { stopsExtras } = this
-
+    this.stats = new Stats({ realtime })
     this.search = new Search({ logger, connection, prefix, stopsExtras })
     this.lines = new Lines({
       logger,
@@ -101,7 +102,7 @@ class WakaWorker {
   }
 
   bindRoutes() {
-    const { lines, search, station, realtime, router } = this
+    const { lines, search, station, realtime, router, stats } = this
 
     /**
      * @api {get} /:region/info Get worker info
@@ -146,6 +147,7 @@ class WakaWorker {
      */
     router.get('/ping', (req, res) => res.send('pong'))
     router.get('/info', (req, res) => res.send(this.signature()))
+    router.get('/stats', stats.getStats)
 
     router.get('/station', station.stopInfo)
     router.get('/station/search', search.getStopsLatLon)

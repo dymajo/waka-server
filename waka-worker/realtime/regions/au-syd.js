@@ -1,7 +1,7 @@
 const GtfsRealtimeBindings = require('gtfs-realtime-bindings')
-const fetch = require('node-fetch')
-const request = require('request')
 const protobuf = require('protobufjs')
+const fetch = require('node-fetch')
+const request = require('request-promise-native')
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
@@ -63,30 +63,29 @@ class RealtimeAUSYD {
     const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
     const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
     modes.forEach(async mode => {
-      request(
-        {
-          url: `${tripUpdateOptions.url}/${mode}`,
+      try {
+        const res = await request(`${tripUpdateOptions.url}/${mode}`, {
           headers: tripUpdateOptions.headers,
           encoding: null,
-        },
-        (err, res, body) => {
-          if (!err && res.statusCode === 200) {
-            try {
-              const feed = FeedMessage.decode(body)
+        })
+        const _feed = GtfsRealtimeBindings.FeedMessage.decode(res)
 
-              // const feed = GtfsRealtimeBindings.TripUpdate.decode(buffer)
-              feed.entity.forEach(trip => {
-                if (trip.trip_update) {
-                  newData[trip.trip_update.trip.trip_id] = trip.trip_update
-                }
-              })
-            } catch (err) {
-              logger.error(err)
-            }
+        const body = await res.arrayBuffer()
+        const uInt8 = new Uint8Array(body)
+        debugger
+        const feed = FeedMessage.decode(uInt8)
+        // const feed = GtfsRealtimeBindings.TripUpdate.decode(buffer)
+        feed.entity.forEach(trip => {
+          if (trip.tripUpdate) {
+            newData[trip.tripUpdate.trip.tripId] = trip.tripUpdate
           }
-        }
-      )
+        })
+      } catch (err) {
+        this.currentDataFails += 1
+        logger.error({ err }, `could not get ${mode} data`)
+      }
     })
+
     this.currentData = newData
     this.currentDataFails = 0
     this.lastUpdate = new Date()
@@ -98,32 +97,63 @@ class RealtimeAUSYD {
     const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
 
     const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
-    const newVehicleData = {}
+    const newVehicleData = { entity: [] }
     modes.forEach(async mode => {
-      request(
-        {
+      try {
+        const res = await request({
           url: `${vehicleLocationOptions.url}/${mode}`,
           headers: vehicleLocationOptions.headers,
           encoding: null,
-        },
-        (err, res, body) => {
-          if (!err && res.statusCode === 200) {
-            try {
-              const feed = FeedMessage.decode(body)
+        })
+        const _feed = GtfsRealtimeBindings.FeedMessage.decode(res)
 
-              feed.entity.forEach(trip => {
-                if (trip.trip_update) {
-                  newVehicleData[trip.trip_update.trip.trip_id] =
-                    trip.trip_update
-                }
-              })
-            } catch (err) {
-              console.error(err)
-            }
-          }
-        }
-      )
+        const feed = FeedMessage.decode(res)
+        newVehicleData.entity = [...newVehicleData.entity, ...feed.entity]
+      } catch (err) {
+        this.currentVehicleDataFails += 1
+        logger.error({ err }, `could not get ${mode} data`)
+      }
     })
+    this.currentVehicleData = newVehicleData
+    this.currentDataVehicleFails = 0
+    this.lastVehicleUpdate = new Date()
+    setTimeout(this.scheduleLocationPull, scheduleLocationPullTimeout)
+  }
+
+  async getTripsEndpoint(req, res) {
+    // compat with old version of api
+    if (req.body.trips.constructor !== Array) {
+      req.body.trips = Object.keys(req.body.trips)
+    }
+    const { trips, train } = req.body
+
+    // falls back to API if we're out of date
+    const data = this.getTripsCached(trips)
+    res.send(data)
+  }
+
+  getTripsCached(trips) {
+    // this is essentially the same function as above, but just pulls from cache
+    const realtimeInfo = {}
+    console.log(trips[0])
+    console.log(this.currentData)
+    trips.forEach(trip => {
+      const data = this.currentData[trip]
+      // console.log(data)
+
+      if (typeof data !== 'undefined') {
+        const timeUpdate =
+          data.stopTimeUpdate.departure || data.stopTimeUpdate.arrival || {}
+        realtimeInfo[trip] = {
+          stop_sequence: data.stopTimeUpdate.stopSequence,
+          delay: timeUpdate.delay,
+          timestamp: timeUpdate.time,
+          // v_id: data.vehicle.id,
+        }
+      }
+    })
+
+    return realtimeInfo
   }
 }
 

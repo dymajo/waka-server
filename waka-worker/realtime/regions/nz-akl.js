@@ -1,5 +1,7 @@
+const request = require('request-promise-native')
 const fetch = require('node-fetch')
 const sql = require('mssql')
+const GtfsRealtimeBindings = require('gtfs-realtime-bindings')
 const doubleDeckers = require('./nz-akl-doubledecker.json')
 
 const schedulePullTimeout = 20000
@@ -23,12 +25,14 @@ class RealtimeNZAKL {
       url: 'https://api.at.govt.nz/v2/public/realtime/tripupdates',
       headers: {
         'Ocp-Apim-Subscription-Key': apiKey,
+        Accept: 'application/x-protobuf',
       },
     }
     this.vehicleLocationsOptions = {
       url: 'https://api.at.govt.nz/v2/public/realtime/vehiclelocations',
       headers: {
         'Ocp-Apim-Subscription-Key': apiKey,
+        Accept: 'application/x-protobuf',
       },
     }
 
@@ -63,14 +67,22 @@ class RealtimeNZAKL {
   async schedulePull() {
     const { logger, tripUpdatesOptions } = this
     try {
-      const data = await fetch(tripUpdatesOptions.url, {
+      const res = await request(tripUpdatesOptions.url, {
         headers: tripUpdatesOptions.headers,
-      }).then(r => r.json())
-      if (data.response && data.response.entity) {
-        const newData = {}
-        data.response.entity.forEach(trip => {
-          newData[trip.trip_update.trip.trip_id] = trip.trip_update
-        })
+        encoding: null,
+      })
+      debugger
+      const feed = GtfsRealtimeBindings.FeedMessage.decode(res)
+      feed.entity.forEach(entity => {
+        if (entity.trip_update) {
+          console.log(entity.trip_update)
+        }
+      })
+      // if (data.response && data.response.entity) {
+      //   const newData = {}
+      //   data.response.entity.forEach(trip => {
+      //     newData[trip.trip_update.trip.trip_id] = trip.trip_update
+      //   })
         this.currentData = newData
         this.currentDataFails = 0
         this.lastUpdate = new Date()
@@ -88,6 +100,12 @@ class RealtimeNZAKL {
   async scheduleLocationPull() {
     const { logger, vehicleLocationsOptions } = this
     try {
+      const res = await request({
+        url: vehicleLocationsOptions.url,
+        headers: vehicleLocationsOptions.headers,
+        encoding: null,
+      })
+
       const data = await fetch(vehicleLocationsOptions.url, {
         headers: vehicleLocationsOptions.headers,
       }).then(r => r.json())
@@ -241,7 +259,7 @@ class RealtimeNZAKL {
       )
       // this is good enough because data comes from auckland transport
       const tripIds = trips.map(entity => entity.vehicle.trip.trip_id)
-      const escapedTripIds = `'${tripIds.join("', '")}'`
+      const escapedTripIds = `'${tripIds.join('\', \'')}'`
       const sqlTripIdRequest = connection.get().request()
       const tripIdRequest = await sqlTripIdRequest.query(`
         SELECT *

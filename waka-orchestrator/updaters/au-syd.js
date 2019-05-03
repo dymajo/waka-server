@@ -1,4 +1,4 @@
-const axios = require('axios')
+const request = require('request-promise-native')
 const moment = require('moment-timezone')
 const logger = require('../logger.js')
 
@@ -77,13 +77,14 @@ class TfNSWUpdater {
           newest = version
         }
       }
-      const newVersion = `${newest.getFullYear()}${newest
-        .getMonth()
+      console.log(newest)
+      const year = newest.getUTCFullYear()
+      const month = newest.getUTCMonth() + 1
+      const date = newest.getUTCDate()
+      const newVersion = `${year}${month
         .toString()
-        .padStart(2, 0)}${newest
-        .getDate()
-        .toString()
-        .padStart(2, 0)}`
+        .padStart(2, 0)}${date.toString().padStart(2, 0)}`
+
       callback('au-syd', newVersion, true)
     } catch (err) {
       logger.error({ err }, 'Could not update.')
@@ -99,11 +100,11 @@ class TfNSWUpdater {
       },
     }
     try {
-      const res = await axios.head(options.url, {
+      const res = await request.head(options.url, {
         headers: options.headers,
       })
 
-      return new Date(res.headers['last-modified'])
+      return new Date(res['last-modified'])
     } catch (err) {
       logger.error({ err }, 'Could not reach api')
       return new Date(0)
