@@ -8,9 +8,10 @@ const StopsDataAccess = require('../stops/dataAccess.js')
 const LinesNZAKL = require('./regions/nz-akl.js')
 const LinesNZCHC = require('./regions/nz-chc.js')
 const LinesNZWLG = require('./regions/nz-wlg.js')
+const LinesAUSYD = require('./regions/au-syd')
 
 const regions = {
-  // 'au-syd': LinesAUSYD,
+  'au-syd': LinesAUSYD,
   'nz-akl': LinesNZAKL,
   'nz-chc': LinesNZCHC,
   'nz-wlg': LinesNZWLG,
@@ -80,7 +81,10 @@ class Lines {
 
   stop() {}
 
-  getColor(agencyId, routeShortName) {
+  getColor(agencyId, routeShortName, routeColor) {
+    if (routeColor) {
+      return `#${routeColor}`
+    }
     // If you need to get colors from the DB, please see the Wellington Lines Code.
     // Essentially does a one-time cache of all the colors into the lineData object.
     const { lineData } = this
