@@ -3,7 +3,7 @@ const RealtimeNZAKL = require('./regions/nz-akl')
 const RealtimeNZWLG = require('./regions/nz-wlg')
 
 const regions = {
-  'au-syd': RealtimeAUSYD,
+  // 'au-syd': RealtimeAUSYD,
   'nz-akl': RealtimeNZAKL,
   'nz-wlg': RealtimeNZWLG,
 }
