@@ -1,4 +1,5 @@
-const fetch = require('node-fetch')
+const AWSXRay = require('aws-xray-sdk')
+const axios = require('axios')
 const cityMetadata = require('../cityMetadata.json')
 const logger = require('./logger.js')
 
@@ -25,17 +26,28 @@ class WorkerDiscovery {
   }
 
   async checkCity(prefix) {
-    const request = await fetch(`${this.endpoint}/${prefix}/info`)
-    let message = null
-    if (request.status === 200) {
-      const data = await request.json()
-      this.responseMap.set(prefix, data)
-      message = `${prefix} is available`
-    } else {
-      this.responseMap.delete(prefix)
-      message = `${prefix} is unavailable`
-    }
-    logger.info({ prefix, status: request.status }, message)
+    AWSXRay.getNamespace().run(() => {
+      const segment = new AWSXRay.Segment(
+        `waka-proxy${process.env.XRAY_SUFFIX || ''}`
+      )
+      AWSXRay.setSegment(segment)
+      AWSXRay.captureAsyncFunc(`check-${prefix}`, async subsegment => {
+        let response = null
+        let message = null
+        try {
+          response = await axios.get(`${this.endpoint}/${prefix}/info`)
+          this.responseMap.set(prefix, response.data)
+          message = `${prefix} is available`
+        } catch (err) {
+          response = err.response
+          this.responseMap.delete(prefix)
+          message = `${prefix} is unavailable`
+        }
+        logger.info({ prefix, status: response.status }, message)
+        subsegment.close()
+      })
+      segment.close()
+    })
   }
 
   getRegionByBounds(lat, lon) {
