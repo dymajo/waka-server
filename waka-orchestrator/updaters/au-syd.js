@@ -103,7 +103,7 @@ class TfNSWUpdater {
         headers: options.headers,
       })
 
-      return new Date(res['last-modified'])
+      return new Date(res.headers['last-modified'])
     } catch (err) {
       logger.error({ err }, 'Could not reach api')
       return new Date(0)
