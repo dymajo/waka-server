@@ -1,4 +1,4 @@
-const request = require('request-promise-native')
+const axios = require('axios')
 const moment = require('moment-timezone')
 const logger = require('../logger.js')
 
@@ -77,7 +77,6 @@ class TfNSWUpdater {
           newest = version
         }
       }
-      console.log(newest)
       const year = newest.getUTCFullYear()
       const month = newest.getUTCMonth() + 1
       const date = newest.getUTCDate()
@@ -100,7 +99,7 @@ class TfNSWUpdater {
       },
     }
     try {
-      const res = await request.head(options.url, {
+      const res = await axios.head(options.url, {
         headers: options.headers,
       })
 
