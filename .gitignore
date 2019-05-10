@@ -5,3 +5,4 @@ built/
 .env
 .DS_STORE
 dist/docs
+/lib
