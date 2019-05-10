@@ -1,4 +1,4 @@
-import bunyan from 'bunyan'
+import * as bunyan from 'bunyan'
 
 const logger = bunyan.createLogger({
   name: 'waka-orchestrator',

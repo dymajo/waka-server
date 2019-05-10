@@ -1,7 +1,6 @@
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings'
 import fetch from 'node-fetch'
 import axios from 'axios'
-import * as request from 'request'
 import * as protobuf from 'protobufjs'
 import BaseRealtime from './BaseRealtime'
 
@@ -77,6 +76,49 @@ class RealtimeAUSYD extends BaseRealtime {
     const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
     const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
     modes.forEach(async mode => {
+      try {
+        const res = await fetch(`${tripUpdateOptions.url}/${mode}`, {
+          headers: tripUpdateOptions.headers,
+          compress: false,
+        })
+        const body = await res.arrayBuffer()
+        const uInt8 = new Uint8Array(body)
+        const feedUnknown = <unknown>FeedMessage.decode(uInt8)
+        const feed = <
+          {
+            entity: {
+              trip_update: {
+                trip: {
+                  trip_id: string
+                }
+              }
+            }[]
+          }
+        >feedUnknown
+        // const feed = GtfsRealtimeBindings.TripUpdate.decode(buffer)
+        feed.entity.forEach(trip => {
+          if (trip.trip_update) {
+            newData[trip.trip_update.trip.trip_id] = trip.trip_update
+          }
+        })
+      } catch (err) {
+        console.error(err)
+        logger.error(err)
+      }
+    })
+
+    this.currentData = newData
+    this.currentDataFails = 0
+    this.lastUpdate = new Date()
+    setTimeout(this.schedulePull, schedulePullTimeout)
+  }
+
+  async _schedulePull() {
+    const { logger, tripUpdateOptions } = this
+    const newData = {}
+    const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
+    const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
+    modes.forEach(async mode => {
       request(
         {
           url: `${tripUpdateOptions.url}/${mode}`,
@@ -118,6 +160,32 @@ class RealtimeAUSYD extends BaseRealtime {
   }
 
   async scheduleLocationPull() {
+    const { logger, vehicleLocationOptions } = this
+    const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
+    const reader = new protobuf.BufferReader()
+    const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
+    const newVehicleData = {}
+    modes.forEach(async mode => {
+      try {
+        const res = await request({
+          url: `${vehicleLocationOptions.url}/${mode}`,
+          headers: vehicleLocationOptions.headers,
+          encoding: null,
+        })
+        const feed = FeedMessage.decode(res.body)
+
+        feed.entity.forEach(trip => {
+          if (trip.trip_update) {
+            newVehicleData[trip.trip_update.trip.trip_id] = trip.trip_update
+          }
+        })
+      } catch (err) {
+        console.error(err)
+      }
+    })
+  }
+
+  async _scheduleLocationPull() {
     const { logger, vehicleLocationOptions } = this
     const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
 

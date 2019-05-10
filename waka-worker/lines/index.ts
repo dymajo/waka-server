@@ -4,7 +4,7 @@ import { Request, Response } from 'express'
 import cityMetadata from '../../cityMetadata.json'
 import StopsDataAccess from '../stops/dataAccess'
 
-// import LinesAUSYD from './regions/au-syd'
+import LinesAUSYD from './regions/au-syd'
 import LinesNZAKL from './regions/nz-akl'
 import LinesNZCHC from './regions/nz-chc'
 import LinesNZWLG from './regions/nz-wlg'
@@ -14,7 +14,7 @@ import Search from '../stops/search'
 import * as Logger from 'bunyan'
 import BaseRealtime from '../realtime/regions/BaseRealtime'
 const regions = {
-  // 'au-syd': LinesAUSYD,
+  'au-syd': LinesAUSYD,
   'nz-akl': LinesNZAKL,
   'nz-chc': LinesNZCHC,
   'nz-wlg': LinesNZWLG,

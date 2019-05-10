@@ -2,6 +2,7 @@ import * as moment from 'moment-timezone'
 import logger from '../logger'
 import axios from 'axios'
 import UpdateManager from '.'
+import fetch from 'node-fetch'
 
 const tfnswmodes = {
   buses1: { endpoint: 'buses/SMBSC001' },
@@ -39,12 +40,12 @@ const tfnswmodes = {
 }
 
 class TfNSWUpdater {
-  apiKey: string
-  callback: UpdateManager['callback']
-  delay: number
-  interval: number
   prefix: string
   timeout: NodeJS.Timeout
+  apiKey: any
+  callback: any
+  delay: any
+  interval: any
   constructor(props) {
     const { apiKey, callback, delay, interval } = props
     this.apiKey = apiKey
