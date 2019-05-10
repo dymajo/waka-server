@@ -1,7 +1,6 @@
 import * as moment from 'moment-timezone'
 import logger from '../logger'
 import axios from 'axios'
-import UpdateManager from '.'
 import fetch from 'node-fetch'
 
 const tfnswmodes = {

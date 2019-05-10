@@ -1,9 +1,9 @@
-import GtfsRealtimeBindings from 'gtfs-realtime-bindings'
-import fetch from 'node-fetch'
+// import GtfsRealtimeBindings from 'gtfs-realtime-bindings'
 import axios from 'axios'
 import * as protobuf from 'protobufjs'
 import BaseRealtime from './BaseRealtime'
-
+import Connection from '../../db/connection'
+import * as Logger from 'bunyan'
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
 
@@ -16,10 +16,16 @@ const modes = [
   'sydneytrains',
 ]
 
+interface IRealtimeAUSYDProps {
+  apiKey: string
+  connection: Connection
+  logger: Logger
+}
+
 class RealtimeAUSYD extends BaseRealtime {
-  connection: any
-  logger: any
-  apiKey: any
+  connection: Connection
+  logger: Logger
+  apiKey: string
   lastUpdate: any
   lastVehicleUpdate: any
   currentData: {}
@@ -28,7 +34,7 @@ class RealtimeAUSYD extends BaseRealtime {
   currentVehicleDataFails: any
   tripUpdateOptions: { url: string; headers: { Authorization: any } }
   vehicleLocationOptions: { url: string; headers: { Authorization: any } }
-  constructor(props) {
+  constructor(props: IRealtimeAUSYDProps) {
     super()
     const { apiKey, connection, logger } = props
     this.connection = connection
@@ -77,24 +83,25 @@ class RealtimeAUSYD extends BaseRealtime {
     const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
     modes.forEach(async mode => {
       try {
-        const res = await fetch(`${tripUpdateOptions.url}/${mode}`, {
+        const res = await axios.get(`${tripUpdateOptions.url}/${mode}`, {
           headers: tripUpdateOptions.headers,
-          compress: false,
+          responseType: 'arraybuffer',
         })
-        const body = await res.arrayBuffer()
-        const uInt8 = new Uint8Array(body)
-        const feedUnknown = <unknown>FeedMessage.decode(uInt8)
-        const feed = <
-          {
-            entity: {
-              trip_update: {
-                trip: {
-                  trip_id: string
-                }
+        const uInt8 = new Uint8Array(res.data)
+        const _feed = FeedMessage.decode(uInt8) as unknown
+        // const _feed = GtfsRealtimeBindings.FeedMessage.decode(res)
+
+        const feed = _feed as {
+          entity: {
+            trip_update: {
+              trip: {
+                trip_id: string
               }
-            }[]
-          }
-        >feedUnknown
+            }
+          }[]
+        }
+
+        debugger
         // const feed = GtfsRealtimeBindings.TripUpdate.decode(buffer)
         feed.entity.forEach(trip => {
           if (trip.trip_update) {
