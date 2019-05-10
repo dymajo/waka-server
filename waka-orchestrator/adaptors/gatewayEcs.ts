@@ -1,8 +1,9 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
-import { ECS } from 'aws-sdk'
 import logger from '../logger'
 import EnvMapper from '../../envMapper'
+import AWSXRay from 'aws-xray-sdk'
+const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 
 const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())
@@ -12,7 +13,7 @@ class GatewayEcs {
   serviceSuffix: any
   replicas: any
   envMapper: EnvMapper
-  ecs: ECS
+  ecs: AWS.ECS
   constructor(config) {
     const { cluster, region, servicePrefix, serviceSuffix, replicas } = config
     this.servicePrefix = servicePrefix || ''
@@ -25,7 +26,7 @@ class GatewayEcs {
       return
     }
 
-    this.ecs = new ECS({ region, params: { cluster } })
+    this.ecs = new AWS.ECS({ region, params: { cluster } })
   }
 
   async start(prefix, config) {

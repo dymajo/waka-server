@@ -3,18 +3,30 @@ import 'dotenv'
 import * as bodyParser from 'body-parser'
 import EnvMapper from '../envMapper'
 import WakaWorker from './index'
+import AWSXRay from 'aws-xray-sdk'
+
+AWSXRay.config([AWSXRay.plugins.ECSPlugin])
+AWSXRay.captureHTTPsGlobal(require('http'))
 
 const { PREFIX, VERSION, PORT } = process.env
 
+const envMapper = new EnvMapper()
+const config = envMapper.fromEnvironmental(process.env)
+const worker = new WakaWorker(config)
+AWSXRay.setLogger(worker.logger)
+
 const app = express()
+app.use(
+  AWSXRay.express.openSegment(
+    `waka-worker-${PREFIX}-${VERSION}${process.env.XRAY_SUFFIX || ''}`
+  )
+)
 app.use(bodyParser.json())
 app.use((req, res, next) => {
   res.setHeader('X-Powered-By', `waka-worker-${PREFIX}-${VERSION}`)
   next()
 })
-const envMapper = new EnvMapper()
-const config = envMapper.fromEnvironmental(process.env)
-const worker = new WakaWorker(config)
+
 app.use(`/a/${PREFIX}`, worker.router)
 app.use(worker.router)
 
@@ -23,5 +35,14 @@ const listener = app.listen(PORT, () => {
     { port: listener.address()['port'] },
     'waka-worker listening'
   )
-  worker.start()
+  AWSXRay.getNamespace().run(() => {
+    const segment = new AWSXRay.Segment(
+      `waka-worker-${PREFIX}-${VERSION}${process.env.XRAY_SUFFIX || ''}`
+    )
+    AWSXRay.setSegment(segment)
+    worker.start()
+    segment.close()
+  })
 })
+
+app.use(AWSXRay.express.closeSegment())

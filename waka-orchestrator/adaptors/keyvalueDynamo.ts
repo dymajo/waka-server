@@ -1,15 +1,16 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
-
+const AWSXRay = require('aws-xray-sdk')
+const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 import { DynamoDB } from 'aws-sdk'
 import logger from '../logger'
 
 class KeyvalueDynamo {
   name: string
-  dynamo: DynamoDB
+  dynamo: AWS.DynamoDB
   constructor(props) {
     const { name, region } = props
     this.name = name
-    this.dynamo = new DynamoDB({ region })
+    this.dynamo = new AWS.DynamoDB({ region })
 
     this.flattenObject = this.flattenObject.bind(this)
     this.fattenObject = this.fattenObject.bind(this)

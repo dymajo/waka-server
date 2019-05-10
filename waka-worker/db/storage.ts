@@ -1,6 +1,7 @@
-import fs from 'fs'
-import azure from 'azure-storage'
-import AWS from 'aws-sdk'
+import * as fs from 'fs'
+import * as azure from 'azure-storage'
+import AWSXRay from 'aws-xray-sdk'
+const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 
 const azuretestcreds = [
   'devstoreaccount1',
