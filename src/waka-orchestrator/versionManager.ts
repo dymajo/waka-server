@@ -1,7 +1,7 @@
 import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
-import EnvMapper from '../envMapper'
+import EnvMapper from '../../envMapper'
 import { IWakaConfig } from './configManager'
 import GatewayLocal from './adaptors/gatewayLocal'
 
