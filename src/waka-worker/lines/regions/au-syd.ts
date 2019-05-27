@@ -44,12 +44,10 @@ class LinesAUSYD extends BaseLines {
         name: 'Intercity Trains',
         items: [],
       },
-      { name: 'Regional Trains', items: [] },
       { name: 'Buses', items: [] },
       { name: 'Ferries', items: [] },
       { name: 'Light Rail', items: [] },
       { name: 'NSW TrainLink', items: [] },
-      { name: 'Regional Coach', items: [] },
     ]
     const result = await dataAccess.getRoutes()
     result.recordset.forEach(record => {
@@ -65,38 +63,39 @@ class LinesAUSYD extends BaseLines {
       } else if (splitName.length === 2) {
         lineEntry.push(splitName[1])
       }
-      if (allLines.hasOwnProperty(record.route_short_name)) {
-        allLines[record.route_short_name].push(lineEntry)
-      } else {
-        allLines[record.route_short_name] = [lineEntry]
-
-        const numericLine = parseInt(record.route_short_name, 10)
-      }
       const {
         route_type: routeType,
         route_short_name: routeShortName,
         route_desc: routeDesc,
       } = record
-      if (routeType === 401) {
-        lineGroups[0].items.push(record.route_short_name)
-      }
-      if (routeType === 400 && routeShortName[0] === 'T') {
-        lineGroups[1].items.push(record.route_short_name)
-      }
-      if (routeType === 1000) {
-        lineGroups[5].items.push(record.route_short_name)
-      }
-      if (routeType === 700 && routeDesc !== 'School Buses') {
-        lineGroups[4].items.push(record.route_short_name)
-      }
-      if (routeType === 204) {
-        lineGroups[8].items.push(record.route_short_name)
-      }
-      if (routeType === 106) {
-        lineGroups[3].items.push(record.route_short_name)
-      }
-      if (routeType === 900) {
-        lineGroups[6].items.push(record.route_short_name)
+      if (Object.prototype.hasOwnProperty.call(allLines, routeShortName)) {
+        allLines[routeShortName].push(lineEntry)
+      } else {
+        allLines[routeShortName] = [lineEntry]
+        if (routeType === 401) {
+          lineGroups[0].items.push(routeShortName)
+        }
+        if (routeType === 400 && routeShortName[0] === 'T') {
+          lineGroups[1].items.push(routeShortName)
+        }
+        if (routeType === 400 && routeShortName[0] !== 'T') {
+          lineGroups[2].items.push(routeShortName)
+        }
+        if (routeType === 700 && routeDesc !== 'School Buses') {
+          lineGroups[3].items.push(routeShortName)
+        }
+        if (routeType === 1000) {
+          lineGroups[4].items.push(routeShortName)
+        }
+
+        if (routeType === 900) {
+          lineGroups[5].items.push(routeShortName)
+        }
+        if (routeType === 106 || routeType === 204) {
+          lineGroups[6].items.push(routeShortName)
+        }
+
+        const numericLine = parseInt(routeShortName, 10)
       }
 
       lineGroups.forEach(group => {
