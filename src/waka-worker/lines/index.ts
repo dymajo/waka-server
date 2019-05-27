@@ -94,7 +94,10 @@ class Lines {
 
   stop() {}
 
-  getColor(agencyId: string, routeShortName: string) {
+  getColor(agencyId: string, routeShortName: string, routeColor:string) {
+    if (routeColor) {
+      return `#${routeColor}`
+    }
     const { lineData } = this
     if (lineData.getColor) {
       return lineData.getColor(agencyId, routeShortName)
