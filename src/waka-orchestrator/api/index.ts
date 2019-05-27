@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { Router } from 'express'
+import { Router, static as _static } from 'express'
 import logger from '../logger'
 import KeyvalueLocal from '../adaptors/keyvalueLocal'
 import KeyvalueDynamo from '../adaptors/keyvalueDynamo'
@@ -148,7 +148,7 @@ class PrivateApi {
       }
     })
 
-    router.use('/', express.static(path.join(__dirname, '/dist')))
+    router.use('/', _static(path.join(__dirname, '/dist')))
   }
 }
 export default PrivateApi

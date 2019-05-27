@@ -1,7 +1,7 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
 import logger from '../logger'
-import EnvMapper from '../../../envMapper'
+import EnvMapper from '../../envMapper'
 import AWSXRay from 'aws-xray-sdk'
 const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 
