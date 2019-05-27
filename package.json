@@ -9,8 +9,11 @@
     "build": "npm run build:types && npm run build:js",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --copy-files",
-    "start": "node lib/waka-orchestartor/standalone.js",
-    "bs": "npm run build:js && npm start"
+    "start": "node lib/waka-orchestrator/standalone.js",
+    "bs": "npm run build:js && npm start",
+    "install:proxy": "go get -v ./src/waka-go-proxy",
+    "build:proxy": "go build -o ./src/waka-go-proxy/waka-go-proxy ./src/waka-go-proxy/",
+    "document": "apidoc -i waka-orchestrator -i waka-go-proxy -i waka-worker -o dist/docs"
   },
   "repository": {
     "type": "git",
@@ -36,6 +39,7 @@
     "@types/body-parser": "^1.17.0",
     "@types/bunyan": "^1.8.6",
     "@types/express": "^4.16.1",
+    "@types/express-http-proxy": "^1.5.9",
     "@types/moment-timezone": "^0.5.12",
     "@types/morgan": "^1.7.35",
     "@types/mssql": "^4.0.13",
@@ -54,8 +58,10 @@
     "csv-parse": "^2.5.0",
     "dotenv": "^6.0.0",
     "express": "^4.16.4",
+    "express-http-proxy": "^1.5.1",
     "extract-zip": "^1.6.7",
     "gtfs-realtime-bindings": "0.0.5",
+    "long": "^4.0.0",
     "moment-timezone": "^0.5.23",
     "morgan": "^1.9.1",
     "mssql": "^4.1.0",
