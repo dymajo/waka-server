@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone'
+import moment from 'moment-timezone'
 import StopsDataAccess from './dataAccess'
 import Connection from '../db/connection'
 import * as Logger from 'bunyan'
@@ -217,8 +217,21 @@ class Station {
     } = {
       provider: 'sql-server',
     }
+    let timezone
+    switch (prefix) {
+      case 'au-syd':
+        timezone = 'Australia/Sydney'
+        break
+      case 'au-mel':
+        timezone = 'Australia/Melbourne'
+      case 'nz-wlg':
+      case 'nz-akl':
+      default:
+        timezone = 'Pacific/Auckland'
+        break
+    }
 
-    const time = moment().tz('Pacific/Auckland')
+    const time = moment().tz(timezone)
     let currentTime = new Date(Date.UTC(1970, 0, 1, time.hour(), time.minute()))
     let midnightOverride = false
     if (req.params.time) {
@@ -367,6 +380,7 @@ class Station {
   async timetable(req, res) {
     const { prefix, dataAccess, logger, regionSpecific, lines } = this
     const { station, route, direction, offset } = req.params
+
     if (parseInt(direction, 10) > 2 || parseInt(direction, 10) < 0) {
       return res.status(400).send({ error: 'Direction is not valid.' })
     }
@@ -375,7 +389,21 @@ class Station {
       dateOffset = parseInt(offset, 10)
     }
 
-    const time = moment().tz('Pacific/Auckland')
+    let timezone
+    switch (prefix) {
+      case 'au-syd':
+        timezone = 'Australia/Sydney'
+        break
+      case 'au-mel':
+        timezone = 'Australia/Melbourne'
+      case 'nz-wlg':
+      case 'nz-akl':
+      default:
+        timezone = 'Pacific/Auckland'
+        break
+    }
+
+    const time = moment().tz(timezone)
     const currentTime = new Date(
       Date.UTC(1970, 0, 1, time.hour(), time.minute())
     )
