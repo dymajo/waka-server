@@ -94,8 +94,17 @@ class PrivateApi {
     })
 
     // TODO
-    router.post('/worker/delete', (req, res) => {
-      res.status(500).send({ message: 'Not implemented!' })
+    router.post('/worker/delete', async (req, res) => {
+      const {
+        body: { id },
+      } = req
+      try {
+        await this.versionManager.deleteWorker(id)
+        res.send({ message: 'Deleting worker.' })
+      } catch (error) {
+        logger.error({ error }, 'error deleting worker')
+        res.status(500).send(error)
+      }
     })
 
     router.get('/mapping', async (req, res) => {

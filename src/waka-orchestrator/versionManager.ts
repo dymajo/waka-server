@@ -97,6 +97,10 @@ class VersionManager {
     await this.mappings.delete(prefix)
   }
 
+  async deleteWorker(id: string) {
+    await this.versions.delete(id)
+  }
+
   async checkVersionExists(prefix, version) {
     const { versions } = this
     const id = `${prefix.replace(/-/g, '_')}_${version
