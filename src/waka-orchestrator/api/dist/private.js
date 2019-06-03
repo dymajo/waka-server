@@ -129,6 +129,10 @@ prefix: ${worker.prefix}`)
       alert('Error in JSON')
     }
   }
+
+  addGitHash(text) {
+    document.getElementById('footer').innerHTML = text
+  }
 }
 
 class WorkerController {
@@ -141,6 +145,7 @@ class WorkerController {
     this.domController.start()
     this.loadWorkers()
     this.loadConfig()
+    this.getHash()
   }
 
   runAction(action, data) {
@@ -161,6 +166,12 @@ class WorkerController {
         this.loadWorkers()
         this.loadConfig()
       })
+  }
+
+  async getHash() {
+    const githash = await fetch(`${this.endpoint}/git`)
+    const text = await githash.text()
+    this.domController.addGitHash(text)
   }
 
   async loadWorkers() {

@@ -4,6 +4,7 @@ import logger from '../logger'
 import KeyvalueLocal from '../adaptors/keyvalueLocal'
 import KeyvalueDynamo from '../adaptors/keyvalueDynamo'
 import VersionManager from '../versionManager'
+import c from 'child_process'
 
 class PrivateApi {
   versionManager: VersionManager
@@ -30,7 +31,14 @@ class PrivateApi {
 
   bindRoutes() {
     const { router } = this
-
+    router.get('/git', (req, res) => {
+      const commit = c
+        .execSync('git log -1')
+        .toString()
+        .replace(/(<|>)/g, '')
+      console.log(commit)
+      res.send(commit)
+    })
     router.get('/worker', async (req, res) => {
       const { versionManager } = this
       try {
