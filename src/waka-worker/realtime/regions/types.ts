@@ -63,6 +63,8 @@ export interface VehiclePosition {
   position: {
     latitude: number
     longitude: number
+    bearing?: number
+    speed?: number
   }
   stopId: string
   timestamp: Long
