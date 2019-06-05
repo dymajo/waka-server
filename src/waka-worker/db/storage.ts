@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as azure from 'azure-storage'
 import AWSXRay from 'aws-xray-sdk'
+import axios from 'axios'
 const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 
 const azuretestcreds = [
@@ -14,20 +15,23 @@ class Storage {
   blobSvc: any
   s3: AWS.S3
   constructor(props: {
-    backing: string
+    backing: 'aws' | 'local'
     local: boolean
     endpoint: string
     region: string
   }) {
     this.backing = props.backing
     if (this.backing === 'azure') {
-      const creds = props.local ? azuretestcreds : []
-      this.blobSvc = azure.createBlobService(...creds)
-    } else if (this.backing === 'aws') {
+      // const creds = props.local ? azuretestcreds : []
+      // this.blobSvc = azure.createBlobService(...creds)
+    }
+    if (this.backing === 'aws') {
       this.s3 = new AWS.S3({
         endpoint: props.endpoint,
         region: props.region,
       })
+    }
+    if (this.backing === 'local') {
     }
   }
 
@@ -49,7 +53,7 @@ class Storage {
     }
   }
 
-  downloadStream(container, file, stream, callback) {
+  async downloadStream(container, file, stream, callback) {
     if (this.backing === 'azure') {
       return this.blobSvc.getBlobToStream(container, file, stream, callback)
     }
@@ -69,6 +73,13 @@ class Storage {
         })
         .on('end', data => callback(null, data)) // do nothing, but this prevents from crashing
         .pipe(stream)
+    }
+    if (this.backing === 'local') {
+      const res = await axios.get(`http://localhost:9004/${file}`, {
+        responseType: 'stream',
+      })
+      return res.data.pipe(stream)
+      // return res.data
     }
   }
 
