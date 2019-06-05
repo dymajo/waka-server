@@ -4,8 +4,14 @@ import * as protobuf from 'protobufjs'
 import BaseRealtime from './BaseRealtime'
 import Connection from '../../db/connection'
 import * as Logger from 'bunyan'
-import { PositionFeedMessage, UpdateFeedMessage, TripUpdate } from './types'
+import {
+  PositionFeedMessage,
+  UpdateFeedMessage,
+  TripUpdate,
+  VehiclePosition,
+} from './types'
 import { Response, Request } from 'express'
+import { VarChar } from 'mssql'
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
 
@@ -32,7 +38,7 @@ class RealtimeAUSYD extends BaseRealtime {
   lastVehicleUpdate: any
   currentData: { [tripId: string]: TripUpdate }
   currentDataFails: number
-  currentVehicleData: {}
+  currentVehicleData: { [tripId: string]: VehiclePosition }
   currentVehicleDataFails: any
   tripUpdateOptions: { url: string; headers: { Authorization: any } }
   vehicleLocationOptions: { url: string; headers: { Authorization: any } }
@@ -170,49 +176,37 @@ class RealtimeAUSYD extends BaseRealtime {
     }
     return res.send(realtimeInfo)
   }
-  async getVehicleLocationEndpoint(req, res) {
-    const { logger, vehicleLocationsOptions } = this
-    const { trips } = req.body
 
+  async getVehicleLocationEndpoint(req, res) {
+    const { logger, currentVehicleData } = this
+    const { trips } = req.body
     const vehicleInfo = {}
-    req.body.trips.forEach(trip => {
-      vehicleInfo[trip] = {}
-    })
-    try {
-      const data = await fetch(
-        `${vehicleLocationsOptions.url}?tripid=${trips.join(',')}`,
-        {
-          headers: vehicleLocationsOptions.headers,
+    for (const trip in trips) {
+      try {
+        const data = currentVehicleData[trip]
+        vehicleInfo[trip] = {
+          latitude: data.position.latitude,
+          longitude: data.position.longitude,
         }
-      ).then(r => r.json())
-      if (data.response.entity) {
-        data.response.entity.forEach(trip => {
-          vehicleInfo[trip.vehicle.trip.trip_id] = {
-            latitude: trip.vehicle.position.latitude,
-            longitude: trip.vehicle.position.longitude,
-            bearing: trip.vehicle.position.bearing,
-          }
-        })
-      }
-      res.send(vehicleInfo)
-      return vehicleInfo
-    } catch (err) {
-      logger.error({ err }, 'Could not get vehicle location from AT.')
-      res.send({ error: err })
-      return err
+      } catch (err) {}
     }
+    debugger
+    res.send(vehicleInfo)
   }
 
   async getLocationsForLine(req, res) {
+    debugger
     const { logger, connection } = this
     const { line } = req.params
-    if (this.currentVehicleData.entity === undefined) {
+    const currentTripIds = Object.keys(this.currentVehicleData)
+    debugger
+    if (currentTripIds.length === 0) {
       return res.send([])
     }
 
     try {
       const sqlRouteIdRequest = connection.get().request()
-      sqlRouteIdRequest.input('route_short_name', sqla.VarChar(50), line)
+      sqlRouteIdRequest.input('route_short_name', VarChar(50), line)
       const routeIdResult = await sqlRouteIdRequest.query<{ route_id: string }>(
         `
         SELECT route_id
@@ -220,12 +214,13 @@ class RealtimeAUSYD extends BaseRealtime {
         WHERE route_short_name = @route_short_name
         `
       )
+
       const routeIds = routeIdResult.recordset.map(r => r.route_id)
-      const trips = this.currentVehicleData.entity.filter(entity =>
-        routeIds.includes(entity.vehicle.trip.route_id)
-      )
-      // this is good enough because data comes from auckland transport
-      const tripIds = trips.map(entity => entity.vehicle.trip.trip_id)
+      const tripIds = currentTripIds.filter(tripId => {
+        const routeId = this.currentVehicleData[tripId].trip.routeId
+        routeIds.includes(routeId)
+      })
+      // const tripIds = trips.map(entity => entity.vehicle.trip.trip_id)
       const escapedTripIds = `'${tripIds.join("', '")}'`
       const sqlTripIdRequest = connection.get().request()
       const tripIdRequest = await sqlTripIdRequest.query<{
