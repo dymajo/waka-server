@@ -1,51 +1,49 @@
-import * as fs from 'fs'
-import * as azure from 'azure-storage'
-import AWSXRay from 'aws-xray-sdk'
+import FormData from 'form-data'
+import { createReadStream } from 'fs'
+import logger from '../logger'
 import axios from 'axios'
-const AWS = AWSXRay.captureAWS(require('aws-sdk'))
+import { PutObjectRequest } from 'aws-sdk/clients/s3'
+import AWS from 'aws-sdk'
+import { ServerResponse } from 'http'
+import * as Logger from 'bunyan'
 
-const azuretestcreds = [
-  'devstoreaccount1',
-  'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==',
-  'http://127.0.0.1:10000/devstoreaccount1',
-]
+// import { PutObjectRequest } from 'aws-sdk/clients/s3'
+
+interface StorageProps {
+  backing?: 'aws' | 'local'
+  endpoint?: string
+  region?: string
+  logger: Logger
+}
 
 class Storage {
   backing: string
-  blobSvc: any
   s3: AWS.S3
-  constructor(props: {
-    backing: 'aws' | 'local'
-    local: boolean
-    endpoint: string
-    region: string
-  }) {
+  logger: Logger
+  constructor(props: StorageProps) {
+    this.logger = props.logger
     this.backing = props.backing
-    if (this.backing === 'azure') {
-      // const creds = props.local ? azuretestcreds : []
-      // this.blobSvc = azure.createBlobService(...creds)
-    }
     if (this.backing === 'aws') {
+      // const credentials = new AWS.SharedIniFileCredentials({
+      //   profile: 'dymajo',
+      // })
+      // AWS.config.credentials = credentials
       this.s3 = new AWS.S3({
         endpoint: props.endpoint,
         region: props.region,
       })
     }
-    if (this.backing === 'local') {
-    }
   }
 
-  createContainer(container, cb) {
-    const createCb = function(error) {
+  createContainer(container: string, cb: any) {
+    const createCb = (error: any) => {
       if (error) {
-        console.error(error)
+        this.logger.info(error)
         throw error
       }
       cb()
     }
-    if (this.backing === 'azure') {
-      this.blobSvc.createContainerIfNotExists(container, createCb)
-    } else if (this.backing === 'aws') {
+    if (this.backing === 'aws') {
       const params = {
         Bucket: container,
       }
@@ -53,10 +51,12 @@ class Storage {
     }
   }
 
-  async downloadStream(container, file, stream, callback) {
-    if (this.backing === 'azure') {
-      return this.blobSvc.getBlobToStream(container, file, stream, callback)
-    }
+  async downloadStream(
+    container: string,
+    file: string,
+    stream: ServerResponse,
+    callback: (error: any, data?: any) => void
+  ) {
     if (this.backing === 'aws') {
       const params = {
         Bucket: container,
@@ -66,39 +66,36 @@ class Storage {
         .getObject(params)
         .createReadStream()
         .on('error', err => {
-          if (err.code !== 'NoSuchKey') {
-            console.error(err)
-          }
+          // if (err.code !== 'NoSuchKey') {
+          this.logger.error(err)
+          // }
           callback(err)
         })
-        .on('end', data => callback(null, data)) // do nothing, but this prevents from crashing
+        .on('end', (data: any) => callback(null, data)) // do nothing, but this prevents from crashing
         .pipe(stream)
-    }
-    if (this.backing === 'local') {
-      const res = await axios.get(`http://localhost:9004/${file}`, {
-        responseType: 'stream',
-      })
-      return res.data.pipe(stream)
-      // return res.data
     }
   }
 
-  uploadFile(container, file, sourcePath, callback) {
-    if (this.backing === 'azure') {
-      return this.blobSvc.createBlockBlobFromLocalFile(
-        container,
-        file,
-        sourcePath,
-        callback
-      )
-    }
+  async uploadFile(container: string, file: string, sourcePath: string) {
     if (this.backing === 'aws') {
-      const params = {
-        Body: fs.createReadStream(sourcePath),
+      const params: PutObjectRequest = {
+        Body: createReadStream(sourcePath),
         Bucket: container,
         Key: file,
       }
-      return this.s3.putObject(params, callback)
+      return this.s3.putObject(params).promise()
+    }
+    if (this.backing === 'local') {
+      try {
+        const bodyFormData = new FormData()
+        bodyFormData.append('uploadFile', createReadStream(sourcePath))
+        return axios.post(`http://127.0.0.1:9004/${file}`, bodyFormData, {
+          headers: bodyFormData.getHeaders(),
+        })
+      } catch (error) {
+        this.logger.error(error.data)
+        // throw error
+      }
     }
   }
 }

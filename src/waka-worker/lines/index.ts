@@ -45,8 +45,8 @@ class Lines {
 
     this.storageSvc = new Storage({
       backing: config.storageService,
-      local: config.emulatedStorage,
       region: config.shapesRegion,
+      logger: logger,
     })
 
     this.lineData = {}
