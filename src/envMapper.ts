@@ -14,7 +14,6 @@ class EnvMapper {
       SHAPES_CONTAINER: config.shapesContainer,
       SHAPES_REGION: config.shapesRegion,
       SHAPES_SKIP: 'true',
-      EMULATED_STORAGE: config.emulatedStorage,
       // importer only:
       KEYVALUE: config.keyvalue,
       KEYVALUE_VERSION_TABLE: `${config.keyvaluePrefix}-versions`,
@@ -63,7 +62,6 @@ class EnvMapper {
       storageService: STORAGE_SERVICE,
       shapesContainer: SHAPES_CONTAINER,
       shapesRegion: SHAPES_REGION,
-      emulatedStorage: EMULATED_STORAGE === 'true',
       db: {
         user: DB_USER,
         password: DB_PASSWORD,

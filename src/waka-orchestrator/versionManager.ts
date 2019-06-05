@@ -156,7 +156,6 @@ class VersionManager {
       shapesContainer: workerConfig.shapesContainer,
       shapesRegion: workerConfig.shapesRegion,
       status: workerConfig.status,
-      emulatedStorage: config.emulatedStorage,
       api: config.api,
       db: {
         user: workerConfig.db.user,
