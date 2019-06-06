@@ -8,6 +8,14 @@ import transform from 'stream-transform'
 import * as moment from 'moment-timezone'
 import logger from '../logger'
 
+interface BasicUpdaterProps {
+  prefix: string
+  callback: any
+  interval: number
+  delay: number
+  url: string
+}
+
 class BasicUpdater {
   prefix: any
   callback: any
@@ -15,7 +23,7 @@ class BasicUpdater {
   interval: number
   url: any
   timeout: NodeJS.Timeout
-  constructor(props) {
+  constructor(props: BasicUpdaterProps) {
     const { prefix, callback, delay, interval, url } = props
     this.prefix = prefix
     this.callback = callback
@@ -88,7 +96,7 @@ class BasicUpdater {
 
   async download() {
     const { prefix, url } = this
-    return new Promise(async (resolve, reject) => {
+    return new Promise<string>(async (resolve, reject) => {
       const response = await fetch(url)
       const destination = path.join(os.tmpdir(), `${prefix}.zip`)
       const dest = fs.createWriteStream(destination)
@@ -100,7 +108,7 @@ class BasicUpdater {
 
   async unzip(zipLocation) {
     const { prefix } = this
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       const dir = path.join(os.tmpdir(), prefix)
       extract(zipLocation, { dir }, err => {
         if (err) {
@@ -113,7 +121,11 @@ class BasicUpdater {
   }
 
   async findVersion(gtfsLocation) {
-    return new Promise((resolve, reject) => {
+    return new Promise<{
+      version: string
+      startDate: string
+      endDate: string
+    }>((resolve, reject) => {
       // checks to see if the file has a feed_info.txt
       let feedLocation = 'feed_info.txt'
       try {

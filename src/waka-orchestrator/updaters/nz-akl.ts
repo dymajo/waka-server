@@ -2,6 +2,13 @@ import fetch from 'node-fetch'
 import * as moment from 'moment-timezone'
 import logger from '../logger'
 
+interface ATUpdaterProps {
+  apiKey: string
+  callback: any
+  delay: number
+  interval: number
+}
+
 class ATUpdater {
   apiKey: any
   callback: any
@@ -9,12 +16,7 @@ class ATUpdater {
   interval: any
   prefix: string
   timeout: NodeJS.Timeout
-  constructor(props: {
-    apiKey: string
-    callback: any
-    delay: number
-    interval: number
-  }) {
+  constructor(props: ATUpdaterProps) {
     const { apiKey, callback, delay, interval } = props
     this.apiKey = apiKey
     this.callback = callback

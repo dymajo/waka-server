@@ -38,14 +38,22 @@ const tfnswmodes = {
   trains2: { endpoint: 'sydneytrains' },
 }
 
+interface TfNSWUpdaterProps {
+  apiKey: string
+  callback: any
+  delay: number
+  interval: number
+}
+
 class TfNSWUpdater {
   prefix: string
   timeout: NodeJS.Timeout
-  apiKey: any
+  apiKey: string
   callback: any
-  delay: any
-  interval: any
-  constructor(props) {
+  delay: number
+  interval: number
+
+  constructor(props: TfNSWUpdaterProps) {
     const { apiKey, callback, delay, interval } = props
     this.apiKey = apiKey
     this.callback = callback
