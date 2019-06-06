@@ -106,7 +106,16 @@ class VersionManager {
     const id = `${prefix.replace(/-/g, '_')}_${version
       .replace(/-/g, '_')
       .replace(/ /g, '_')}`
-    const data = await versions.get(id)
+    const _data = (await versions.get(id)) as unknown
+    const data = _data as {
+      db: { database: string; password: string; server: string; user: string }
+      id: string
+      prefix: string
+      shapesContainer: string
+      shapesRegion: string
+      status: string
+      version: string
+    }
 
     return {
       id,
@@ -148,7 +157,16 @@ class VersionManager {
 
     // the gateway needs some settings from the orchestrator,
     // but also some settings from the worker config
-    const workerConfig = await versions.get(versionId)
+    const _workerConfig = (await versions.get(versionId)) as unknown
+    const workerConfig = _workerConfig as {
+      db: { database: string; password: string; server: string; user: string }
+      id: string
+      prefix: string
+      shapesContainer: string
+      shapesRegion: string
+      status: string
+      version: string
+    }
     const gatewayConfig = {
       prefix: workerConfig.prefix,
       version: workerConfig.version,
@@ -180,7 +198,16 @@ class VersionManager {
     // empty -> pendingimport -> importing -> imported
     // empty -> pendingimport-willmap -> importing-willmap -> imported-willmap -> imported
     const { versions } = this
-    const version = await versions.get(versionId)
+    const _version = (await versions.get(versionId)) as unknown
+    const version = _version as {
+      db: { database: string; password: string; server: string; user: string }
+      id: string
+      prefix: string
+      shapesContainer: string
+      shapesRegion: string
+      status: string
+      version: string
+    }
     version.status = status
     await versions.set(versionId, version)
   }

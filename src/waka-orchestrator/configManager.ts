@@ -88,7 +88,20 @@ class ConfigManager {
 
   async getConfig() {
     const localConfig = this.config
-    const remoteConfig = await this.meta.get('config')
+    const _remoteConfig = (await this.meta.get('config')) as unknown
+    const remoteConfig = _remoteConfig as {
+      api: { 'agenda-21': string; 'au-syd': string; 'nz-akl': string }
+      db: {
+        connectionTimeoutNumber: number
+        requestTimeoutNumber: number
+        transactionLimitNumber: number
+        uat: {
+          passwordString: string
+          serverString: string
+          userString: string
+        }
+      }
+    }
     const mergedConfig = Object.assign(localConfig, remoteConfig)
     logger.info('Configuration retrieved from remote.')
     return mergedConfig
