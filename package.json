@@ -13,7 +13,7 @@
     "bs": "npm run build:js && npm start",
     "install:proxy": "go get -v ./src/waka-go-proxy",
     "build:proxy": "go build -o ./src/waka-go-proxy/waka-go-proxy ./src/waka-go-proxy/",
-    "document": "apidoc -i waka-orchestrator -i waka-go-proxy -i waka-worker -o dist/docs"
+    "document": "apidoc -i src/waka-orchestrator -i src/waka-go-proxy -i src/waka-worker -o dist/docs"
   },
   "repository": {
     "type": "git",
