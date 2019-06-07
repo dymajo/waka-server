@@ -1,10 +1,10 @@
-import { error } from '../logger'
+import logger from '../logger'
 
 // seeing as I'm on the kubes team at work,
 // I should probaby get this to also work with kubes.
 class GatewayKubernetes {
   start() {
-    error('Kubernetes Gateway Not Implemented!')
+    logger.error('Kubernetes Gateway Not Implemented!')
   }
 }
 export default GatewayKubernetes

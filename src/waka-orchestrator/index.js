@@ -4,7 +4,7 @@ import { join } from 'path'
 import proxy from 'express-http-proxy'
 import { statSync } from 'fs'
 
-import { info, error } from './logger'
+import logger from './logger'
 import GatewayLocal from './adaptors/gatewayLocal'
 import GatewayEcs from './adaptors/gatewayEcs'
 import GatewayKubernetes from './adaptors/gatewayKubernetes'
@@ -49,7 +49,7 @@ class WakaOrchestrator {
         delete data.msg
         delete data.level
         delete data.time
-        info(data, msg)
+        logger.info(data, msg)
       }
 
       try {
@@ -66,10 +66,10 @@ class WakaOrchestrator {
         this.proxy.stdout.on('data', goLogs)
         this.proxy.stderr.on('data', goLogs)
         this.proxy.on('close', d =>
-          info({ code: d.toString() }, 'proxy exited')
+          logger.info({ code: d.toString() }, 'proxy exited')
         )
       } catch (err) {
-        error(
+        logger.error(
           'proxy could not start - make sure you compile with `npm run build:proxy`. some routes will not work'
         )
       }

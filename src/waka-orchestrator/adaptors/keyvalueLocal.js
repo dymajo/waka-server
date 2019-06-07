@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { promises as fs } from 'fs'
-import { error } from '../logger'
+import logger from '../logger'
 
 // this is designed to be slow af to emulate the dynamoDB lag
 const filePath = join(__dirname, '../../cache/keyvalue-')
@@ -39,7 +39,7 @@ class KeyvalueLocal {
       await this.write(data)
       return true
     } catch (err) {
-      error({ err }, 'Could not write data.')
+      logger.error({ err }, 'Could not write data.')
       return false
     }
   }
@@ -51,7 +51,7 @@ class KeyvalueLocal {
       await this.write(data)
       return true
     } catch (err) {
-      error({ err }, 'Could not write data.')
+      logger.error({ err }, 'Could not write data.')
       return false
     }
   }

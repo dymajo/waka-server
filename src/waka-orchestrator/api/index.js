@@ -1,8 +1,8 @@
 import { join } from 'path'
 import express, { static as _static } from 'express'
-import { error, info } from '../logger.js'
-import KeyvalueLocal from '../adaptors/keyvalueLocal.js'
-import KeyvalueDynamo from '../adaptors/keyvalueDynamo.js'
+import logger from '../logger'
+import KeyvalueLocal from '../adaptors/keyvalueLocal'
+import KeyvalueDynamo from '../adaptors/keyvalueDynamo'
 
 const { Router } = express
 
@@ -74,7 +74,7 @@ class PrivateApi {
         versionManager.recycleGateway(req.body.prefix)
         res.send({ message: 'Recycled worker.' })
       } catch (err) {
-        error({ err }, 'Error recycling app.')
+        logger.error({ err }, 'Error recycling app.')
         res.status(500).send(err)
       }
     })
@@ -85,7 +85,7 @@ class PrivateApi {
         const command = await versionManager.getDockerCommand(req.body.id)
         res.send({ command })
       } catch (err) {
-        error({ err }, 'Error getting docker command')
+        logger.error({ err }, 'Error getting docker command')
         res.status(500).send(err)
       }
     })
@@ -108,7 +108,7 @@ class PrivateApi {
         await versionManager.updateMapping(prefix, id)
         res.send({ message: 'Activated worker.' })
       } catch (err) {
-        error({ err }, 'Error mapping worker.')
+        logger.error({ err }, 'Error mapping worker.')
         res.status(500).send(err)
       }
     })
@@ -120,7 +120,7 @@ class PrivateApi {
         await versionManager.deleteMapping(prefix)
         res.send({ message: 'Deleting mapping.' })
       } catch (err) {
-        error({ err }, 'Error unmapping worker.')
+        logger.error({ err }, 'Error unmapping worker.')
         res.status(500).send(err)
       }
     })
@@ -130,7 +130,7 @@ class PrivateApi {
         const remoteConfig = await this.meta.get('config')
         res.send({ config: remoteConfig })
       } catch (err) {
-        error({ err }, 'Error getting remote config')
+        logger.error({ err }, 'Error getting remote config')
         res.status(500).send(err)
       }
     })
@@ -140,13 +140,13 @@ class PrivateApi {
         await this.meta.set('config', req.body.config)
         res.send({ message: 'Saved config.' })
       } catch (err) {
-        error({ err }, 'Error saving config.')
+        logger.error({ err }, 'Error saving config.')
         res.status(500).send(err)
       }
     })
 
     router.post('/orchestrator/kill', async (req, res) => {
-      info('Orchestrator killed by user.')
+      logger.info('Orchestrator killed by user.')
       await res.send({ message: 'sending SIGTERM' })
       process.exit()
     })

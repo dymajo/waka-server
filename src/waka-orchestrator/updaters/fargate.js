@@ -1,7 +1,8 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 import { captureAWS } from 'aws-xray-sdk'
-const AWS = captureAWS(import('aws-sdk'))
 import logger from '../logger'
+
+const AWS = captureAWS(import('aws-sdk'))
 
 class Fargate {
   constructor(config) {

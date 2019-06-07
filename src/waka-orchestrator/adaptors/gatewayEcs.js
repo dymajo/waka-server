@@ -1,9 +1,10 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
 import { captureAWS } from 'aws-xray-sdk'
+import logger from '../logger'
+import EnvMapper from '../../envMapper'
+
 const AWS = captureAWS(import('aws-sdk'))
-import { warn, error, info, debug } from '../logger.js'
-import EnvMapper from '../../envMapper.js'
 
 const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())
@@ -17,7 +18,7 @@ class GatewayEcs {
     this.envMapper = new EnvMapper()
 
     if (!(region && cluster)) {
-      warn('Cannot use ECS Gateway - Missing Config.')
+      logger.warn('Cannot use ECS Gateway - Missing Config.')
       return
     }
 
@@ -27,10 +28,10 @@ class GatewayEcs {
   async start(prefix, config) {
     const { ecs, servicePrefix, serviceSuffix, replicas } = this
     if (!ecs) {
-      error({ prefix }, 'Cannot start ECS Service - not configured.')
+      logger.error({ prefix }, 'Cannot start ECS Service - not configured.')
       return
     }
-    info({ prefix }, 'Starting ECS Service')
+    logger.info({ prefix }, 'Starting ECS Service')
 
     // makes config docker friendly
     const env = this.envMapper.toEnvironmental(config, 'worker')
@@ -38,7 +39,7 @@ class GatewayEcs {
       name,
       value: (env[name] || '').toString(),
     }))
-    debug({ prefix, env }, 'Environmental Variables')
+    logger.debug({ prefix, env }, 'Environmental Variables')
     const serviceName = `${servicePrefix}${prefix}${serviceSuffix}`
 
     try {
@@ -47,7 +48,7 @@ class GatewayEcs {
         .describeServices({ services: [serviceName] })
         .promise()
 
-      debug({ prefix, services }, 'Service Info')
+      logger.debug({ prefix, services }, 'Service Info')
       const service = services.services[0]
 
       // describe task definition
@@ -60,7 +61,7 @@ class GatewayEcs {
         })
         .promise()
       let newTaskDefinitionArn = taskDefinition.taskDefinition.taskDefinitionArn
-      debug({ prefix, taskDefinition }, 'Task Definition Info')
+      logger.debug({ prefix, taskDefinition }, 'Task Definition Info')
 
       // determine if task definitions needs update
       const containerDefinition =
@@ -72,9 +73,9 @@ class GatewayEcs {
       if (
         envConvert(envArray) === envConvert(containerDefinition.environment)
       ) {
-        info({ prefix }, 'Environmental variables have not changed.')
+        logger.info({ prefix }, 'Environmental variables have not changed.')
       } else {
-        info(
+        logger.info(
           { prefix },
           'Environmental variables have changed - updating task definition.'
         )
@@ -93,15 +94,15 @@ class GatewayEcs {
           .promise()
         newTaskDefinitionArn =
           newTaskDefinition.taskDefinition.taskDefinitionArn
-        info({ prefix, newTaskDefinitionArn }, 'Task defintion updated.')
+        logger.info({ prefix, newTaskDefinitionArn }, 'Task defintion updated.')
       }
 
       // update service if needed - logging
       if (service.taskDefinition !== newTaskDefinitionArn) {
-        info({ prefix }, 'New Task Definition - updating service.')
+        logger.info({ prefix }, 'New Task Definition - updating service.')
       }
       if (service.desiredCount !== replicas) {
-        info(
+        logger.info(
           {
             prefix,
             wantedReplicas: replicas,
@@ -123,16 +124,22 @@ class GatewayEcs {
             desiredCount: replicas,
           })
           .promise()
-        info({ prefix, service: service.serviceName }, 'ECS service updated.')
+        logger.info(
+          { prefix, service: service.serviceName },
+          'ECS service updated.'
+        )
       } else {
-        info({ prefix, service: service.serviceName }, 'No updates required.')
+        logger.info(
+          { prefix, service: service.serviceName },
+          'No updates required.'
+        )
       }
 
       // done
       // wow. just realized this is the same logic as a powershell script I wrote
       // that allows Octopus Deploy to deploy to ECS
     } catch (err) {
-      error({ err, serviceName }, 'Could not start ECS Service.')
+      logger.error({ err, serviceName }, 'Could not start ECS Service.')
     }
   }
 
@@ -145,17 +152,20 @@ class GatewayEcs {
       forceNewDeployment: true,
       desiredCount: replicas,
     })
-    info({ prefix, service: serviceName }, 'ECS Service Updated')
+    logger.info({ prefix, service: serviceName }, 'ECS Service Updated')
   }
 
   async stop(prefix) {
     const { ecs, servicePrefix, serviceSuffix } = this
     if (!ecs) {
-      error({ prefix }, 'Cannot stop ECS Service - not configured.')
+      logger.error({ prefix }, 'Cannot stop ECS Service - not configured.')
       return
     }
     const serviceName = `${servicePrefix}${prefix}${serviceSuffix}`
-    info({ prefix, service: serviceName }, 'Scaling ECS Worker Service to 0.')
+    logger.info(
+      { prefix, service: serviceName },
+      'Scaling ECS Worker Service to 0.'
+    )
 
     // scale service to 0
     await ecs
@@ -164,7 +174,7 @@ class GatewayEcs {
         desiredCount: 0,
       })
       .promise()
-    info({ prefix, service: serviceName }, 'ECS service stopped.')
+    logger.info({ prefix, service: serviceName }, 'ECS service stopped.')
 
     // done
   }

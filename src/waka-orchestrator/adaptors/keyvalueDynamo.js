@@ -1,8 +1,9 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
 import { captureAWS } from 'aws-xray-sdk'
+import logger from '../logger'
+
 const AWS = captureAWS(import('aws-sdk'))
-import { debug, warn } from '../logger'
 
 class KeyvalueDynamo {
   constructor(props) {
@@ -62,11 +63,11 @@ class KeyvalueDynamo {
       },
       TableName: name,
     }
-    debug(params)
+    logger.debug(params)
     return new Promise(resolve => {
       dynamo.getItem(params, (err, data) => {
         if (err) {
-          warn({ err }, 'Could not get DynamoDB Item')
+          logger.warn({ err }, 'Could not get DynamoDB Item')
           return resolve({})
         }
         const response = data.Item || {}
@@ -83,11 +84,11 @@ class KeyvalueDynamo {
       Item: item,
       TableName: name,
     }
-    debug(params)
+    logger.debug(params)
     return new Promise(resolve => {
       dynamo.putItem(params, err => {
         if (err) {
-          warn({ err }, 'Could not set DynamoDB Item')
+          logger.warn({ err }, 'Could not set DynamoDB Item')
           return resolve(false)
         }
         return resolve(true)
@@ -105,11 +106,11 @@ class KeyvalueDynamo {
       },
       TableName: name,
     }
-    debug(params)
+    logger.debug(params)
     return new Promise(resolve => {
       dynamo.deleteItem(params, err => {
         if (err) {
-          warn({ err }, 'Could not delete DynamoDB Item')
+          logger.warn({ err }, 'Could not delete DynamoDB Item')
           return resolve(false)
         }
         return resolve(true)
@@ -122,11 +123,11 @@ class KeyvalueDynamo {
     const params = {
       TableName: name,
     }
-    debug(params)
+    logger.debug(params)
     return new Promise(resolve => {
       dynamo.scan(params, (err, data) => {
         if (err) {
-          warn({ err }, 'Could not scan DynamoDB Table')
+          logger.warn({ err }, 'Could not scan DynamoDB Table')
           return resolve({})
         }
         const response = {}

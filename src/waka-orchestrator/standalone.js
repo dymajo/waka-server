@@ -7,7 +7,7 @@ import {
   captureHTTPsGlobal,
   express,
 } from 'aws-xray-sdk'
-import logger, { info } from './logger'
+import logger from './logger'
 import ConfigManager from './configManager'
 import WakaOrchestrator from '.'
 
@@ -33,7 +33,10 @@ const start = async () => {
   app.use(express.closeSegment())
 
   const listener = app.listen(config.port, () => {
-    info({ port: listener.address().port }, 'waka-orchestrator listening')
+    logger.info(
+      { port: listener.address().port },
+      'waka-orchestrator listening'
+    )
     orchestrator.start(listener.address().port)
   })
 }

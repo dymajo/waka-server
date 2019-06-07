@@ -1,4 +1,4 @@
-import { info } from './logger'
+import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 
@@ -59,7 +59,7 @@ class ConfigManager {
     const localConfig = this.config
     const remoteConfig = await this.meta.get('config')
     const mergedConfig = Object.assign(localConfig, remoteConfig)
-    info('Configuration retrieved from remote.')
+    logger.info('Configuration retrieved from remote.')
     return mergedConfig
   }
 }
