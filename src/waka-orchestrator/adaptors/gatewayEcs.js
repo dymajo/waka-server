@@ -4,7 +4,7 @@ import { captureAWS } from 'aws-xray-sdk'
 import logger from '../logger'
 import EnvMapper from '../../envMapper'
 
-const AWS = captureAWS(import('aws-sdk'))
+const AWS = captureAWS(require('aws-sdk'))
 
 const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())

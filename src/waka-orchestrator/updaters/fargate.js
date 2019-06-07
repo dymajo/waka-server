@@ -2,7 +2,7 @@
 import { captureAWS } from 'aws-xray-sdk'
 import logger from '../logger'
 
-const AWS = captureAWS(import('aws-sdk'))
+const AWS = captureAWS(require('aws-sdk'))
 
 class Fargate {
   constructor(config) {
