@@ -1,48 +1,89 @@
 import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
-import { NumberResults } from 'aws-sdk/clients/clouddirectory'
+import BaseKeyvalue from './adaptors/BaseKeyvalue'
 
-export interface IWakaConfig {
+export interface WakaConfig {
   port: number
   gateway: string
   keyvalue: string
   keyvaluePrefix: string
   keyvalueRegion: string
   storageService: string
-  emulatedStorage: boolean
   connectionTimeout: number
   requestTimeout: number
+  transactionLimit: number
   api: {
-    [api: string]: any
+    [api: string]: string
   }
   db: {
-    local: {
-      server: string
-      user: string
-      password: string
+    [dbConfig: string]: DBConfig
+  }
+  updaters: {
+    [updater: string]: {
+      delay: number
+      prefix: string
+      dbconfig: string
+      interval: number
+      shapesContainer: string
+      type: string
+      shapesRegion: string
+      url: string
+      extended: boolean
     }
   }
-  // not how it's used
-  updaters: {
-    [updater: string]: boolean | {
-      delay:number,prefix:string, dbconfig:string,interval:number,shapesContainer:string,type:string,shapesRegion: string, url:string
-    }
+  gatewayConfig?: {
+    ecs: EcsGatewayConfig
+  }
+}
+
+export interface WorkerConfig {
+  prefix: string
+  version: string
+  db: DBConfig
+  api: string
+  storageService: string
+  shapesContainer: string
+  shapesRegion: string
+}
+
+export interface EcsGatewayConfig {
+  cluster: string
+  region: string
+  servicePrefix: string
+  serviceSuffix: string
+  replicas: number
+}
+
+export interface DBConfig {
+  server: string
+  user: string
+  password: string
+}
+
+declare const process: {
+  env: {
+    PORT: string
+    GATEWAY: string
+    KEYVALUE: string
+    KEYVALUE_PREFIX: string
+    KEYVALUE_REGION: string
+    STORAGE_SERVICE: 'aws' | 'local'
   }
 }
 
 class ConfigManager {
-  config: IWakaConfig
-  meta: KeyvalueDynamo
+  config: WakaConfig
+  meta: BaseKeyvalue
+
   constructor() {
     const config = {
-      port: Number.parseInt(process.env.PORT) || 9001,
+      port: Number.parseInt(process.env.PORT, 10) || 9001,
       gateway: process.env.GATEWAY || 'local',
       keyvalue: process.env.KEYVALUE || 'local',
       keyvaluePrefix: process.env.KEYVALUE_PREFIX || 'waka',
       keyvalueRegion: process.env.KEYVALUE_REGION || 'us-west-2',
-      storageService: 'aws',
-      emulatedStorage: false,
+      storageService: process.env.STORAGE_SERVICE || 'aws',
       transactionLimit: 50000,
       connectionTimeout: 60000,
       requestTimeout: 60000,
@@ -60,9 +101,9 @@ class ConfigManager {
         },
       },
       updaters: {
-        'nz-akl': false,
-        'nz-wlg': false,
-        'au-syd': false,
+        'nz-akl': null,
+        'nz-wlg': null,
+        'au-syd': null,
       },
       importer: {},
       gatewayConfig: {

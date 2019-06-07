@@ -1,5 +1,35 @@
+interface EnviromentConfig {
+  PREFIX: string
+  VERSION: string
+  DB_DATABASE: string
+  DB_USER: string
+  DB_PASSWORD: string
+  DB_SERVER: string
+  DB_TRANSACTION_LIMIT: string
+  DB_CONNECTION_TIMEOUT: string
+  DB_REQUEST_TIMEOUT: string
+  STORAGE_SERVICE: string
+  SHAPES_CONTAINER: string
+  SHAPES_REGION: string
+  SHAPES_SKIP: string
+}
+
+interface ImporterConfig extends EnviromentConfig {
+  KEYVALUE: string
+  KEYVALUE_VERSION_TABLE: string
+  KEYVALUE_REGION: string
+}
+
+interface WorkerConfig extends EnviromentConfig {
+  AT_API_KEY: string
+  AGENDA21_API_KEY: string
+}
+
 class EnvMapper {
-  toEnvironmental(config, subset) {
+  toEnvironmental(
+    config,
+    subset
+  ): EnviromentConfig | ImporterConfig | WorkerConfig {
     const base = {
       PREFIX: config.prefix,
       VERSION: config.version,
