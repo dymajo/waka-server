@@ -1,7 +1,8 @@
 FROM node:latest as build
 WORKDIR /app
 COPY . ./
-RUN npm ci --production
+RUN npm ci
+RUN npm run build:js
 
 FROM node:alpine as runtime
 ENV NODE_ENV=production
