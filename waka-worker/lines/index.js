@@ -1,13 +1,13 @@
-const sql = require('mssql')
-const Storage = require('../db/storage.js')
+import { VarChar } from 'mssql'
+import Storage from '../db/storage'
 
-const cityMetadata = require('../../cityMetadata.json')
-const StopsDataAccess = require('../stops/dataAccess.js')
+import cityMetadata from '../../cityMetadata.json'
+import StopsDataAccess from '../stops/dataAccess'
 
-// const LinesAUSYD = require('./regions/au-syd.js')
-const LinesNZAKL = require('./regions/nz-akl.js')
-const LinesNZCHC = require('./regions/nz-chc.js')
-const LinesNZWLG = require('./regions/nz-wlg.js')
+// import LinesAUSYD from './regions/au-syd'
+import LinesNZAKL from './regions/nz-akl'
+import LinesNZCHC from './regions/nz-chc'
+import LinesNZWLG from './regions/nz-wlg'
 
 const regions = {
   // 'au-syd': LinesAUSYD,
@@ -261,10 +261,10 @@ class Lines {
       if (agencyId !== null) {
         lineId = lineId.replace(agencyId, '')
         agency = 'and routes.agency_id = @agency_id'
-        sqlRequest.input('agency_id', sql.VarChar(50), agencyId)
+        sqlRequest.input('agency_id', VarChar(50), agencyId)
       }
     }
-    sqlRequest.input('route_short_name', sql.VarChar(50), lineId)
+    sqlRequest.input('route_short_name', VarChar(50), lineId)
 
     const query = `
       SELECT
@@ -501,7 +501,7 @@ class Lines {
     })
     const { connection, logger, stopsDataAccess, search } = this
     const sqlRequest = connection.get().request()
-    sqlRequest.input('trip_id', sql.VarChar(100), req.params.tripId)
+    sqlRequest.input('trip_id', VarChar(100), req.params.tripId)
     try {
       const result = await sqlRequest.query(`
         SELECT
@@ -576,7 +576,7 @@ class Lines {
   async getStopsFromShape(req, res) {
     const { connection, logger } = this
     const sqlRequest = connection.get().request()
-    sqlRequest.input('shape_id', sql.VarChar(100), req.params.shapeId)
+    sqlRequest.input('shape_id', VarChar(100), req.params.shapeId)
     try {
       const result = await sqlRequest.query(
         'SELECT TOP(1) trip_id FROM trips WHERE trips.shape_id = @shape_id'
@@ -593,4 +593,4 @@ class Lines {
   }
 }
 
-module.exports = Lines
+export default Lines

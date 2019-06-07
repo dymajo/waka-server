@@ -1,9 +1,9 @@
-const path = require('path')
-const fs = require('fs').promises
-const logger = require('../logger.js')
+import { join } from 'path'
+import { promises as fs } from 'fs'
+import { error } from '../logger'
 
 // this is designed to be slow af to emulate the dynamoDB lag
-const filePath = path.join(__dirname, '../../cache/keyvalue-')
+const filePath = join(__dirname, '../../cache/keyvalue-')
 class KeyvalueLocal {
   constructor(props) {
     const { name } = props
@@ -39,7 +39,7 @@ class KeyvalueLocal {
       await this.write(data)
       return true
     } catch (err) {
-      logger.error({ err }, 'Could not write data.')
+      error({ err }, 'Could not write data.')
       return false
     }
   }
@@ -51,7 +51,7 @@ class KeyvalueLocal {
       await this.write(data)
       return true
     } catch (err) {
-      logger.error({ err }, 'Could not write data.')
+      error({ err }, 'Could not write data.')
       return false
     }
   }
@@ -61,4 +61,4 @@ class KeyvalueLocal {
     return data
   }
 }
-module.exports = KeyvalueLocal
+export default KeyvalueLocal

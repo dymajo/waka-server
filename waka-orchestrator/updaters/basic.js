@@ -1,12 +1,12 @@
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const extract = require('extract-zip')
-const fetch = require('node-fetch')
-const csvparse = require('csv-parse')
-const transform = require('stream-transform')
-const moment = require('moment-timezone')
-const logger = require('../logger.js')
+import { createWriteStream, statSync, createReadStream } from 'fs'
+import { tmpdir } from 'os'
+import { join, resolve as _resolve } from 'path'
+import extract from 'extract-zip'
+import fetch from 'node-fetch'
+import csvparse from 'csv-parse'
+import transform from 'stream-transform'
+import moment from 'moment-timezone'
+import logger from '../logger'
 
 class BasicUpdater {
   constructor(props) {
@@ -84,8 +84,8 @@ class BasicUpdater {
     const { prefix, url } = this
     return new Promise(async (resolve, reject) => {
       const response = await fetch(url)
-      const destination = path.join(os.tmpdir(), `${prefix}.zip`)
-      const dest = fs.createWriteStream(destination)
+      const destination = join(tmpdir(), `${prefix}.zip`)
+      const dest = createWriteStream(destination)
       response.body.pipe(dest)
       dest.on('finish', () => resolve(destination))
       dest.on('error', reject)
@@ -95,7 +95,7 @@ class BasicUpdater {
   async unzip(zipLocation) {
     const { prefix } = this
     return new Promise((resolve, reject) => {
-      const dir = path.join(os.tmpdir(), prefix)
+      const dir = join(tmpdir(), prefix)
       extract(zipLocation, { dir }, err => {
         if (err) {
           reject()
@@ -111,14 +111,12 @@ class BasicUpdater {
       // checks to see if the file has a feed_info.txt
       let feedLocation = 'feed_info.txt'
       try {
-        fs.statSync(path.resolve(gtfsLocation, feedLocation))
+        statSync(_resolve(gtfsLocation, feedLocation))
       } catch (err) {
         feedLocation = 'calendar.txt'
       }
 
-      const input = fs.createReadStream(
-        path.resolve(gtfsLocation, feedLocation)
-      )
+      const input = createReadStream(_resolve(gtfsLocation, feedLocation))
       const parser = csvparse({ delimiter: ',' })
 
       let headers = null
@@ -156,4 +154,4 @@ class BasicUpdater {
     clearTimeout(this.timeout)
   }
 }
-module.exports = BasicUpdater
+export default BasicUpdater

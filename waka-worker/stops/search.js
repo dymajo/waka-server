@@ -1,4 +1,4 @@
-const sql = require('mssql')
+import { Decimal } from 'mssql'
 
 class Search {
   constructor(props) {
@@ -215,10 +215,10 @@ class Search {
     const stop_lng_gt = lon - lonDist
     const stop_lng_lt = lon + lonDist
     const sqlRequest = connection.get().request()
-    sqlRequest.input('stop_lat_gt', sql.Decimal(10, 6), stop_lat_gt)
-    sqlRequest.input('stop_lat_lt', sql.Decimal(10, 6), stop_lat_lt)
-    sqlRequest.input('stop_lon_gt', sql.Decimal(10, 6), stop_lng_gt)
-    sqlRequest.input('stop_lon_lt', sql.Decimal(10, 6), stop_lng_lt)
+    sqlRequest.input('stop_lat_gt', Decimal(10, 6), stop_lat_gt)
+    sqlRequest.input('stop_lat_lt', Decimal(10, 6), stop_lat_lt)
+    sqlRequest.input('stop_lon_gt', Decimal(10, 6), stop_lng_gt)
+    sqlRequest.input('stop_lon_lt', Decimal(10, 6), stop_lng_lt)
 
     // TODO: Temporary - needs to be more robust
     // Other cities have hubs.
@@ -265,4 +265,4 @@ class Search {
     return stops
   }
 }
-module.exports = Search
+export default Search

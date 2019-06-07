@@ -1,4 +1,4 @@
-const DataAccess = require('../dataAccess.js')
+import DataAccess from '../dataAccess'
 
 const friendlyNames = {
   Orbiter: 'The Orbiter',
@@ -128,4 +128,4 @@ class LinesNZCHC {
     logger.info('Cached Lines')
   }
 }
-module.exports = LinesNZCHC
+export default LinesNZCHC

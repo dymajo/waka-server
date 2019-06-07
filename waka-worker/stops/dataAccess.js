@@ -1,4 +1,4 @@
-const sql = require('mssql')
+import { VarChar, Time, Date, Int } from 'mssql'
 
 class StopsDataAccess {
   constructor(props) {
@@ -29,11 +29,11 @@ class StopsDataAccess {
     const sqlRequest = connection
       .get()
       .request()
-      .input('stop_code', sql.VarChar, stopCode)
+      .input('stop_code', VarChar, stopCode)
 
     const result = await sqlRequest.query(`
-      SELECT 
-        stops.stop_code as stop_id, 
+      SELECT
+        stops.stop_code as stop_id,
         stops.stop_name,
         stops.stop_desc,
         stops.stop_lat,
@@ -49,9 +49,9 @@ class StopsDataAccess {
       LEFT JOIN
         stop_times
       ON stop_times.id = (
-          SELECT TOP 1 id 
+          SELECT TOP 1 id
           FROM    stop_times
-          WHERE 
+          WHERE
           stop_times.stop_id = stops.stop_id
       )
       LEFT JOIN trips ON trips.trip_id = stop_times.trip_id
@@ -69,9 +69,9 @@ class StopsDataAccess {
     const sqlRequest = connection
       .get()
       .request()
-      .input('stop_id', sql.VarChar(100), stopCode)
-      .input('departure_time', sql.Time, time)
-      .input('date', sql.Date, date)
+      .input('stop_id', VarChar(100), stopCode)
+      .input('departure_time', Time, time)
+      .input('date', Date, date)
 
     const result = await sqlRequest.execute(procedure)
     return result.recordset
@@ -88,10 +88,10 @@ class StopsDataAccess {
     const sqlRequest = connection
       .get()
       .request()
-      .input('stop_id', sql.VarChar(100), stopCode)
-      .input('route_short_name', sql.VarChar(50), routeId)
-      .input('date', sql.Date, date)
-      .input('direction', sql.Int, direction)
+      .input('stop_id', VarChar(100), stopCode)
+      .input('route_short_name', VarChar(50), routeId)
+      .input('date', Date, date)
+      .input('direction', Int, direction)
 
     const result = await sqlRequest.execute(procedure)
     return result.recordset
@@ -107,7 +107,7 @@ class StopsDataAccess {
     const sqlRequest = connection
       .get()
       .request()
-      .input('stop_code', sql.VarChar, stopCode)
+      .input('stop_code', VarChar, stopCode)
 
     const result = await sqlRequest.query(`
       DECLARE @stop_id varchar(200)
@@ -124,7 +124,7 @@ class StopsDataAccess {
         JOIN trips ON trips.trip_id = stop_times.trip_id
         JOIN routes ON routes.route_id = trips.route_id
       WHERE stop_times.stop_id = @stop_id
-      GROUP BY 
+      GROUP BY
         route_short_name,
         trip_headsign,
         direction_id
@@ -175,7 +175,7 @@ class StopsDataAccess {
           JOIN #stops on stop_times.stop_id = #stops.stop_id
           JOIN trips ON trips.trip_id = stop_times.trip_id
           JOIN routes ON routes.route_id = trips.route_id
-        GROUP BY 
+        GROUP BY
           #stops.stop_code,
           route_short_name,
           trip_headsign,
@@ -210,4 +210,4 @@ class StopsDataAccess {
     return routesContainer
   }
 }
-module.exports = StopsDataAccess
+export default StopsDataAccess

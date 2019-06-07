@@ -1,11 +1,11 @@
-const bunyan = require('bunyan')
+import { createLogger as _createLogger, stdSerializers } from 'bunyan'
 
 const createLogger = (prefix, version) =>
-  bunyan.createLogger({
+  _createLogger({
     name: 'waka-worker',
     prefix,
     version,
-    serializers: bunyan.stdSerializers,
+    serializers: stdSerializers,
   })
 
-module.exports = createLogger
+export default createLogger

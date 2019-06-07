@@ -1,9 +1,9 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
-const AWSXRay = require('aws-xray-sdk')
-const AWS = AWSXRay.captureAWS(require('aws-sdk'))
-const logger = require('../logger.js')
-const EnvMapper = require('../../envMapper.js')
+import { captureAWS } from 'aws-xray-sdk'
+const AWS = captureAWS(import('aws-sdk'))
+import { warn, error, info, debug } from '../logger.js'
+import EnvMapper from '../../envMapper.js'
 
 const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())
@@ -17,7 +17,7 @@ class GatewayEcs {
     this.envMapper = new EnvMapper()
 
     if (!(region && cluster)) {
-      logger.warn('Cannot use ECS Gateway - Missing Config.')
+      warn('Cannot use ECS Gateway - Missing Config.')
       return
     }
 
@@ -27,10 +27,10 @@ class GatewayEcs {
   async start(prefix, config) {
     const { ecs, servicePrefix, serviceSuffix, replicas } = this
     if (!ecs) {
-      logger.error({ prefix }, 'Cannot start ECS Service - not configured.')
+      error({ prefix }, 'Cannot start ECS Service - not configured.')
       return
     }
-    logger.info({ prefix }, 'Starting ECS Service')
+    info({ prefix }, 'Starting ECS Service')
 
     // makes config docker friendly
     const env = this.envMapper.toEnvironmental(config, 'worker')
@@ -38,7 +38,7 @@ class GatewayEcs {
       name,
       value: (env[name] || '').toString(),
     }))
-    logger.debug({ prefix, env }, 'Environmental Variables')
+    debug({ prefix, env }, 'Environmental Variables')
     const serviceName = `${servicePrefix}${prefix}${serviceSuffix}`
 
     try {
@@ -47,7 +47,7 @@ class GatewayEcs {
         .describeServices({ services: [serviceName] })
         .promise()
 
-      logger.debug({ prefix, services }, 'Service Info')
+      debug({ prefix, services }, 'Service Info')
       const service = services.services[0]
 
       // describe task definition
@@ -60,7 +60,7 @@ class GatewayEcs {
         })
         .promise()
       let newTaskDefinitionArn = taskDefinition.taskDefinition.taskDefinitionArn
-      logger.debug({ prefix, taskDefinition }, 'Task Definition Info')
+      debug({ prefix, taskDefinition }, 'Task Definition Info')
 
       // determine if task definitions needs update
       const containerDefinition =
@@ -72,9 +72,9 @@ class GatewayEcs {
       if (
         envConvert(envArray) === envConvert(containerDefinition.environment)
       ) {
-        logger.info({ prefix }, 'Environmental variables have not changed.')
+        info({ prefix }, 'Environmental variables have not changed.')
       } else {
-        logger.info(
+        info(
           { prefix },
           'Environmental variables have changed - updating task definition.'
         )
@@ -93,15 +93,15 @@ class GatewayEcs {
           .promise()
         newTaskDefinitionArn =
           newTaskDefinition.taskDefinition.taskDefinitionArn
-        logger.info({ prefix, newTaskDefinitionArn }, 'Task defintion updated.')
+        info({ prefix, newTaskDefinitionArn }, 'Task defintion updated.')
       }
 
       // update service if needed - logging
       if (service.taskDefinition !== newTaskDefinitionArn) {
-        logger.info({ prefix }, 'New Task Definition - updating service.')
+        info({ prefix }, 'New Task Definition - updating service.')
       }
       if (service.desiredCount !== replicas) {
-        logger.info(
+        info(
           {
             prefix,
             wantedReplicas: replicas,
@@ -123,22 +123,16 @@ class GatewayEcs {
             desiredCount: replicas,
           })
           .promise()
-        logger.info(
-          { prefix, service: service.serviceName },
-          'ECS service updated.'
-        )
+        info({ prefix, service: service.serviceName }, 'ECS service updated.')
       } else {
-        logger.info(
-          { prefix, service: service.serviceName },
-          'No updates required.'
-        )
+        info({ prefix, service: service.serviceName }, 'No updates required.')
       }
 
       // done
       // wow. just realized this is the same logic as a powershell script I wrote
       // that allows Octopus Deploy to deploy to ECS
     } catch (err) {
-      logger.error({ err, serviceName }, 'Could not start ECS Service.')
+      error({ err, serviceName }, 'Could not start ECS Service.')
     }
   }
 
@@ -151,20 +145,17 @@ class GatewayEcs {
       forceNewDeployment: true,
       desiredCount: replicas,
     })
-    logger.info({ prefix, service: serviceName }, 'ECS Service Updated')
+    info({ prefix, service: serviceName }, 'ECS Service Updated')
   }
 
   async stop(prefix) {
     const { ecs, servicePrefix, serviceSuffix } = this
     if (!ecs) {
-      logger.error({ prefix }, 'Cannot stop ECS Service - not configured.')
+      error({ prefix }, 'Cannot stop ECS Service - not configured.')
       return
     }
     const serviceName = `${servicePrefix}${prefix}${serviceSuffix}`
-    logger.info(
-      { prefix, service: serviceName },
-      'Scaling ECS Worker Service to 0.'
-    )
+    info({ prefix, service: serviceName }, 'Scaling ECS Worker Service to 0.')
 
     // scale service to 0
     await ecs
@@ -173,9 +164,9 @@ class GatewayEcs {
         desiredCount: 0,
       })
       .promise()
-    logger.info({ prefix, service: serviceName }, 'ECS service stopped.')
+    info({ prefix, service: serviceName }, 'ECS service stopped.')
 
     // done
   }
 }
-module.exports = GatewayEcs
+export default GatewayEcs

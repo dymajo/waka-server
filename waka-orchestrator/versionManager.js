@@ -1,7 +1,7 @@
-const logger = require('./logger.js')
-const KeyvalueLocal = require('./adaptors/keyvalueLocal.js')
-const KeyvalueDynamo = require('./adaptors/keyvalueDynamo.js')
-const EnvMapper = require('../envMapper.js')
+import logger from './logger'
+import KeyvalueLocal from './adaptors/keyvalueLocal'
+import KeyvalueDynamo from './adaptors/keyvalueDynamo'
+import EnvMapper from '../envMapper'
 
 class VersionManager {
   constructor(props) {
@@ -203,4 +203,4 @@ class VersionManager {
     return envArray
   }
 }
-module.exports = VersionManager
+export default VersionManager

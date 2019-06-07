@@ -1,6 +1,6 @@
-const axios = require('axios')
-const moment = require('moment-timezone')
-const logger = require('../logger.js')
+import { head } from 'axios'
+import moment from 'moment-timezone'
+import logger from '../logger'
 
 const tfnswmodes = {
   buses1: { endpoint: 'buses/SMBSC001' },
@@ -99,7 +99,7 @@ class TfNSWUpdater {
       },
     }
     try {
-      const res = await axios.head(options.url, {
+      const res = await head(options.url, {
         headers: options.headers,
       })
 
@@ -117,4 +117,4 @@ class TfNSWUpdater {
   }
 }
 
-module.exports = TfNSWUpdater
+export default TfNSWUpdater

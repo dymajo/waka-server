@@ -1,5 +1,5 @@
-const moment = require('moment-timezone')
-const StopsDataAccess = require('./dataAccess.js')
+import moment from 'moment-timezone'
+import StopsDataAccess from './dataAccess'
 
 class Station {
   constructor(props) {
@@ -416,4 +416,4 @@ class Station {
     return sending
   }
 }
-module.exports = Station
+export default Station

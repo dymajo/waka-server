@@ -1,8 +1,8 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
-const AWSXRay = require('aws-xray-sdk')
-const AWS = AWSXRay.captureAWS(require('aws-sdk'))
-const logger = require('../logger.js')
+import { captureAWS } from 'aws-xray-sdk'
+const AWS = captureAWS(import('aws-sdk'))
+import { debug, warn } from '../logger'
 
 class KeyvalueDynamo {
   constructor(props) {
@@ -62,11 +62,11 @@ class KeyvalueDynamo {
       },
       TableName: name,
     }
-    logger.debug(params)
+    debug(params)
     return new Promise(resolve => {
       dynamo.getItem(params, (err, data) => {
         if (err) {
-          logger.warn({ err }, 'Could not get DynamoDB Item')
+          warn({ err }, 'Could not get DynamoDB Item')
           return resolve({})
         }
         const response = data.Item || {}
@@ -83,11 +83,11 @@ class KeyvalueDynamo {
       Item: item,
       TableName: name,
     }
-    logger.debug(params)
+    debug(params)
     return new Promise(resolve => {
       dynamo.putItem(params, err => {
         if (err) {
-          logger.warn({ err }, 'Could not set DynamoDB Item')
+          warn({ err }, 'Could not set DynamoDB Item')
           return resolve(false)
         }
         return resolve(true)
@@ -105,11 +105,11 @@ class KeyvalueDynamo {
       },
       TableName: name,
     }
-    logger.debug(params)
+    debug(params)
     return new Promise(resolve => {
       dynamo.deleteItem(params, err => {
         if (err) {
-          logger.warn({ err }, 'Could not delete DynamoDB Item')
+          warn({ err }, 'Could not delete DynamoDB Item')
           return resolve(false)
         }
         return resolve(true)
@@ -122,11 +122,11 @@ class KeyvalueDynamo {
     const params = {
       TableName: name,
     }
-    logger.debug(params)
+    debug(params)
     return new Promise(resolve => {
       dynamo.scan(params, (err, data) => {
         if (err) {
-          logger.warn({ err }, 'Could not scan DynamoDB Table')
+          warn({ err }, 'Could not scan DynamoDB Table')
           return resolve({})
         }
         const response = {}
@@ -138,4 +138,4 @@ class KeyvalueDynamo {
     })
   }
 }
-module.exports = KeyvalueDynamo
+export default KeyvalueDynamo

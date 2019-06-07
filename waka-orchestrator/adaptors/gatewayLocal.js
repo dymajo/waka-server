@@ -1,6 +1,6 @@
-const { Router } = require('express')
-const logger = require('../logger.js')
-const WakaWorker = require('../../waka-worker/index.js')
+import { Router } from 'express'
+import { info, warn } from '../logger'
+import WakaWorker from '../../waka-worker'
 
 class GatewayLocal {
   constructor() {
@@ -17,15 +17,12 @@ class GatewayLocal {
     // If there's already something on the same prefix,
     // We need to clean it up.
     if (oldWorker !== undefined) {
-      logger.info(
-        { prefix },
-        'Route has already been bound - stopping old route.'
-      )
+      info({ prefix }, 'Route has already been bound - stopping old route.')
       oldWorker.stop()
     }
     workers[prefix] = newWorker
     newWorker.start()
-    logger.info({ prefix }, 'Local Gateway Started.')
+    info({ prefix }, 'Local Gateway Started.')
 
     // If there's no route, we simply add it to the router
     // This weird middleware exists because express does not support
@@ -52,10 +49,10 @@ class GatewayLocal {
     if (workers[prefix] !== undefined) {
       workers[prefix].stop()
       delete workers[prefix]
-      logger.info({ prefix }, 'Local Gateway Stopped.')
+      info({ prefix }, 'Local Gateway Stopped.')
     } else {
-      logger.warn({ prefix }, 'Could not stop - could not find worker.')
+      warn({ prefix }, 'Could not stop - could not find worker.')
     }
   }
 }
-module.exports = GatewayLocal
+export default GatewayLocal

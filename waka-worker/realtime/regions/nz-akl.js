@@ -1,6 +1,6 @@
-const fetch = require('node-fetch')
-const sql = require('mssql')
-const doubleDeckers = require('./nz-akl-doubledecker.json')
+import fetch from 'node-fetch'
+import { VarChar } from 'mssql'
+import doubleDeckers from './nz-akl-doubledecker.json'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
@@ -227,7 +227,7 @@ class RealtimeNZAKL {
 
     try {
       const sqlRouteIdRequest = connection.get().request()
-      sqlRouteIdRequest.input('route_short_name', sql.VarChar(50), line)
+      sqlRouteIdRequest.input('route_short_name', VarChar(50), line)
       const routeIdResult = await sqlRouteIdRequest.query(
         `
         SELECT route_id
@@ -273,4 +273,4 @@ class RealtimeNZAKL {
     }
   }
 }
-module.exports = RealtimeNZAKL
+export default RealtimeNZAKL

@@ -1,7 +1,7 @@
-const GtfsRealtimeBindings = require('gtfs-realtime-bindings')
-const fetch = require('node-fetch')
-const request = require('request')
-const protobuf = require('protobufjs')
+import GtfsRealtimeBindings from 'gtfs-realtime-bindings'
+import fetch from 'node-fetch'
+import request from 'request'
+import { load } from 'protobufjs'
 
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
@@ -60,7 +60,7 @@ class RealtimeAUSYD {
   async schedulePull() {
     const { logger, tripUpdateOptions } = this
     const newData = {}
-    const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
+    const root = await load('tfnsw-gtfs-realtime.proto')
     const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
     modes.forEach(async mode => {
       request(
@@ -95,7 +95,7 @@ class RealtimeAUSYD {
 
   async scheduleLocationPull() {
     const { logger, vehicleLocationOptions } = this
-    const root = await protobuf.load('tfnsw-gtfs-realtime.proto')
+    const root = await load('tfnsw-gtfs-realtime.proto')
 
     const FeedMessage = root.lookupType('transit_realtime.FeedMessage')
     const newVehicleData = {}
@@ -127,4 +127,4 @@ class RealtimeAUSYD {
   }
 }
 
-module.exports = RealtimeAUSYD
+export default RealtimeAUSYD

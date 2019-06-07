@@ -1,4 +1,4 @@
-const sql = require('mssql')
+import { VarChar } from 'mssql'
 
 class DataAccess {
   constructor(props) {
@@ -21,17 +21,17 @@ class DataAccess {
   async getOperator(route) {
     const { connection } = this
     const sqlRequest = connection.get().request()
-    sqlRequest.input('route_short_name', sql.VarChar(50), route)
+    sqlRequest.input('route_short_name', VarChar(50), route)
     const data = await sqlRequest.query(
       `
       SELECT top(1)
         agency_id
-      FROM routes 
-      WHERE 
+      FROM routes
+      WHERE
         route_short_name = @route_short_name
     `
     )
     return data
   }
 }
-module.exports = DataAccess
+export default DataAccess

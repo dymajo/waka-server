@@ -1,5 +1,5 @@
-const fetch = require('node-fetch')
-const local = require('../local')
+import fetch from 'node-fetch'
+import { endpoint } from '../local'
 // const local = {
 //   endpoint: 'http://localhost:8000/a',
 // }
@@ -90,7 +90,6 @@ const variants = [
   ['248X', 2],
   ['252', 2],
   ['253', 2],
-
 
   // NORTH OF MOTORWAY ISTHMUS
   ['70', 2],
@@ -261,7 +260,7 @@ async function testLines() {
   let failed = 0
 
   for (const route of variants) {
-    const res = await fetch(`${local.endpoint}/nz-akl/line/` + route[0])
+    const res = await fetch(`${endpoint}/nz-akl/line/` + route[0])
     const data = await res.json()
 
     if (route[1] === data.length) {

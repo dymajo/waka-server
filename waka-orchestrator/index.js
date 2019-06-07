@@ -1,16 +1,16 @@
-const { Router } = require('express')
-const { spawn } = require('child_process')
-const path = require('path')
-const proxy = require('express-http-proxy')
-const fs = require('fs')
+import { Router } from 'express'
+import { spawn } from 'child_process'
+import { join } from 'path'
+import proxy from 'express-http-proxy'
+import { statSync } from 'fs'
 
-const logger = require('./logger.js')
-const GatewayLocal = require('./adaptors/gatewayLocal.js')
-const GatewayEcs = require('./adaptors/gatewayEcs.js')
-const GatewayKubernetes = require('./adaptors/gatewayKubernetes.js')
-const UpdateManager = require('./updaters/index.js')
-const VersionManager = require('./versionManager.js')
-const PrivateApi = require('./api/index.js')
+import { info, error } from './logger'
+import GatewayLocal from './adaptors/gatewayLocal'
+import GatewayEcs from './adaptors/gatewayEcs'
+import GatewayKubernetes from './adaptors/gatewayKubernetes'
+import UpdateManager from './updaters/index'
+import VersionManager from './versionManager'
+import PrivateApi from './api'
 
 const proxyPort = '9002'
 
@@ -41,7 +41,7 @@ class WakaOrchestrator {
     this.updateManager.start()
 
     if (config.gateway === 'local') {
-      const binaryPath = path.join(__dirname, '../waka-go-proxy/waka-go-proxy')
+      const binaryPath = join(__dirname, '../waka-go-proxy/waka-go-proxy')
       const goLogs = d => {
         const data = JSON.parse(d)
         const { msg } = data
@@ -49,27 +49,27 @@ class WakaOrchestrator {
         delete data.msg
         delete data.level
         delete data.time
-        logger.info(data, msg)
+        info(data, msg)
       }
 
       try {
-        fs.statSync(binaryPath)
+        statSync(binaryPath)
         this.proxy = spawn(binaryPath, [
           '-e',
           `http://localhost:${port}`,
           '-p',
           proxyPort,
           '-f',
-          path.join(__dirname, '../cityMetadata.json'),
+          join(__dirname, '../cityMetadata.json'),
         ])
 
         this.proxy.stdout.on('data', goLogs)
         this.proxy.stderr.on('data', goLogs)
         this.proxy.on('close', d =>
-          logger.info({ code: d.toString() }, 'proxy exited')
+          info({ code: d.toString() }, 'proxy exited')
         )
       } catch (err) {
-        logger.error(
+        error(
           'proxy could not start - make sure you compile with `npm run build:proxy`. some routes will not work'
         )
       }
@@ -89,4 +89,4 @@ class WakaOrchestrator {
     }
   }
 }
-module.exports = WakaOrchestrator
+export default WakaOrchestrator

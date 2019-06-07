@@ -1,6 +1,6 @@
-const logger = require('./logger.js')
-const KeyvalueLocal = require('./adaptors/keyvalueLocal.js')
-const KeyvalueDynamo = require('./adaptors/keyvalueDynamo.js')
+import { info } from './logger'
+import KeyvalueLocal from './adaptors/keyvalueLocal'
+import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 
 class ConfigManager {
   constructor() {
@@ -59,8 +59,8 @@ class ConfigManager {
     const localConfig = this.config
     const remoteConfig = await this.meta.get('config')
     const mergedConfig = Object.assign(localConfig, remoteConfig)
-    logger.info('Configuration retrieved from remote.')
+    info('Configuration retrieved from remote.')
     return mergedConfig
   }
 }
-module.exports = ConfigManager
+export default ConfigManager

@@ -1,8 +1,8 @@
-const logger = require('../logger.js')
-const Fargate = require('./fargate.js')
-const BasicUpdater = require('./basic.js')
-const ATUpdater = require('./nz-akl.js')
-const TfNSWUpdater = require('./au-syd.js')
+import logger from '../logger'
+import Fargate from './fargate'
+import BasicUpdater from './basic'
+import ATUpdater from './nz-akl'
+import TfNSWUpdater from './au-syd'
 
 class UpdateManager {
   constructor(props) {
@@ -156,4 +156,4 @@ class UpdateManager {
     })
   }
 }
-module.exports = UpdateManager
+export default UpdateManager
