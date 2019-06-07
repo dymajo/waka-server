@@ -22,4 +22,4 @@ RUN apk update && apk add --no-cache ca-certificates
 COPY --from=docs /app/dist/docs ./docs
 COPY --from=build /app/waka-go-proxy ./
 COPY src/cityMetadata.json ./
-CMD ./src/waka-go-proxy -p 80 -f ./src/cityMetadata.json -docsdir ./docs -e $ENDPOINT -pathprefix $PATHPREFIX -s $XRAY_SUFFIX
+CMD ./waka-go-proxy -p 80 -f ./cityMetadata.json -docsdir ./docs -e $ENDPOINT -pathprefix $PATHPREFIX -s $XRAY_SUFFIX
