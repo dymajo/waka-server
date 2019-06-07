@@ -4,3 +4,4 @@ cache/
 .DS_STORE
 dist/docs
 waka-go-proxy/waka-go-proxy
+lib

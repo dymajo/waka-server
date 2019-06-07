@@ -4,9 +4,10 @@
   "description": "The API that powers Waka.",
   "main": "index.js",
   "scripts": {
-    "start": "node ./waka-orchestrator/standalone.js | bunyan -L -o short",
+    "start": "node ./lib/waka-orchestrator/standalone.js | bunyan -L -o short",
     "install:proxy": "go get -v ./waka-go-proxy",
     "build:proxy": "go build -o ./waka-go-proxy/waka-go-proxy ./waka-go-proxy/",
+    "build:js": "babel src --out-dir lib --copy-files",
     "document": "apidoc -i waka-orchestrator -i waka-go-proxy -i waka-worker -o dist/docs"
   },
   "repository": {
@@ -54,10 +55,16 @@
     "stream-transform": "^1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/parser": "^7.3.4",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/parser": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/preset-env": "^7.4.5",
+    "babel-eslint": "^10.0.1",
     "cross-env": "^5.2.0",
-    "eslint": "^5.6.1",
+    "eslint": "^5.16.0",
     "eslint-config": "^0.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^3.6.0",
