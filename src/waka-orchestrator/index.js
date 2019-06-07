@@ -43,13 +43,18 @@ class WakaOrchestrator {
     if (config.gateway === 'local') {
       const binaryPath = join(__dirname, '../waka-go-proxy/waka-go-proxy')
       const goLogs = d => {
-        const data = JSON.parse(d)
-        const { msg } = data
-        data.name = 'waka-go-proxy'
-        delete data.msg
-        delete data.level
-        delete data.time
-        logger.info(data, msg)
+        const dString = d.toString()
+        try {
+          const data = JSON.parse(dString)
+          const { msg } = data
+          data.name = 'waka-go-proxy'
+          delete data.msg
+          delete data.level
+          delete data.time
+          logger.info(data, msg)
+        } catch (error) {
+          // logger.error(dString)
+        }
       }
 
       try {
