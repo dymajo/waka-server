@@ -40,34 +40,37 @@ class UpdateManager {
         'No updaters are turned on. Waka will not update automatically.'
       )
     }
-
     regions.forEach(prefix => {
-      const { url, delay, interval, type } = updaters[prefix]
-      logger.info({ prefix, type }, 'Starting Updater')
+      const updaterConfig = updaters[prefix]
+      if (updaterConfig !== false) {
+        const { url, delay, interval, type, extended } = updaterConfig
+        logger.info({ prefix, type }, 'Starting Updater')
 
-      let updater
-      if (prefix === 'nz-akl') {
-        const apiKey = config.api['nz-akl']
-        const params = { prefix, apiKey, delay, interval, callback }
-        updater = new ATUpdater(params)
-      } else if (prefix === 'au-syd') {
-        const apiKey = config.api['au-syd']
-        const params = {
-          prefix,
-          apiKey,
-          delay,
-          interval,
-          callback,
-          versionManager,
+        let updater
+        if (prefix === 'nz-akl') {
+          const apiKey = config.api['nz-akl']
+          const params = { prefix, apiKey, delay, interval, callback, extended }
+          updater = new ATUpdater(params)
+        } else if (prefix === 'au-syd') {
+          const apiKey = config.api['au-syd']
+          const params = {
+            prefix,
+            apiKey,
+            delay,
+            interval,
+            callback,
+            versionManager,
+            extended,
+          }
+          updater = new TfNSWUpdater(params)
+        } else {
+          const params = { prefix, url, delay, interval, callback, extended }
+          updater = new BasicUpdater(params)
         }
-        updater = new TfNSWUpdater(params)
-      } else {
-        const params = { prefix, url, delay, interval, callback }
-        updater = new BasicUpdater(params)
-      }
 
-      updater.start()
-      this.updaters[prefix] = updater
+        updater.start()
+        this.updaters[prefix] = updater
+      }
     })
 
     // check the versions for remappings
@@ -154,7 +157,7 @@ class UpdateManager {
         } else {
           logger.info({ prefix, version: version.version }, 'Starting Import')
           const environment = await versionManager.getFargateVariables(id)
-          fargate.startTask(environment)
+          await fargate.startTask(environment)
         }
       } else if (version.status === 'imported-willmap') {
         logger.info(
