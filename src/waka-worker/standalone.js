@@ -15,7 +15,7 @@ import EnvMapper from '../envMapper'
 import WakaWorker from './index'
 
 __config([plugins.ECSPlugin])
-captureHTTPsGlobal(import('http'))
+captureHTTPsGlobal(require('http'))
 
 _config()
 

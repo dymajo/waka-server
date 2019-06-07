@@ -13,10 +13,10 @@ import WakaOrchestrator from '.'
 
 setLogger(logger)
 _config([plugins.ECSPlugin])
-captureHTTPsGlobal(import('http'))
+captureHTTPsGlobal(require('http'))
 
 const start = async () => {
-  const app = new Express()
+  const app = Express()
   app.use(
     express.openSegment(`waka-orchestrator${process.env.XRAY_SUFFIX || ''}`)
   )

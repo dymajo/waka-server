@@ -11,7 +11,7 @@ class Storage {
   constructor(props) {
     this.backing = props.backing
     if (this.backing === 'azure') {
-      const azure = import('azure-storage')
+      const azure = require('azure-storage')
       const creds = props.local ? azuretestcreds : []
       this.blobSvc = azure.createBlobService(...creds)
     } else if (this.backing === 'aws') {
