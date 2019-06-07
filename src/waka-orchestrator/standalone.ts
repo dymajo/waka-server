@@ -1,10 +1,11 @@
 import Express from 'express'
 import * as bodyParser from 'body-parser'
 import * as morgan from 'morgan'
-import ConfigManager from './configManager'
-import WakaOrchestrator from './index'
-import logger from './logger'
 import AWSXRay from 'aws-xray-sdk'
+
+import ConfigManager from './configManager'
+import WakaOrchestrator from '.'
+import logger from './logger'
 
 AWSXRay.setLogger(logger)
 AWSXRay.config([AWSXRay.plugins.ECSPlugin])

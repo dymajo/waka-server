@@ -1,13 +1,15 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
-const AWSXRay = require('aws-xray-sdk')
+import AWSXRay from 'aws-xray-sdk'
 const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 import { DynamoDB } from 'aws-sdk'
 import logger from '../logger'
+import BaseKeyvalue from './BaseKeyvalue'
 
-class KeyvalueDynamo {
+class KeyvalueDynamo extends BaseKeyvalue {
   name: string
   dynamo: AWS.DynamoDB
   constructor(props) {
+    super()
     const { name, region } = props
     this.name = name
     this.dynamo = new AWS.DynamoDB({ region })
@@ -84,7 +86,7 @@ class KeyvalueDynamo {
       TableName: name,
     }
     logger.debug(params)
-    return new Promise(resolve => {
+    return new Promise<boolean>(resolve => {
       dynamo.putItem(params, err => {
         if (err) {
           logger.warn({ err }, 'Could not set DynamoDB Item')

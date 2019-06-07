@@ -3,10 +3,9 @@ import BasicUpdater from './basic'
 import ATUpdater from './nz-akl'
 import TfNSWUpdater from './au-syd'
 import VersionManager from '../versionManager'
-import { IWakaConfig } from '../configManager'
 import Fargate from './fargate'
 
-interface IUpdateManagerProps {
+interface UpdateManagerProps {
   config: any
   versionManager: VersionManager
 }
@@ -17,7 +16,7 @@ class UpdateManager {
   updaters: {}
   interval: NodeJS.Timeout
   fargate: Fargate
-  constructor(props: IUpdateManagerProps) {
+  constructor(props: UpdateManagerProps) {
     const { config, versionManager } = props
     this.config = config
     this.versionManager = versionManager

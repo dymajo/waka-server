@@ -3,8 +3,14 @@ import AWSXRay from 'aws-xray-sdk'
 const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 // import * as AWS from 'aws-sdk'
 import logger from '../logger'
+import { ECS } from 'aws-sdk'
 
 class Fargate {
+  cluster: string
+  taskDefinition: string
+  securityGroups: string[]
+  subnets: string[]
+  ecs: ECS
   constructor(config) {
     const { subnets, cluster, taskDefinition, securityGroups, region } = config
     if (!(subnets && cluster && taskDefinition && securityGroups)) {
@@ -19,13 +25,13 @@ class Fargate {
     this.ecs = new AWS.ECS({ region })
   }
 
-  startTask(environment) {
+  async startTask(environment: ECS.KeyValuePair[]) {
     if (!this.ecs) {
       logger.warn('Cannot start task - missing config.')
       return
     }
     const { cluster, taskDefinition, securityGroups, subnets, ecs } = this
-    const params = {
+    const params: ECS.RunTaskRequest = {
       taskDefinition,
       cluster,
       count: 1,
@@ -42,14 +48,14 @@ class Fargate {
       },
     }
     logger.debug({ params }, 'Task Parameters')
-    ecs.runTask(params, (err, data) => {
-      if (err) {
-        logger.error({ err }, 'Could not start task.')
-        return
-      }
+    try {
+      const data = await ecs.runTask(params).promise()
       logger.debug({ data })
       logger.info({ taskArn: data.tasks[0].taskArn }, 'Started Task')
-    })
+    } catch (error) {
+      logger.error({ error }, 'Could not start task.')
+      return
+    }
   }
 }
 export default Fargate

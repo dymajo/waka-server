@@ -1,10 +1,11 @@
-import * as path from 'path'
+import { join } from 'path'
+import { readFile } from 'fs'
 import { Router, static as _static } from 'express'
 import logger from '../logger'
 import KeyvalueLocal from '../adaptors/keyvalueLocal'
 import KeyvalueDynamo from '../adaptors/keyvalueDynamo'
 import VersionManager from '../versionManager'
-import c from 'child_process'
+import Connection from '../../waka-worker/db/connection'
 
 class PrivateApi {
   versionManager: VersionManager
@@ -32,12 +33,10 @@ class PrivateApi {
   bindRoutes() {
     const { router } = this
     router.get('/git', (req, res) => {
-      const commit = c
-        .execSync('git log -1')
-        .toString()
-        .replace(/(<|>)/g, '')
-      console.log(commit)
-      res.send(commit)
+      readFile('v.txt', 'utf8', (err, data) => {
+        const git = data.replace(/(<|>)/g, '')
+        res.send(git)
+      })
     })
     router.get('/worker', async (req, res) => {
       const { versionManager } = this
@@ -61,8 +60,15 @@ class PrivateApi {
 
     router.post('/worker/add', async (req, res) => {
       const { versionManager } = this
+      const workerConfig = req.body as {
+        prefix: string
+        version: string
+        shapesContainer: string
+        shapesRegion: string
+        dbconfig: string
+      }
       try {
-        await versionManager.addVersion(req.body)
+        await versionManager.addVersion(workerConfig)
         res.send({ message: 'Added worker.' })
       } catch (err) {
         res.status(500).send(err)
@@ -108,6 +114,7 @@ class PrivateApi {
       } = req
       try {
         await this.versionManager.deleteWorker(id)
+        Connection
         res.send({ message: 'Deleting worker.' })
       } catch (error) {
         logger.error({ error }, 'error deleting worker')
@@ -165,7 +172,7 @@ class PrivateApi {
       }
     })
 
-    router.use('/', _static(path.join(__dirname, '/dist')))
+    router.use('/', _static(join(__dirname, '/dist')))
   }
 }
 export default PrivateApi

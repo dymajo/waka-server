@@ -27,16 +27,145 @@ class RealtimeNZWLG extends BaseRealtime {
       return res.status(400).send({ message: 'stop_id required' })
     }
     try {
-      const bodies = await Promise.all(
+      const bodies = await Promise.all<{
+        LastModified: string
+        Stop: {
+          Name: string
+          Sms: string
+          Farezone: string
+          Lat: number
+          Long: number
+          LastModified: string
+        }
+        Notices: {
+          RecordedAtTime: string
+          MonitoringRef: string
+          LineRef: string
+          DirectionRef: string
+          LineNote: string
+        }[]
+        Services: {
+          ServiceID: string
+          IsRealtime: boolean
+          VehicleRef: string
+          Direction: string
+          OperatorRef: string
+          OriginStopID: string
+          OriginStopName: string
+          DestinationStopID: string
+          DestinationStopName: string
+          AimedArrival: string
+          AimedDeparture: string
+          VehicleFeature: string
+          DepartureStatus: string
+          ExpectedDeparture: string
+          DisplayDeparture: string
+          DisplayDepartureSeconds: number
+          Service: {
+            Code: string
+            TrimmedCode: string
+            Name: string
+            Mode: string
+            Link: string
+          }
+        }[]
+        station: string
+      }>(
         req.body.stop_id
           .split('+')
           .slice(0, 3)
           .map(
-            stop =>
-              new Promise(async (resolve, reject) => {
+            (stop: string) =>
+              new Promise<{
+                LastModified: string
+                Stop: {
+                  Name: string
+                  Sms: string
+                  Farezone: string
+                  Lat: number
+                  Long: number
+                  LastModified: string
+                }
+                Notices: {
+                  RecordedAtTime: string
+                  MonitoringRef: string
+                  LineRef: string
+                  DirectionRef: string
+                  LineNote: string
+                }[]
+                Services: {
+                  ServiceID: string
+                  IsRealtime: boolean
+                  VehicleRef: string
+                  Direction: string
+                  OperatorRef: string
+                  OriginStopID: string
+                  OriginStopName: string
+                  DestinationStopID: string
+                  DestinationStopName: string
+                  AimedArrival: string
+                  AimedDeparture: string
+                  VehicleFeature: string
+                  DepartureStatus: string
+                  ExpectedDeparture: string
+                  DisplayDeparture: string
+                  DisplayDepartureSeconds: number
+                  Service: {
+                    Code: string
+                    TrimmedCode: string
+                    Name: string
+                    Mode: string
+                    Link: string
+                  }
+                }[]
+                station: string
+              }>(async (resolve, reject) => {
                 try {
                   const request = await fetch(tripsUrl + stop)
-                  const data = await request.json()
+                  const data: {
+                    LastModified: string
+                    Stop: {
+                      Name: string
+                      Sms: string
+                      Farezone: string
+                      Lat: number
+                      Long: number
+                      LastModified: string
+                    }
+                    Notices: {
+                      RecordedAtTime: string
+                      MonitoringRef: string
+                      LineRef: string
+                      DirectionRef: string
+                      LineNote: string
+                    }[]
+                    Services: {
+                      ServiceID: string
+                      IsRealtime: boolean
+                      VehicleRef: string
+                      Direction: string
+                      OperatorRef: string
+                      OriginStopID: string
+                      OriginStopName: string
+                      DestinationStopID: string
+                      DestinationStopName: string
+                      AimedArrival: string
+                      AimedDeparture: string
+                      VehicleFeature: string
+                      DepartureStatus: string
+                      ExpectedDeparture: string
+                      DisplayDeparture: string
+                      DisplayDepartureSeconds: number
+                      Service: {
+                        Code: string
+                        TrimmedCode: string
+                        Name: string
+                        Mode: string
+                        Link: string
+                      }
+                    }[]
+                    station: string
+                  } = await request.json()
                   data.station = stop
                   resolve(data)
                 } catch (err) {
@@ -135,7 +264,7 @@ class RealtimeNZWLG extends BaseRealtime {
     const tripId = req.body.trips[0]
 
     const sqlRequest = connection.get().request()
-    sqlRequest.input('trip_id', sql.stop_idVarChar(50), tripId)
+    sqlRequest.input('trip_id', sql.VarChar(50), tripId)
     try {
       const result = await sqlRequest.query(
         `

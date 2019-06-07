@@ -1,12 +1,13 @@
 import * as path from 'path'
 import { promises as fs } from 'fs'
 import logger from '../logger'
+import BaseKeyvalue from './BaseKeyvalue'
 
 // this is designed to be slow af to emulate the dynamoDB lag
 const filePath = path.join(__dirname, '../../cache/keyvalue-')
-class KeyvalueLocal {
-  name: string
+class KeyvalueLocal extends BaseKeyvalue {
   constructor(props) {
+    super()
     const { name } = props
     this.name = name
   }
@@ -14,6 +15,7 @@ class KeyvalueLocal {
   async read() {
     const { name } = this
     try {
+      console.log(filePath, name)
       const content = await fs.readFile(`${filePath}${name}.json`)
       const jsonstring = content.toString()
       const data = JSON.parse(jsonstring)

@@ -1,15 +1,8 @@
 import { ConnectionPool } from 'mssql'
-
-interface Logger {
-  debug(primaryMessage: string, ...supportingData: any[]): void
-  warn(primaryMessage: string, ...supportingData: any[]): void
-  error(primaryMessage: string, ...supportingData: any[]): void
-  info(primaryMessage: string, ...supportingData: any[]): void
-  log(primaryMessage: string, ...supportingData: any[]): void
-}
+import { WakaConfig, DBConfig } from '../../waka-orchestrator/configManager'
 
 class Connection {
-  db: string
+  db: DBConfig
   logger: Logger
   pool: ConnectionPool
   ready: Promise<{}>

@@ -33,7 +33,7 @@ const groups = [
   },
 ]
 
-const regionEnum = {}
+const regionEnum: { [region: string]: number } = {}
 groups.forEach((data, index) => {
   regionEnum[data.id] = index
 })

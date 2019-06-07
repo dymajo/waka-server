@@ -1,20 +1,23 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
+import AWSXRay from 'aws-xray-sdk'
 import logger from '../logger'
 import EnvMapper from '../../envMapper'
-import AWSXRay from 'aws-xray-sdk'
+import { EcsGatewayConfig } from '../configManager'
+// import a from 'aws-sdk'
 const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 
 const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())
 
 class GatewayEcs {
-  servicePrefix: any
-  serviceSuffix: any
-  replicas: any
+  servicePrefix: string
+  serviceSuffix: string
+  replicas: number
   envMapper: EnvMapper
   ecs: AWS.ECS
-  constructor(config) {
+
+  constructor(config: EcsGatewayConfig) {
     const { cluster, region, servicePrefix, serviceSuffix, replicas } = config
     this.servicePrefix = servicePrefix || ''
     this.serviceSuffix = serviceSuffix || ''

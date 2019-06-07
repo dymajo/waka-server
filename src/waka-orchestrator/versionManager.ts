@@ -2,21 +2,22 @@ import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 import EnvMapper from '../envMapper'
-import { IWakaConfig } from './configManager'
+import { WakaConfig } from './configManager'
 import GatewayLocal from './adaptors/gatewayLocal'
+import GatewayEcs from './adaptors/gatewayEcs'
 
-interface IVersionManager {
+interface VersionManagerProps {
   gateway: GatewayLocal
-  config: IWakaConfig
+  config: WakaConfig
 }
 
 class VersionManager {
-  config: IWakaConfig
-  gateway: GatewayLocal
+  config: WakaConfig
+  gateway: GatewayLocal | GatewayEcs
   envMapper: EnvMapper
   versions: KeyvalueDynamo
   mappings: KeyvalueDynamo
-  constructor(props: IVersionManager) {
+  constructor(props: VersionManagerProps) {
     const { gateway, config } = props
     this.config = config
     this.gateway = gateway
@@ -65,6 +66,7 @@ class VersionManager {
     const { gateway } = this
 
     const gatewayConfig = await this.getVersionConfig(versionId)
+    console.log(gatewayConfig)
     logger.info({ prefix, version: gatewayConfig.version }, 'Updating Gateway')
 
     // We trust the gateways to handle the scheduling of new tasks / configs
@@ -75,7 +77,9 @@ class VersionManager {
   async recycleGateway(prefix) {
     const { gateway } = this
     logger.info({ prefix }, 'Recycling Gateway')
-    const versionId = (await this.mappings.get(prefix)).value
+    const _mapping = (await this.mappings.get(prefix)) as unknown
+    const mapping = _mapping as { id: string; value: string }
+    const versionId = mapping.value
     const gatewayConfig = await this.getVersionConfig(versionId)
     gateway.recycle(prefix, gatewayConfig)
   }
@@ -123,7 +127,13 @@ class VersionManager {
     }
   }
 
-  async addVersion(workerConfig) {
+  async addVersion(workerConfig: {
+    prefix: string
+    version: string
+    shapesContainer: string
+    shapesRegion: string
+    dbconfig: string
+  }) {
     const { config, versions } = this
     const {
       prefix,
@@ -158,6 +168,7 @@ class VersionManager {
     // the gateway needs some settings from the orchestrator,
     // but also some settings from the worker config
     const _workerConfig = (await versions.get(versionId)) as unknown
+    console.log(_workerConfig)
     const workerConfig = _workerConfig as {
       db: { database: string; password: string; server: string; user: string }
       id: string
@@ -193,7 +204,7 @@ class VersionManager {
     return gatewayConfig
   }
 
-  async updateVersionStatus(versionId, status) {
+  async updateVersionStatus(versionId: string, status) {
     // statuses:
     // empty -> pendingimport -> importing -> imported
     // empty -> pendingimport-willmap -> importing-willmap -> imported-willmap -> imported
@@ -222,7 +233,8 @@ class VersionManager {
     return this.mappings.scan()
   }
 
-  async getDockerCommand(versionId) {
+  async getDockerCommand(versionId: string) {
+    debugger
     const config = await this.getVersionConfig(versionId)
     const env = this.envMapper.toEnvironmental(config, 'importer-local')
     const envArray = Object.keys(env).map(
@@ -235,7 +247,7 @@ class VersionManager {
     return command
   }
 
-  async getFargateVariables(versionId) {
+  async getFargateVariables(versionId: string) {
     const config = await this.getVersionConfig(versionId)
     const env = this.envMapper.toEnvironmental(config, 'importer')
     const envArray = Object.keys(env).map(name => ({

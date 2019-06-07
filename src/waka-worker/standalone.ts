@@ -2,7 +2,7 @@ import * as express from 'express'
 import 'dotenv'
 import * as bodyParser from 'body-parser'
 import EnvMapper from '../envMapper'
-import WakaWorker from './index'
+import WakaWorker from '.'
 import AWSXRay from 'aws-xray-sdk'
 
 AWSXRay.config([AWSXRay.plugins.ECSPlugin])

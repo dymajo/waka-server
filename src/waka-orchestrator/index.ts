@@ -10,24 +10,23 @@ import fs from 'fs'
 import logger from './logger'
 import GatewayLocal from './adaptors/gatewayLocal'
 import GatewayEcs from './adaptors/gatewayEcs'
-import GatewayKubernetes from './adaptors/gatewayKubernetes'
 import UpdateManager from './updaters'
 import VersionManager from './versionManager'
 import PrivateApi from './api'
-import { IWakaConfig } from './configManager'
+import { WakaConfig } from './configManager'
 
 const proxyPort = '9002'
 
 class WakaOrchestrator {
-  config: IWakaConfig
+  config: WakaConfig
   router: Router
-  gateway: GatewayLocal // | GatewayEcs | GatewayKubernetes
+  gateway: GatewayLocal | GatewayEcs
   versionManager: VersionManager
   privateApi: PrivateApi
   updateManager: UpdateManager
   proxy: ChildProcessWithoutNullStreams
 
-  constructor(config: IWakaConfig) {
+  constructor(config: WakaConfig) {
     const { gateway } = config
     this.config = config
 
@@ -37,7 +36,7 @@ class WakaOrchestrator {
     } else if (gateway === 'ecs') {
       this.gateway = new GatewayEcs(config.gatewayConfig.ecs)
     } else if (gateway === 'kubernetes') {
-      this.gateway = new GatewayKubernetes(config.gatewayConfig.kubernetes)
+      // this.gateway = new GatewayKubernetes(config.gatewayConfig.kubernetes)
     }
     const versionManager = new VersionManager({ config, gateway: this.gateway })
     this.versionManager = versionManager
@@ -65,7 +64,7 @@ class WakaOrchestrator {
           delete data.time
           logger.info(data, msg)
         } catch (error) {
-          logger.info(dString)
+          // logger.info(dString)
         }
       }
 

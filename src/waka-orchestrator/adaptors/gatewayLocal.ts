@@ -1,7 +1,6 @@
 import { Router } from 'express'
 import logger from '../logger'
-import WakaWorker from '../../waka-worker/index'
-import { IWakaConfig } from '../configManager'
+import WakaWorker from '../../waka-worker'
 
 class GatewayLocal {
   router: Router
