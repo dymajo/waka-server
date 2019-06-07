@@ -1,31 +1,35 @@
 import { Router } from 'express'
 import * as morgan from 'morgan'
+import * as Logger from 'bunyan'
 import createLogger from './logger'
 import cityMetadata from '../cityMetadata.json'
-import * as Logger from 'bunyan'
 import Connection from './db/connection'
-import Lines from './lines/index'
+import Lines from './lines'
 import Search from './stops/search'
 import Station from './stops/station'
 import StopsNZAKL from './stops/regions/nz-akl'
 import StopsNZWLG from './stops/regions/nz-wlg'
-import Realtime from './realtime/index'
+import Realtime from './realtime'
+import BaseStops from './stops/regions/BaseStops'
+import { WorkerConfig } from '../waka-orchestrator/configManager'
 
 class WakaWorker {
   config: any
   logger: Logger
   connection: Connection
-  router: any
+  router: Router
   realtime: Realtime
-  stopsExtras: any
+  stopsExtras: BaseStops
   search: Search
   lines: Lines
   station: Station
+
   bounds: {
     lat: { min: number; max: number }
     lon: { min: number; max: number }
   }
-  constructor(config: any) {
+
+  constructor(config: WorkerConfig) {
     const {
       prefix,
       version,
@@ -34,7 +38,6 @@ class WakaWorker {
       storageService,
       shapesContainer,
       shapesRegion,
-      emulatedStorage,
     } = config
 
     this.config = config
@@ -65,7 +68,6 @@ class WakaWorker {
         storageService,
         shapesContainer,
         shapesRegion,
-        emulatedStorage,
       },
     })
     this.station = new Station({
