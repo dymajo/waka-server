@@ -94,7 +94,7 @@ class Lines {
 
   stop() {}
 
-  getColor(agencyId: string, routeShortName: string, routeColor:string) {
+  getColor(agencyId: string, routeShortName: string, routeColor: string) {
     if (routeColor) {
       return `#${routeColor}`
     }
@@ -189,6 +189,7 @@ class Lines {
   _getLines() {
     const { prefix, lineData } = this
     // if the region has multiple cities
+    console.log(cityMetadata)
     let city = cityMetadata[prefix]
     if (!Object.prototype.hasOwnProperty.call(city, 'name')) {
       city = city[prefix]
@@ -296,7 +297,9 @@ class Lines {
           LEFT JOIN trips on
           trips.route_id = routes.route_id
       WHERE
-          routes.route_short_name = @route_short_name
+          (routes.route_short_name = @route_short_name OR
+          routes.route_id = @route_short_name)
+          and shape_id is not null
           ${agency}
       GROUP BY
         routes.route_id,
@@ -410,7 +413,7 @@ class Lines {
    *   ]
    * }
    */
-  getShapeJSON(req, res) {
+  async getShapeJSON(req: Request, res: Response) {
     const { prefix, version, config, storageSvc } = this
     const containerName = config.shapesContainer
     const { shapeId } = req.params
@@ -418,12 +421,17 @@ class Lines {
       .replace('_', '-')
       .replace('.', '-')}/${Buffer.from(shapeId).toString('base64')}.json`
 
-    storageSvc.downloadStream(containerName, fileName, res, blobError => {
-      if (blobError) {
-        res.status(404)
+    await storageSvc.downloadStream(
+      containerName,
+      fileName,
+      res,
+      (blobError, data) => {
+        if (blobError) {
+          res.status(404)
+        }
+        res.end()
       }
-      res.end()
-    })
+    )
   }
 
   // TODO: Probably move these to the Auckland & Wellington Specific Files

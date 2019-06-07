@@ -17,9 +17,11 @@ class DataAccess {
       agency_id: string
       route_type: number
       route_color: string
+      route_desc: string
+      route_id: string
     }>(`
       SELECT
-        route_short_name, route_long_name, agency_id, route_type, route_color
+        route_short_name, route_long_name, agency_id, route_type, route_color, route_desc,route_id
       FROM routes
       ORDER BY route_type, route_short_name
     `)
