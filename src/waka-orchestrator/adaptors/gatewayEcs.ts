@@ -1,11 +1,10 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 
-import AWSXRay from 'aws-xray-sdk'
+import AWS from 'aws-sdk'
 import logger from '../logger'
 import EnvMapper from '../../envMapper'
-import { EcsGatewayConfig } from '../configManager'
+import { EcsGatewayConfig } from '../../typings'
 // import a from 'aws-sdk'
-const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 
 const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())

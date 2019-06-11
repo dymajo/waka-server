@@ -1,9 +1,7 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
-import AWSXRay from 'aws-xray-sdk'
-const AWS = AWSXRay.captureAWS(require('aws-sdk'))
-import { DynamoDB } from 'aws-sdk'
+import AWS from 'aws-sdk'
 import logger from '../logger'
-import BaseKeyvalue from './BaseKeyvalue'
+import { BaseKeyvalue } from '../../typings'
 
 class KeyvalueDynamo extends BaseKeyvalue {
   name: string
@@ -18,7 +16,7 @@ class KeyvalueDynamo extends BaseKeyvalue {
     this.fattenObject = this.fattenObject.bind(this)
   }
 
-  flattenObject(obj: DynamoDB.AttributeMap) {
+  flattenObject(obj: AWS.DynamoDB.AttributeMap) {
     const { flattenObject } = this
     const response = {}
     Object.keys(obj)

@@ -1,16 +1,14 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
-import AWSXRay from 'aws-xray-sdk'
-const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 // import * as AWS from 'aws-sdk'
+import AWS from 'aws-sdk'
 import logger from '../logger'
-import { ECS } from 'aws-sdk'
 
 class Fargate {
   cluster: string
   taskDefinition: string
   securityGroups: string[]
   subnets: string[]
-  ecs: ECS
+  ecs: AWS.ECS
   constructor(config) {
     const { subnets, cluster, taskDefinition, securityGroups, region } = config
     if (!(subnets && cluster && taskDefinition && securityGroups)) {
@@ -25,13 +23,13 @@ class Fargate {
     this.ecs = new AWS.ECS({ region })
   }
 
-  async startTask(environment: ECS.KeyValuePair[]) {
+  async startTask(environment: AWS.ECS.KeyValuePair[]) {
     if (!this.ecs) {
       logger.warn('Cannot start task - missing config.')
       return
     }
     const { cluster, taskDefinition, securityGroups, subnets, ecs } = this
-    const params: ECS.RunTaskRequest = {
+    const params: AWS.ECS.RunTaskRequest = {
       taskDefinition,
       cluster,
       count: 1,
