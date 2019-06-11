@@ -50,7 +50,10 @@ class WakaOrchestrator {
     this.updateManager.start()
 
     if (config.gateway === 'local') {
-      const binaryPath = path.join(__dirname, '../waka-go-proxy/waka-go-proxy')
+      const binaryPath = path.join(
+        __dirname,
+        '../waka-go-proxy/waka-go-proxy.exe'
+      )
       const goLogs = (d: Buffer) => {
         const dString = d.toString()
         try {
