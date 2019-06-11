@@ -1,76 +1,7 @@
 import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
-import BaseKeyvalue from './adaptors/BaseKeyvalue'
-
-export interface WakaConfig {
-  port: number
-  gateway: string
-  keyvalue: string
-  keyvaluePrefix: string
-  keyvalueRegion: string
-  storageService: string
-  connectionTimeout: number
-  requestTimeout: number
-  transactionLimit: number
-  api: {
-    [api: string]: string
-  }
-  db: {
-    [dbConfig: string]: DBConfig
-  }
-  updaters: {
-    [updater: string]: {
-      delay: number
-      prefix: string
-      dbconfig: string
-      interval: number
-      shapesContainer: string
-      type: string
-      shapesRegion: string
-      url: string
-      extended: boolean
-    }
-  }
-  gatewayConfig?: {
-    ecs: EcsGatewayConfig
-  }
-}
-
-export interface WorkerConfig {
-  prefix: string
-  version: string
-  db: DBConfig
-  api: string
-  storageService: string
-  shapesContainer: string
-  shapesRegion: string
-}
-
-export interface EcsGatewayConfig {
-  cluster: string
-  region: string
-  servicePrefix: string
-  serviceSuffix: string
-  replicas: number
-}
-
-export interface DBConfig {
-  server: string
-  user: string
-  password: string
-}
-
-declare const process: {
-  env: {
-    PORT: string
-    GATEWAY: string
-    KEYVALUE: string
-    KEYVALUE_PREFIX: string
-    KEYVALUE_REGION: string
-    STORAGE_SERVICE: 'aws' | 'local'
-  }
-}
+import { BaseKeyvalue, WakaConfig } from '../typings'
 
 class ConfigManager {
   config: WakaConfig

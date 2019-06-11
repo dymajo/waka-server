@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'
 import BaseStops from './BaseStops'
+import { AklTimes } from '../../../typings'
 
 const pricingHtml = `
 <ul class="trip-content" style="padding: 0; min-height: 0;">
@@ -192,9 +193,7 @@ class StopsNZAKL extends BaseStops {
         const cacheObj = this.carparks[agenda21mapper[carpark.name]]
         cacheObj.availableSpaces = carpark.availableSpaces
         cacheObj.timestamp = carpark.timestamp
-        cacheObj.description = `${
-          carpark.availableSpaces
-        } spaces currently available`
+        cacheObj.description = `${carpark.availableSpaces} spaces currently available`
       })
     } catch (err) {
       // api is offline or whatever. just retries in 5 mins
@@ -227,19 +226,12 @@ class StopsNZAKL extends BaseStops {
   getTimes(code: string) {
     if (code in this.carparks) {
       const carpark = this.carparks[code]
-      const additionalDatem = additionalData[code]
-      interface ObjectType {
-        provider: string
-        trips: undefined[]
-        availableSpaces?: number
-        maxSpaces?: number
-        html?: string
-      }
-      let obj: ObjectType = {
+
+      let obj: AklTimes = {
         provider: 'carpark-bot',
         trips: [], // not used but won't crash older versions of client
       }
-      obj = Object.assign(obj, this.carparks[code])
+      obj = Object.assign(obj, carpark)
       obj = Object.assign(obj, additionalData[code])
       const percent = Math.round((obj.availableSpaces / obj.maxSpaces) * 100)
       if (obj.availableSpaces === 0) {

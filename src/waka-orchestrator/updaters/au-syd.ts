@@ -2,6 +2,7 @@ import * as moment from 'moment-timezone'
 import logger from '../logger'
 import axios from 'axios'
 import fetch from 'node-fetch'
+import { TfNSWUpdaterProps } from '../../typings'
 
 const tfnswmodes = {
   buses1: { endpoint: 'buses/SMBSC001' },
@@ -36,13 +37,6 @@ const tfnswmodes = {
   lightrail2: { endpoint: 'lightrail/newcastle' },
   trains1: { endpoint: 'nswtrains' },
   trains2: { endpoint: 'sydneytrains' },
-}
-
-interface TfNSWUpdaterProps {
-  apiKey: string
-  callback: any
-  delay: number
-  interval: number
 }
 
 class TfNSWUpdater {

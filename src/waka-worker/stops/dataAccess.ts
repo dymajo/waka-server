@@ -1,16 +1,19 @@
 import * as sql from 'mssql'
 import Connection from '../db/connection'
-
-interface IStopsDataAccess {
-  connection: Connection
-  prefix: string
-}
+import { StopsDataAccessProps } from '../../typings'
 
 class StopsDataAccess {
   connection: Connection
   prefix: string
-  stopRouteCache: Map<string, any>
-  constructor(props: IStopsDataAccess) {
+  stopRouteCache: Map<
+    string,
+    {
+      route_short_name: string
+      trip_headsign: string
+      direction_id: number
+}
+  >
+  constructor(props: StopsDataAccessProps) {
     const { connection, prefix } = props
     this.connection = connection
     this.prefix = prefix

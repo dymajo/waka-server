@@ -2,6 +2,7 @@ import moment from 'moment-timezone'
 import StopsDataAccess from './dataAccess'
 import Connection from '../db/connection'
 import * as Logger from 'bunyan'
+import { WakaRequest } from '../../typings'
 
 class Station {
   logger: Logger
@@ -183,7 +184,10 @@ class Station {
    *       }
    *     }
    */
-  async stopTimes(req, res) {
+  async stopTimes(
+    req: WakaRequest<{}, { time: string; station: string }>,
+    res
+  ) {
     const {
       prefix,
       dataAccess,
