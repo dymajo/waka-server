@@ -2,21 +2,16 @@ import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 import EnvMapper from '../envMapper'
-import { WakaConfig } from './configManager'
 import GatewayLocal from './adaptors/gatewayLocal'
 import GatewayEcs from './adaptors/gatewayEcs'
-
-interface VersionManagerProps {
-  gateway: GatewayLocal
-  config: WakaConfig
-}
+import { WakaConfig, VersionManagerProps, BaseKeyvalue } from '../typings'
 
 class VersionManager {
   config: WakaConfig
   gateway: GatewayLocal | GatewayEcs
   envMapper: EnvMapper
-  versions: KeyvalueDynamo
-  mappings: KeyvalueDynamo
+  versions: BaseKeyvalue
+  mappings: BaseKeyvalue
   constructor(props: VersionManagerProps) {
     const { gateway, config } = props
     this.config = config

@@ -1,8 +1,9 @@
 import Long from 'long'
 import * as Logger from 'bunyan'
 import { Request, Response } from 'express'
-
+import { config as SqlConfig } from 'mssql'
 import Connection from './waka-worker/db/connection'
+import GatewayLocal from './waka-orchestrator/adaptors/gatewayLocal'
 
 export interface WakaConfig {
   port: number
@@ -56,7 +57,7 @@ export interface EcsGatewayConfig {
   replicas: number
 }
 
-export interface DBConfig {
+export interface DBConfig extends SqlConfig {
   server: string
   user: string
   password: string
@@ -95,6 +96,8 @@ export abstract class BaseKeyvalue {
   abstract get(key: string): Promise<any>
 
   abstract set(key: string, value: string): Promise<boolean>
+
+  abstract scan(): Promise<any>
 }
 
 export abstract class BaseRealtime {
@@ -102,7 +105,6 @@ export abstract class BaseRealtime {
   logger: Logger
   scheduleLocationPull?(): Promise<void>
   schedulePull?(): Promise<void>
-
   abstract start(): void
 }
 
@@ -118,6 +120,12 @@ export abstract class BaseLines {
   lineGroups: any
   lineOperators: any
   friendlyNames: any
+}
+
+export abstract class BaseGateway {
+  abstract start(prefix: string, config: WorkerConfig): Promise<void>
+  abstract recycle(prefix: string, config: WorkerConfig): Promise<void>
+  abstract stop(prefix: string): Promise<void>
 }
 
 export interface UpdateFeedMessage {
@@ -211,6 +219,31 @@ export interface AklTimes {
 export interface StopsDataAccessProps {
   connection: Connection
   prefix: string
+}
+
+export interface RealtimeNZWLGProps {
+  connection: Connection
+  logger: Logger
+}
+export interface RealtimeNZAKLProps {
+  connection: Connection
+  logger: Logger
+  apiKey: string
+}
+
+export interface LinesAUSYDProps {
+  logger: Logger
+  connection: Connection
+}
+
+export interface VersionManagerProps {
+  gateway: GatewayLocal
+  config: WakaConfig
+}
+
+export interface LinesNZAKLProps {
+  connection: Connection
+  logger: Logger
 }
 
 export type WakaParams<T> = T

@@ -1,5 +1,6 @@
+import * as Logger from 'bunyan'
 import { ConnectionPool } from 'mssql'
-import { WakaConfig, DBConfig } from '../../waka-orchestrator/configManager'
+import { DBConfig } from '../../typings'
 
 class Connection {
   db: DBConfig

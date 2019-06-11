@@ -3,13 +3,13 @@
 import AWS from 'aws-sdk'
 import logger from '../logger'
 import EnvMapper from '../../envMapper'
-import { EcsGatewayConfig } from '../../typings'
+import { EcsGatewayConfig, BaseGateway, WorkerConfig } from '../../typings'
 // import a from 'aws-sdk'
 
 const envConvert = env =>
   JSON.stringify(env.map(e => `${e.name}|${e.value}`).sort())
 
-class GatewayEcs {
+class GatewayEcs extends BaseGateway {
   servicePrefix: string
   serviceSuffix: string
   replicas: number
@@ -17,6 +17,7 @@ class GatewayEcs {
   ecs: AWS.ECS
 
   constructor(config: EcsGatewayConfig) {
+    super()
     const { cluster, region, servicePrefix, serviceSuffix, replicas } = config
     this.servicePrefix = servicePrefix || ''
     this.serviceSuffix = serviceSuffix || ''
@@ -31,7 +32,7 @@ class GatewayEcs {
     this.ecs = new AWS.ECS({ region, params: { cluster } })
   }
 
-  async start(prefix, config) {
+  async start(prefix, config: WorkerConfig) {
     const { ecs, servicePrefix, serviceSuffix, replicas } = this
     if (!ecs) {
       logger.error({ prefix }, 'Cannot start ECS Service - not configured.')
@@ -149,7 +150,7 @@ class GatewayEcs {
     }
   }
 
-  async recycle(prefix) {
+  async recycle(prefix: string) {
     const { ecs, servicePrefix, serviceSuffix, replicas } = this
     const serviceName = `${servicePrefix}${prefix}${serviceSuffix}`
 
@@ -161,7 +162,7 @@ class GatewayEcs {
     logger.info({ prefix, service: serviceName }, 'ECS Service Updated')
   }
 
-  async stop(prefix) {
+  async stop(prefix: string) {
     const { ecs, servicePrefix, serviceSuffix } = this
     if (!ecs) {
       logger.error({ prefix }, 'Cannot stop ECS Service - not configured.')

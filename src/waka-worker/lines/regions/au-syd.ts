@@ -1,12 +1,6 @@
 import DataAccess from '../dataAccess'
-import BaseLines from './BaseLines'
 import Connection from '../../db/connection'
-import * as Logger from 'bunyan'
-
-interface ILinesAUSYDProps {
-  logger: Logger
-  connection: Connection
-}
+import { BaseLines, LinesAUSYDProps } from '../../../typings'
 
 class LinesAUSYD extends BaseLines {
   connection: Connection
@@ -15,7 +9,7 @@ class LinesAUSYD extends BaseLines {
   lineGroups: {}
   lineOperators: {}
   lineColors: {}
-  constructor(props: ILinesAUSYDProps) {
+  constructor(props: LinesAUSYDProps) {
     super()
     const { logger, connection } = props
     this.logger = logger

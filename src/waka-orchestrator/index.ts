@@ -1,7 +1,5 @@
 import { Router, Request, Response } from 'express'
 
-import WakaProxy from '../waka-proxy'
-
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process'
 import path from 'path'
 import proxy from 'express-http-proxy'
@@ -13,14 +11,14 @@ import GatewayEcs from './adaptors/gatewayEcs'
 import UpdateManager from './updaters'
 import VersionManager from './versionManager'
 import PrivateApi from './api'
-import { WakaConfig } from './configManager'
+import { WakaConfig, BaseGateway } from '../typings'
 
 const proxyPort = '9002'
 
 class WakaOrchestrator {
   config: WakaConfig
   router: Router
-  gateway: GatewayLocal | GatewayEcs
+  gateway: BaseGateway
   versionManager: VersionManager
   privateApi: PrivateApi
   updateManager: UpdateManager

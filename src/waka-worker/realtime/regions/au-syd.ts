@@ -203,8 +203,8 @@ class RealtimeAUSYD extends BaseRealtime {
         try {
           const data = currentVehicleData[trip]
           vehicleInfo[trip] = {
-            latitude: data.position.latitude,
-            longitude: data.position.longitude,
+            latitude: data.vehicle.position.latitude,
+            longitude: data.vehicle.position.longitude,
           }
         } catch (err) {}
       }

@@ -1,16 +1,18 @@
 import { Router } from 'express'
 import logger from '../logger'
 import WakaWorker from '../../waka-worker'
+import { BaseGateway, WorkerConfig } from '../../typings'
 
-class GatewayLocal {
+class GatewayLocal extends BaseGateway {
   router: Router
   workers: {}
   constructor() {
+    super()
     this.router = Router()
     this.workers = {}
   }
 
-  start(prefix: string, config) {
+  async start(prefix: string, config: WorkerConfig) {
     // This is a bit magic - it simply instantiates the WakaWorker class
 
     const { router, workers } = this
@@ -45,12 +47,12 @@ class GatewayLocal {
     }
   }
 
-  recycle(prefix, config) {
+  async recycle(prefix: string, config: WorkerConfig) {
     this.stop(prefix)
     this.start(prefix, config)
   }
 
-  stop(prefix) {
+  async stop(prefix: string) {
     const { workers } = this
     if (workers[prefix] !== undefined) {
       workers[prefix].stop()

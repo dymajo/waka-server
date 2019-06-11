@@ -11,7 +11,7 @@ import StopsNZAKL from './stops/regions/nz-akl'
 import StopsNZWLG from './stops/regions/nz-wlg'
 import Realtime from './realtime'
 import BaseStops from './stops/regions/BaseStops'
-import { WorkerConfig } from '../waka-orchestrator/configManager'
+import { WorkerConfig } from '../typings'
 
 class WakaWorker {
   config: any

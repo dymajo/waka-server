@@ -1,13 +1,17 @@
 import fetch from 'node-fetch'
 import sql from 'mssql'
 import moment from 'moment-timezone'
-import BaseRealtime from './BaseRealtime'
+import * as Logger from 'bunyan'
+import { BaseRealtime, RealtimeNZWLGProps } from '../../../typings'
+import Connection from '../../db/connection'
 
 const tripsUrl = 'https://www.metlink.org.nz/api/v1/StopDepartures/'
 const serviceLocation = 'https://www.metlink.org.nz/api/v1/ServiceLocation/'
 
 class RealtimeNZWLG extends BaseRealtime {
-  constructor(props) {
+  connection: Connection
+  logger: Logger
+  constructor(props: RealtimeNZWLGProps) {
     super()
     const { logger, connection } = props
     this.connection = connection

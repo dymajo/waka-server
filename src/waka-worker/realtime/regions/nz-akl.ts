@@ -1,9 +1,9 @@
 import fetch from 'node-fetch'
 import * as sql from 'mssql'
+import * as Logger from 'bunyan'
 import doubleDeckers from './nz-akl-doubledecker'
-import BaseRealtime from './BaseRealtime'
 import Connection from '../../db/connection'
-
+import { BaseRealtime, RealtimeNZAKLProps } from '../../../typings'
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
 
@@ -23,7 +23,9 @@ class RealtimeNZAKL extends BaseRealtime {
     url: string
     headers: { [header: string]: string }
   }
-  constructor(props) {
+  connection: Connection
+  logger: Logger
+  constructor(props: RealtimeNZAKLProps) {
     super()
     const { logger, connection, apiKey } = props
     this.connection = connection
