@@ -47,11 +47,11 @@ class UpdateManager {
         logger.info({ prefix, type }, 'Starting Updater')
 
         let updater
-        if (prefix === 'nz-akl') {
+        if (type === 'nz-akl') {
           const apiKey = config.api['nz-akl']
           const params = { prefix, apiKey, delay, interval, callback, extended }
           updater = new ATUpdater(params)
-        } else if (prefix === 'au-syd') {
+        } else if (type === 'au-syd') {
           const apiKey = config.api['au-syd']
           const params = {
             prefix,
