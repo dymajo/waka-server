@@ -70,7 +70,6 @@ class WakaOrchestrator {
 
       try {
         fs.statSync(binaryPath)
-        console.log(port)
         this.proxy = spawn(binaryPath, [
           '-e',
           `http://localhost:${port}`,

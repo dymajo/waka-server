@@ -11,7 +11,7 @@ class StopsDataAccess {
       route_short_name: string
       trip_headsign: string
       direction_id: number
-}
+    }
   >
   constructor(props: StopsDataAccessProps) {
     const { connection, prefix } = props

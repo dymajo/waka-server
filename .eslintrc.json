@@ -15,9 +15,10 @@
   "rules": {
     "@typescript-eslint/indent": ["error", 2],
     "@typescript-eslint/member-delimiter-style": "off",
-    "@typescript-eslint/no-magic-numbers": ["error"],
+    "@typescript-eslint/no-magic-numbers": 0,
     "@typescript-eslint/explicit-member-accessibility": 0,
     "@typescript-eslint/explicit-function-return-type": 0,
+    "@typescript-eslint/camelcase": 0,
     "semi": "off",
     "indent": "off",
     "linebreak-style": ["error", "unix"],
@@ -31,7 +32,8 @@
         "checkLoops": false
       }
     ],
-    "no-underscore-dangle": [2, { "allow": ["_id"] }],
+    "no-underscore-dangle": 0,
+    "lines-between-class-members": 0,
     "comma-dangle": ["error", "always-multiline"],
     "no-shadow": "off",
     "no-unused-vars": 1,

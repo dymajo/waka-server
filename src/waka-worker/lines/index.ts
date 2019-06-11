@@ -1,18 +1,17 @@
 import * as sql from 'mssql'
-import Storage from '../db/storage'
+import * as Logger from 'bunyan'
 import { Request, Response } from 'express'
 import cityMetadata from '../../cityMetadata.json'
 import StopsDataAccess from '../stops/dataAccess'
+import Storage from '../db/storage'
 
 import LinesAUSYD from './regions/au-syd'
 import LinesNZAKL from './regions/nz-akl'
 import LinesNZCHC from './regions/nz-chc'
 import LinesNZWLG from './regions/nz-wlg'
 import Connection from '../db/connection'
-import BaseLines from './regions/BaseLines'
 import Search from '../stops/search'
-import * as Logger from 'bunyan'
-import BaseRealtime from '../realtime/regions/BaseRealtime'
+
 const regions = {
   'au-syd': LinesAUSYD,
   'nz-akl': LinesNZAKL,
@@ -189,7 +188,6 @@ class Lines {
   _getLines() {
     const { prefix, lineData } = this
     // if the region has multiple cities
-    console.log(cityMetadata)
     let city = cityMetadata[prefix]
     if (!Object.prototype.hasOwnProperty.call(city, 'name')) {
       city = city[prefix]

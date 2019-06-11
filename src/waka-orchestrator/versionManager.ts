@@ -66,7 +66,6 @@ class VersionManager {
     const { gateway } = this
 
     const gatewayConfig = await this.getVersionConfig(versionId)
-    console.log(gatewayConfig)
     logger.info({ prefix, version: gatewayConfig.version }, 'Updating Gateway')
 
     // We trust the gateways to handle the scheduling of new tasks / configs
@@ -168,7 +167,6 @@ class VersionManager {
     // the gateway needs some settings from the orchestrator,
     // but also some settings from the worker config
     const _workerConfig = (await versions.get(versionId)) as unknown
-    console.log(_workerConfig)
     const workerConfig = _workerConfig as {
       db: { database: string; password: string; server: string; user: string }
       id: string
@@ -234,7 +232,6 @@ class VersionManager {
   }
 
   async getDockerCommand(versionId: string) {
-    debugger
     const config = await this.getVersionConfig(versionId)
     const env = this.envMapper.toEnvironmental(config, 'importer-local')
     const envArray = Object.keys(env).map(

@@ -228,6 +228,7 @@ class Station {
         break
       case 'au-mel':
         timezone = 'Australia/Melbourne'
+        break
       case 'nz-wlg':
       case 'nz-akl':
       default:
@@ -240,7 +241,15 @@ class Station {
     let midnightOverride = false
     if (req.params.time) {
       const split = req.params.time.split(':')
-      const tentativeDate = new Date(Date.UTC(1970, 0, 1, split[0], split[1]))
+      const tentativeDate = new Date(
+        Date.UTC(
+          1970,
+          0,
+          1,
+          Number.parseInt(split[0], 10),
+          Number.parseInt(split[1], 10)
+        )
+      )
       if (tentativeDate.toString() !== 'Invalid Date') {
         currentTime = tentativeDate
         midnightOverride = true
