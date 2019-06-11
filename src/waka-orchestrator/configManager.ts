@@ -31,11 +31,7 @@ class ConfigManager {
           password: 'Str0ngPassword',
         },
       },
-      updaters: {
-        'nz-akl': null,
-        'nz-wlg': null,
-        'au-syd': null,
-      },
+      updaters: {},
       importer: {},
       gatewayConfig: {
         // local doesn't need config

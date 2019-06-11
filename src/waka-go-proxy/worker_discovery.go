@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context/ctxhttp"
 
 	"github.com/sirupsen/logrus"
 )
@@ -136,8 +133,8 @@ func (wd WorkerDiscovery) BoundsHandler(pathPrefix string) func(http.ResponseWri
 }
 
 // GetWorker gets details for a particular worker
-func (wd WorkerDiscovery) GetWorker(ctx context.Context, prefix string, initialLocation [2]float32, showInCityList bool) {
-	response, err := ctxhttp.Get(ctx, xray.Client(nil), fmt.Sprintf("%s/%s/info", endpoint, prefix))
+func (wd WorkerDiscovery) GetWorker(prefix string, initialLocation [2]float32, showInCityList bool) {
+	response, err := http.Get(fmt.Sprintf("%s/%s/info", endpoint, prefix))
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -162,16 +159,12 @@ func (wd WorkerDiscovery) GetWorker(ctx context.Context, prefix string, initialL
 }
 
 // Refresh loops through the regions and runs a refresh, infinitely
-func (wd WorkerDiscovery) Refresh(regions Regions, intervalMinutes int, suffix string) {
+func (wd WorkerDiscovery) Refresh(regions Regions, intervalMinutes int) {
 	for true {
-		ctx, seg := xray.BeginSegment(context.Background(), fmt.Sprintf("waka-proxy%s-get-regions", suffix))
 		for prefix, data := range regions.regionMap {
 			// bit yuck can't do async, cause can't do concurrent map writes
-			ctx, subSeg := xray.BeginSubsegment(ctx, fmt.Sprintf("get-%s", prefix))
-			wd.GetWorker(ctx, prefix, data.InitialLocation, data.ShowInCityList)
-			subSeg.Close(nil)
+			wd.GetWorker(prefix, data.InitialLocation, data.ShowInCityList)
 		}
-		seg.Close(nil)
 		time.Sleep(time.Minute * time.Duration(intervalMinutes))
 	}
 }
