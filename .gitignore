@@ -6,3 +6,4 @@ built/
 .DS_STORE
 dist/docs
 /lib
+v.txt

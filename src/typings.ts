@@ -95,7 +95,7 @@ export abstract class BaseKeyvalue {
 
   abstract get(key: string): Promise<any>
 
-  abstract set(key: string, value: string): Promise<boolean>
+  abstract set(key: string, value: any): Promise<boolean>
 
   abstract scan(): Promise<any>
 }

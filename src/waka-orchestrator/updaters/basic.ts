@@ -3,9 +3,9 @@ import * as os from 'os'
 import * as path from 'path'
 import extract from 'extract-zip'
 import fetch from 'node-fetch'
-import * as csvparse from 'csv-parse'
+import csvparse from 'csv-parse'
 import transform from 'stream-transform'
-import * as moment from 'moment-timezone'
+import moment from 'moment-timezone'
 import logger from '../logger'
 
 interface BasicUpdaterProps {
@@ -63,6 +63,7 @@ class BasicUpdater {
     } = this
 
     try {
+      logger.info({ prefix }, 'Starting download.')
       const filePath = await download()
       logger.info({ prefix }, 'Downloaded file.')
 

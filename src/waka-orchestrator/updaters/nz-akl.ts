@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import * as moment from 'moment-timezone'
+import moment from 'moment-timezone'
 import logger from '../logger'
 
 interface ATUpdaterProps {

@@ -141,7 +141,14 @@ class VersionManager {
     const id = `${prefix.replace(/-/g, '_')}_${version
       .replace(/-/g, '_')
       .replace(/ /g, '_')}`
-    const db = JSON.parse(JSON.stringify(config.db[dbconfig]))
+
+    let db
+    try {
+      db = JSON.parse(JSON.stringify(config.db[dbconfig]))
+    } catch (err) {
+      logger.error({ prefix }, 'No database config - could not create worker.')
+      return
+    }
     db.database = id
 
     const newConfig = {
