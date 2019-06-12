@@ -107,14 +107,12 @@ class PrivateApi {
       }
     })
 
-    // TODO
     router.post('/worker/delete', async (req, res) => {
       const {
         body: { id },
       } = req
       try {
         await this.versionManager.deleteWorker(id)
-        Connection
         res.send({ message: 'Deleting worker.' })
       } catch (error) {
         logger.error({ error }, 'error deleting worker')
@@ -170,6 +168,12 @@ class PrivateApi {
         logger.error({ err }, 'Error saving config.')
         res.status(500).send(err)
       }
+    })
+
+    router.post('/orchestrator/kill', async (req, res) => {
+      logger.info('Orchestrator killed by user.')
+      await res.send({ message: 'sending SIGTERM' })
+      process.exit()
     })
 
     router.use('/', _static(join(__dirname, '/dist')))
