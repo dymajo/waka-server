@@ -11,14 +11,7 @@
     <link rel="stylesheet" href="./overrides.css" />
   </head>
   <body>
-    <div class="navbar navbar-dark bg-dark box-shadow">
-      <div class="container d-flex justify-content-between">
-        <a href="#" class="navbar-brand d-flex align-items-center">
-          <strong>Waka</strong>
-          &nbsp;Orchestrator
-        </a>
-      </div>
-    </div>
+    <div id="nav"></div>
 
     <div class="container main-container pt-5">
       <div
@@ -38,40 +31,7 @@
       <div id="workers" class="mb-4">
         Loading...
       </div>
-      <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-1"
-      >
-        <h2>Config</h2>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <button
-            class="btn btn-sm btn-outline-danger"
-            id="restartOrchestrator"
-          >
-            Restart Orchestrator</button
-          >&nbsp;
-          <button class="btn btn-sm btn-outline-primary" id="saveConfig">
-            Save Config
-          </button>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="form-group">
-          <textarea
-            class="form-control pre"
-            id="configTextarea"
-            rows="3"
-          ></textarea>
-          <small class="form-text text-muted">
-            You can override the
-            <a
-              href="https://github.com/dymajo/waka-server/blob/master/waka-orchestrator/configManager.js"
-              >default config</a
-            >
-            by putting values in here. However, you will need to restart the
-            app!
-          </small>
-        </div>
-      </div>
+
       <div>
         <h5>Instructions</h5>
         <ul>
@@ -90,12 +50,6 @@
             default.
           </li>
         </ul>
-      </div>
-      <div>
-        <h5>Latest Commit</h5>
-        <div class="bg-dark">
-          <pre class="text-light p-4" id="footer"></pre>
-        </div>
       </div>
     </div>
 
@@ -201,6 +155,7 @@
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"
     ></script>
-    <script src="private.js"></script>
+    <script src="common.js"></script>
+    <script src="worker.js"></script>
   </body>
 </html>
