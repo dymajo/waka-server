@@ -1,7 +1,5 @@
-import * as moment from 'moment-timezone'
-import logger from '../logger'
 import axios from 'axios'
-import fetch from 'node-fetch'
+import logger from '../logger'
 import { TfNSWUpdaterProps } from '../../typings'
 
 const tfnswmodes = {
@@ -80,10 +78,12 @@ class TfNSWUpdater {
     let newest = new Date(0)
     try {
       for (const mode in tfnswmodes) {
-        const { endpoint } = tfnswmodes[mode]
-        const version = await checkApi(endpoint)
-        if (newest < version) {
-          newest = version
+        if (Object.prototype.hasOwnProperty.call(tfnswmodes, mode)) {
+          const { endpoint } = tfnswmodes[mode]
+          const version = await checkApi(endpoint)
+          if (newest < version) {
+            newest = version
+          }
         }
       }
       const year = newest.getUTCFullYear()
@@ -114,7 +114,7 @@ class TfNSWUpdater {
 
       return new Date(res.headers['last-modified'])
     } catch (err) {
-      logger.error({ err }, 'Could not reach api')
+      // logger.error({ err }, 'Could not reach api')
       return new Date(0)
     }
   }

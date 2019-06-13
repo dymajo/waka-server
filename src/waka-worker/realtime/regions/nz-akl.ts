@@ -1,9 +1,11 @@
 import fetch from 'node-fetch'
 import * as sql from 'mssql'
 import * as Logger from 'bunyan'
-import doubleDeckers from './nz-akl-doubledecker'
+import { Response } from 'express'
+import doubleDeckers from './nz-akl-doubledecker.json'
 import Connection from '../../db/connection'
-import { BaseRealtime, RealtimeNZAKLProps } from '../../../typings'
+import { BaseRealtime, RealtimeNZAKLProps, WakaRequest } from '../../../typings'
+
 const schedulePullTimeout = 20000
 const scheduleLocationPullTimeout = 15000
 
@@ -123,7 +125,10 @@ class RealtimeNZAKL extends BaseRealtime {
     setTimeout(this.scheduleLocationPull, scheduleLocationPullTimeout)
   }
 
-  async getTripsEndpoint(req, res) {
+  async getTripsEndpoint(
+    req: WakaRequest<{ trips: string[]; train: boolean }, null>,
+    res: Response
+  ) {
     // compat with old version of api
     if (req.body.trips.constructor !== Array) {
       req.body.trips = Object.keys(req.body.trips)
@@ -135,10 +140,10 @@ class RealtimeNZAKL extends BaseRealtime {
       train || this.currentDataFails > 3
         ? await this.getTripsAuckland(trips, train)
         : this.getTripsCached(trips)
-    res.send(data)
+    return res.send(data)
   }
 
-  async getTripsAuckland(trips, train = false) {
+  async getTripsAuckland(trips: string[], train = false) {
     const { logger, vehicleLocationsOptions, tripUpdatesOptions } = this
     const realtimeInfo = {}
     trips.forEach(trip => {
@@ -184,9 +189,18 @@ class RealtimeNZAKL extends BaseRealtime {
     return realtimeInfo
   }
 
-  getTripsCached(trips) {
+  getTripsCached(trips: string[]) {
     // this is essentially the same function as above, but just pulls from cache
-    const realtimeInfo = {}
+    const realtimeInfo: {
+      [tripId: string]: {
+        stop_sequence: number
+        delay: number
+        timestamp: number
+        v_id: number
+        double_decker: boolean
+        ev: boolean
+      }
+    } = {}
     trips.forEach(trip => {
       const data = this.currentData[trip]
       if (typeof data !== 'undefined') {
@@ -206,7 +220,10 @@ class RealtimeNZAKL extends BaseRealtime {
     return realtimeInfo
   }
 
-  async getVehicleLocationEndpoint(req, res) {
+  async getVehicleLocationEndpoint(
+    req: WakaRequest<{ trips: string[] }, null>,
+    res: Response
+  ) {
     const { logger, vehicleLocationsOptions } = this
     const { trips } = req.body
 
@@ -230,16 +247,17 @@ class RealtimeNZAKL extends BaseRealtime {
           }
         })
       }
-      res.send(vehicleInfo)
-      return vehicleInfo
+      return res.send(vehicleInfo)
     } catch (err) {
       logger.error({ err }, 'Could not get vehicle location from AT.')
-      res.send({ error: err })
-      return err
+      return res.send({ error: err })
     }
   }
 
-  async getLocationsForLine(req, res) {
+  async getLocationsForLine(
+    req: WakaRequest<null, { line: string }>,
+    res: Response
+  ) {
     const { logger, connection } = this
     const { line } = req.params
     if (this.currentVehicleData.entity === undefined) {
@@ -288,12 +306,10 @@ class RealtimeNZAKL extends BaseRealtime {
         direction: tripIdsMap[entity.vehicle.trip.trip_id],
         updatedAt: this.lastVehicleUpdate,
       }))
-      res.send(result)
-      return result
+      return res.send(result)
     } catch (err) {
       logger.error({ err }, 'Could not get locations from line.')
-      res.status(500).send(err)
-      return err
+      return res.status(500).send(err)
     }
   }
 }

@@ -1,8 +1,10 @@
 import fetch from 'node-fetch'
 import sql from 'mssql'
-import moment from 'moment-timezone'
+import momenttz from 'moment-timezone'
+import moment from 'moment'
 import * as Logger from 'bunyan'
-import { BaseRealtime, RealtimeNZWLGProps } from '../../../typings'
+import { Response } from 'express'
+import { BaseRealtime, RealtimeNZWLGProps, WakaRequest } from '../../../typings'
 import Connection from '../../db/connection'
 
 const tripsUrl = 'https://www.metlink.org.nz/api/v1/StopDepartures/'
@@ -26,7 +28,10 @@ class RealtimeNZWLG extends BaseRealtime {
     this.logger.info('Wellington Realtime Stopped.')
   }
 
-  async getTripsEndpoint(req, res) {
+  async getTripsEndpoint(
+    req: WakaRequest<{ stop_id: string }, null>,
+    res: Response
+  ) {
     if (!req.body.stop_id) {
       return res.status(400).send({ message: 'stop_id required' })
     }
@@ -198,7 +203,7 @@ class RealtimeNZWLG extends BaseRealtime {
             return
           }
 
-          const goal = moment().tz('Pacific/Auckland')
+          const goal = momenttz().tz('Pacific/Auckland')
           goal.hours(0)
           goal.minutes(0)
           goal.seconds(0)
@@ -222,18 +227,23 @@ class RealtimeNZWLG extends BaseRealtime {
           ) {
             const closest = realtimeServices[trip.route_short_name].reduce(
               (prev, curr) =>
-                Math.abs(new Date(curr.AimedDeparture) - goal) <
-                Math.abs(new Date(prev.AimedDeparture) - goal)
+                Math.abs(moment(curr.AimedDeparture).unix() - goal.unix()) <
+                Math.abs(moment(prev.AimedDeparture).unix() - goal.unix())
                   ? curr
                   : prev
             )
 
             // less than 180 seconds, then it's valid?
-            if (Math.abs(new Date(closest.AimedDeparture) - goal) < 180000) {
+            if (
+              Math.abs(moment(closest.AimedDeparture).unix() - goal.unix()) <
+              180000
+            ) {
               responseData[key] = {
                 goal,
-                found: new Date(closest.AimedDeparture),
-                delay: (new Date(closest.ExpectedDeparture) - goal) / 1000,
+                found: moment(closest.AimedDeparture),
+                delay:
+                  (moment(closest.ExpectedDeparture).unix() - goal.unix()) /
+                  1000,
                 v_id: closest.VehicleRef,
                 stop_sequence: -100,
                 time: 0,
@@ -243,7 +253,7 @@ class RealtimeNZWLG extends BaseRealtime {
                 realtimeServices[trip.route_short_name].indexOf(closest),
                 1
               )
-            } else if (goal < new Date()) {
+            } else if (goal < moment()) {
               responseData[key] = {
                 departed: 'probably',
               }
@@ -263,7 +273,10 @@ class RealtimeNZWLG extends BaseRealtime {
     }
   }
 
-  async getVehicleLocationEndpoint(req, res) {
+  async getVehicleLocationEndpoint(
+    req: WakaRequest<{ trips: string[] }, null>,
+    res: Response
+  ) {
     const { logger, connection } = this
     const tripId = req.body.trips[0]
 
@@ -316,7 +329,10 @@ class RealtimeNZWLG extends BaseRealtime {
     }
   }
 
-  async getLocationsForLine(req, res) {
+  async getLocationsForLine(
+    req: WakaRequest<null, { line: string }>,
+    res: Response
+  ) {
     const { logger } = this
     const { line } = req.params
     try {
@@ -328,7 +344,7 @@ class RealtimeNZWLG extends BaseRealtime {
         longitude: parseFloat(service.Long),
         bearing: parseInt(service.Bearing, 10),
         direction: service.Direction === 'Inbound' ? 1 : 0,
-        updatedAt: new Date(service.RecordedAtTime),
+        updatedAt: moment(service.RecordedAtTime),
       }))
       res.send(responseData)
     } catch (err) {

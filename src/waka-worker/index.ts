@@ -186,6 +186,7 @@ class WakaWorker {
     router.get('/shapejson/:shapeId', lines.getShapeJSON)
 
     router.get('/realtime-healthcheck', realtime.healthcheck)
+    router.get('/realtime/all', realtime.all)
     router.get('/realtime/:line', realtime.vehicleLocationV2)
     router.post('/realtime', realtime.stopInfo)
     router.post('/vehicle_location', realtime.vehicleLocation)

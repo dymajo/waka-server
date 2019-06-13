@@ -10,10 +10,10 @@ interface ATUpdaterProps {
 }
 
 class ATUpdater {
-  apiKey: any
+  apiKey: string
   callback: any
   delay: number
-  interval: any
+  interval: number
   prefix: string
   timeout: NodeJS.Timeout
   constructor(props: ATUpdaterProps) {
