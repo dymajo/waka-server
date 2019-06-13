@@ -9,7 +9,6 @@ import {
   PositionFeedMessage,
   UpdateFeedMessage,
   TripUpdate,
-  VehiclePosition,
   BaseRealtime,
   WakaRequest,
   PositionFeedEntity,
@@ -25,6 +24,7 @@ const modes = [
   'lightrail/newcastle',
   'nswtrains',
   'sydneytrains',
+  'metro',
 ]
 
 interface RealtimeAUSYDProps {
@@ -37,12 +37,12 @@ class RealtimeAUSYD extends BaseRealtime {
   connection: Connection
   logger: Logger
   apiKey: string
-  lastUpdate: any
-  lastVehicleUpdate: any
+  lastUpdate: Date
+  lastVehicleUpdate: Date
   currentData: { [tripId: string]: TripUpdate }
   currentDataFails: number
   currentVehicleData: PositionFeedEntity[]
-  currentVehicleDataFails: any
+  currentVehicleDataFails: number
   tripUpdateOptions: { url: string; headers: { Authorization: any } }
   vehicleLocationOptions: { url: string; headers: { Authorization: any } }
   constructor(props: RealtimeAUSYDProps) {
@@ -85,6 +85,11 @@ class RealtimeAUSYD extends BaseRealtime {
     this.schedulePull()
     this.scheduleLocationPull()
     logger.info('TfNSW Realtime Started.')
+  }
+
+  stop() {
+    // TODO!
+    this.logger.warn('Sydney Realtime Not Stopped! Not Implemented.')
   }
 
   async schedulePull() {
@@ -141,14 +146,6 @@ class RealtimeAUSYD extends BaseRealtime {
           // const _feed = GtfsRealtimeBindings.FeedMessage.decode(res)
           const feed = _feed as PositionFeedMessage
           newVehicleData = newVehicleData.concat(feed.entity)
-          // feed.entity.forEach(trip => {
-          //   if (trip.vehicle.trip.routeId === '2441_343') {
-          //     console.log(trip)
-          //   }
-          //   if (trip.vehicle) {
-          //     newVehicleData[trip.vehicle.trip.tripId] = trip.vehicle
-          //   }
-          // })
         } catch (err) {
           // console.error(err)
         }
@@ -209,10 +206,13 @@ class RealtimeAUSYD extends BaseRealtime {
         } catch (err) {}
       }
     }
-    res.send(vehicleInfo)
+    return res.send(vehicleInfo)
   }
 
-  async getLocationsForLine(req: WakaRequest<null, { line: string }>, res) {
+  async getLocationsForLine(
+    req: WakaRequest<null, { line: string }>,
+    res: Response
+  ) {
     const { logger, connection } = this
     const { line } = req.params
     if (this.currentVehicleData.length === 0) {
@@ -226,13 +226,15 @@ class RealtimeAUSYD extends BaseRealtime {
         `
       SELECT route_id
       FROM routes
-      WHERE route_short_name = @route_short_name
+      WHERE route_short_name = @route_short_name or route_id = @route_short_name
       `
       )
       const routeIds = routeIdResult.recordset.map(r => r.route_id)
-      const trips = this.currentVehicleData.filter(entity =>
-        routeIds.includes(entity.vehicle.trip.routeId)
-      )
+      const trips = this.currentVehicleData.filter(entity => {
+        return routeIds.some(routeId => {
+          return routeId === entity.vehicle.trip.routeId
+        })
+      })
       const tripIds = trips.map(entity => entity.vehicle.trip.tripId)
       const escapedTripIds = `'${tripIds.join("', '")}'`
       const sqlTripIdRequest = connection.get().request()
@@ -258,10 +260,13 @@ class RealtimeAUSYD extends BaseRealtime {
         direction: tripIdsMap[entity.vehicle.trip.tripId],
         updatedAt: this.lastVehicleUpdate,
       }))
-      res.send(result)
-      return result
+      return res.send(result)
     } catch (err) {
       logger.error({ err }, 'Could not get locations from line.')
+      return res.status(500).send(err)
+    }
+  }
+
   async getAllVehicleLocations(req: WakaRequest<null, null>, res: Response) {
     const { buses, trains, lightrail, ferries } = req.query
     const { currentVehicleData, connection } = this
