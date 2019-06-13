@@ -1,19 +1,22 @@
+import * as Logger from 'bunyan'
+import { Response } from 'express'
 import RealtimeAUSYD from './regions/au-syd'
 import RealtimeNZAKL from './regions/nz-akl'
 import RealtimeNZWLG from './regions/nz-wlg'
 import Connection from '../db/connection'
-import * as Logger from 'bunyan'
+import { BaseRealtime, WakaRequest } from '../../typings'
+
 const regions = {
   'au-syd': RealtimeAUSYD,
-  'nz-akl': RealtimeNZAKL,
+  // 'nz-akl': RealtimeNZAKL,
   'nz-wlg': RealtimeNZWLG,
 }
 
 class Realtime {
   connection: Connection
   logger: Logger
-  prefix: any
-  fn: any
+  prefix: string
+  fn: BaseRealtime
   constructor(props) {
     const { connection, logger, prefix, api } = props
     this.connection = connection
@@ -25,15 +28,9 @@ class Realtime {
       regions[prefix] !== undefined
         ? new regions[prefix]({ logger, connection, apiKey })
         : null
-
-    this.getCachedTrips = this.getCachedTrips.bind(this)
-    this.stopInfo = this.stopInfo.bind(this)
-    this.vehicleLocation = this.vehicleLocation.bind(this)
-    this.vehicleLocationV2 = this.vehicleLocationV2.bind(this)
-    this.healthcheck = this.healthcheck.bind(this)
   }
 
-  start() {
+  start = () => {
     const { fn, logger } = this
     if (fn) {
       fn.start()
@@ -42,14 +39,14 @@ class Realtime {
     }
   }
 
-  stop() {
+  stop = () => {
     const { fn } = this
     if (fn) {
       fn.stop()
     }
   }
 
-  getCachedTrips(trips) {
+  getCachedTrips = (trips: string[]) => {
     const { fn } = this
     if (fn && fn.getTripsCached) {
       return fn.getTripsCached(trips)
@@ -99,22 +96,20 @@ class Realtime {
    *   }
    * }
    */
-  stopInfo(req, res) {
+  stopInfo = (req: WakaRequest<{ trips: string[] }, null>, res: Response) => {
     if (!req.body.trips) {
-      res.status(400).send({
+      return res.status(400).send({
         message: 'please send trips',
       })
-      return
     }
 
     if (this.fn && typeof this.fn.getTripsEndpoint !== 'undefined') {
-      this.fn.getTripsEndpoint(req, res)
-    } else {
-      res.status(400).send({
+      return this.fn.getTripsEndpoint(req, res)
+    }
+    return res.status(400).send({
         message: 'realtime not available',
       })
     }
-  }
 
   /**
    * @api {post} /:region/vehicle_location Vehicle Location v1
@@ -147,15 +142,14 @@ class Realtime {
    *   }
    * }
    */
-  vehicleLocation(req, res) {
+  vehicleLocation = (req: WakaRequest<null, null>, res: Response) => {
     if (this.fn) {
-      this.fn.getVehicleLocationEndpoint(req, res)
-    } else {
-      res.status(400).send({
+      return this.fn.getVehicleLocationEndpoint(req, res)
+    }
+    return res.status(400).send({
         message: 'realtime not available',
       })
     }
-  }
 
   /**
    * @api {get} /:region/realtime/:line Vehicle Location v2 - by route_short_name
@@ -191,23 +185,23 @@ class Realtime {
    *   }
    * ]
    */
-  vehicleLocationV2(req, res) {
+  vehicleLocationV2 = (req: WakaRequest<null, null>, res: Response) => {
     if (this.fn) {
-      this.fn.getLocationsForLine(req, res)
-    } else {
-      res.status(400).send({
+      return this.fn.getLocationsForLine(req, res)
+    }
+
+    return res.status(400).send({
         message: 'realtime not available',
       })
     }
-  }
 
-  healthcheck(req, res) {
+  healthcheck = (req: WakaRequest<null, null>, res: Response) => {
     if (this.fn) {
       let { lastUpdate } = this.fn
       if (lastUpdate === undefined) lastUpdate = null
-      res.send({ lastUpdate })
-    } else {
-      res.status(400).send({
+      return res.send({ lastUpdate })
+    }
+    return res.status(400).send({
         message: 'realtime not available',
       })
     }
