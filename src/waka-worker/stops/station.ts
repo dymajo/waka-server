@@ -221,7 +221,7 @@ class Station {
     } = {
       provider: 'sql-server',
     }
-    let timezone
+    let timezone: string
     switch (prefix) {
       case 'au-syd':
         timezone = 'Australia/Sydney'
@@ -402,13 +402,14 @@ class Station {
       dateOffset = parseInt(offset, 10)
     }
 
-    let timezone
+    let timezone: string
     switch (prefix) {
       case 'au-syd':
         timezone = 'Australia/Sydney'
         break
       case 'au-mel':
         timezone = 'Australia/Melbourne'
+        break
       case 'nz-wlg':
       case 'nz-akl':
       default:
