@@ -4,6 +4,7 @@ import { Request, Response, Router } from 'express'
 import { config as SqlConfig } from 'mssql'
 import Connection from './waka-worker/db/connection'
 import GatewayLocal from './waka-orchestrator/adaptors/gatewayLocal'
+import DataAccess from './waka-worker/lines/dataAccess'
 
 export interface WakaConfig {
   port: number
@@ -120,6 +121,10 @@ export abstract class BaseRealtime {
   }
   scheduleLocationPull?(): Promise<void>
   schedulePull?(): Promise<void>
+  getAllVehicleLocations?(
+    req: WakaRequest<null, null>,
+    res: Response
+  ): Promise<Response>
   abstract start(): void
   abstract stop(): void
   abstract getVehicleLocationEndpoint(
@@ -139,9 +144,20 @@ export abstract class BaseRealtime {
     res: Response
   ): Promise<Response>
   abstract getTripsEndpoint(
-    req: WakaRequest<{ stop_id: string }, null>,
+    req: WakaRequest<
+      {
+        trips: string[]
+        stop_id: string
+      },
+      null
+    >,
     res: Response
-  )
+  ): Promise<Response>
+}
+
+export interface BaseLinesProps {
+  logger: Logger
+  connection: Connection
 }
 
 export abstract class BaseLines {
@@ -156,6 +172,12 @@ export abstract class BaseLines {
   lineGroups: any
   lineOperators: any
   friendlyNames: any
+  constructor(props: BaseLinesProps) {
+    const { logger, connection } = props
+    this.logger = logger
+    this.connection = connection
+    this.dataAccess = new DataAccess({ connection })
+  }
 }
 
 export abstract class BaseGateway {
@@ -267,11 +289,6 @@ export interface RealtimeNZAKLProps {
   apiKey: string
 }
 
-export interface LinesAUSYDProps {
-  logger: Logger
-  connection: Connection
-}
-
 export interface VersionManagerProps {
   gateway: GatewayLocal
   config: WakaConfig
@@ -285,11 +302,6 @@ export interface Version {
   shapesRegion: string
   status: string
   version: string
-}
-
-export interface LinesNZAKLProps {
-  connection: Connection
-  logger: Logger
 }
 
 export type WakaParams<T> = T

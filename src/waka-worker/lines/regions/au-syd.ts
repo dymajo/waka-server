@@ -1,27 +1,17 @@
 import DataAccess from '../dataAccess'
 import Connection from '../../db/connection'
-import { BaseLines, LinesAUSYDProps } from '../../../typings'
+import { BaseLines, BaseLinesProps } from '../../../typings'
 
 class LinesAUSYD extends BaseLines {
-  connection: Connection
-  dataAccess: DataAccess
-  allLines: {}
-  lineGroups: {}
-  lineOperators: {}
-  lineColors: {}
-  constructor(props: LinesAUSYDProps) {
-    super()
-    const { logger, connection } = props
-    this.logger = logger
-    this.connection = connection
-    this.dataAccess = new DataAccess({ connection })
+  constructor(props: BaseLinesProps) {
+    super(props)
 
-    // this.lineIcons = lineIcons
+    this.lineIcons = {}
     this.lineColors = {}
     this.allLines = {}
     this.lineGroups = {}
     this.lineOperators = {}
-    // this.friendlyNames = friendlyNames
+    this.friendlyNames = {}
   }
 
   async start() {
