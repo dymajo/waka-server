@@ -107,9 +107,9 @@ class Realtime {
       return this.fn.getTripsEndpoint(req, res)
     }
     return res.status(400).send({
-        message: 'realtime not available',
-      })
-    }
+      message: 'realtime not available',
+    })
+  }
 
   /**
    * @api {post} /:region/vehicle_location Vehicle Location v1
@@ -147,9 +147,9 @@ class Realtime {
       return this.fn.getVehicleLocationEndpoint(req, res)
     }
     return res.status(400).send({
-        message: 'realtime not available',
-      })
-    }
+      message: 'realtime not available',
+    })
+  }
 
   /**
    * @api {get} /:region/realtime/:line Vehicle Location v2 - by route_short_name
@@ -191,9 +191,9 @@ class Realtime {
     }
 
     return res.status(400).send({
-        message: 'realtime not available',
-      })
-    }
+      message: 'realtime not available',
+    })
+  }
 
   healthcheck = (req: WakaRequest<null, null>, res: Response) => {
     if (this.fn) {
@@ -202,9 +202,17 @@ class Realtime {
       return res.send({ lastUpdate })
     }
     return res.status(400).send({
-        message: 'realtime not available',
-      })
+      message: 'realtime not available',
+    })
+  }
+
+  all = (req, res) => {
+    if (this.fn) {
+      return this.fn.getAllVehicleLocations(req, res)
     }
+    return res.status(400).send({
+      message: 'realtime not available',
+    })
   }
 }
 export default Realtime

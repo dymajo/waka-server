@@ -262,8 +262,79 @@ class RealtimeAUSYD extends BaseRealtime {
       return result
     } catch (err) {
       logger.error({ err }, 'Could not get locations from line.')
-      res.status(500).send(err)
-      return err
+  async getAllVehicleLocations(req: WakaRequest<null, null>, res: Response) {
+    const { buses, trains, lightrail, ferries } = req.query
+    const { currentVehicleData, connection } = this
+    if (currentVehicleData.length !== 0) {
+      const tripIds = currentVehicleData.map(
+        entity => entity.vehicle.trip.tripId
+      )
+      const escapedTripIds = `'${tripIds.join("', '")}'`
+      try {
+        const sqlTripIdRequest = connection.get().request()
+        const tripIdRequest = await sqlTripIdRequest.query<{
+          trip_id: string
+          route_type: number
+        }>(`
+  select routes.route_type, trips.trip_id from trips join routes on trips.route_id = routes.route_id where trip_id in (${escapedTripIds})
+  `)
+        const routeTypes = tripIdRequest.recordset.map(res => ({
+          trip_id: res.trip_id,
+          route_type: res.route_type,
+        }))
+        const vehicleData = currentVehicleData
+          .filter(entity => entity.vehicle.position)
+          .map(entity => ({
+            latitude: entity.vehicle.position.latitude,
+            longitude: entity.vehicle.position.longitude,
+            bearing: entity.vehicle.position.bearing,
+            updatedAt: this.lastVehicleUpdate,
+            trip_id: entity.vehicle.trip.tripId,
+          }))
+        const result: {
+          route_type: number
+          latitude: number
+          longitude: number
+          bearing: number
+          updatedAt: Date
+          trip_id: string
+        }[] = []
+        for (let i = 0; i < routeTypes.length; i++) {
+          result.push({
+            ...routeTypes[i],
+            ...vehicleData.find(
+              itmInner => itmInner.trip_id === routeTypes[i].trip_id
+            ),
+          })
+        }
+
+        result.filter(res => {
+          switch (res.route_type) {
+            case 1000:
+              return ferries === 'true'
+            case 400:
+            case 401:
+            case 2:
+            case 100:
+            case 106:
+              return trains === 'true'
+            case 900:
+              return lightrail === 'true'
+            case 700:
+            case 712:
+            case 714:
+            case 3:
+              return buses === 'true'
+            default:
+              return false
+          }
+        })
+        return res.send(result)
+      } catch (error) {
+        //
+      }
+    } else {
+      return res.sendStatus(400)
     }
   }
 }
