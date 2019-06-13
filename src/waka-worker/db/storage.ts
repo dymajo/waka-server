@@ -74,6 +74,17 @@ class Storage {
         .on('end', (data: any) => callback(null, data)) // do nothing, but this prevents from crashing
         .pipe(stream)
     }
+    if (this.backing === 'local') {
+      const res = await axios.get(`http://127.0.0.1:9004/${file}`, {
+        responseType: 'stream',
+      })
+      res.data.on('error', err => {
+        this.logger.error(err)
+        callback(err)
+      })
+      res.data.on('end', data => callback(null, data))
+      res.data.pipe(stream)
+    }
   }
 
   async uploadFile(container: string, file: string, sourcePath: string) {
@@ -97,6 +108,7 @@ class Storage {
         // throw error
       }
     }
+    throw Error('not supported backing')
   }
 }
 export default Storage
