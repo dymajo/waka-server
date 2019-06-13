@@ -1,36 +1,18 @@
 /* eslint-env browser */
 
-class DomController {
+class WorkerDomController {
   constructor(controller) {
     this.controller = controller
 
     this.workerButton = this.workerButton.bind(this)
     this.workerCreateButton = this.workerCreateButton.bind(this)
     this.dropdownButton = this.dropdownButton.bind(this)
-    this.saveConfig = this.saveConfig.bind(this)
   }
 
   start() {
-    const { controller } = this
     document
       .getElementById('createWorkerConfirm')
       .addEventListener('click', this.workerCreateButton)
-
-    document
-      .getElementById('saveConfig')
-      .addEventListener('click', this.saveConfig)
-
-    document
-      .getElementById('restartOrchestrator')
-      .addEventListener('click', () => {
-        if (
-          confirm(
-            'Are you sure you want to restart the orchestrator?\nDepending on your environment, it may not restart automatically.'
-          )
-        ) {
-          controller.runAction('/orchestrator/kill')
-        }
-      })
   }
 
   writeWorkers(str) {
@@ -115,37 +97,17 @@ prefix: ${worker.prefix}`)
       controller.runAction(action, JSON.stringify(worker))
     }
   }
-
-  saveConfig(e) {
-    const { controller } = this
-    e.preventDefault()
-    try {
-      const config = JSON.parse(document.getElementById('configTextarea').value)
-      controller
-        .runAction('/config', JSON.stringify({ config }))
-        .then(() => alert('Saved Config! Please restart Waka.'))
-    } catch (err) {
-      console.error(err)
-      alert('Error in JSON')
-    }
-  }
-
-  addGitHash(text) {
-    document.getElementById('footer').innerHTML = text
-  }
 }
 
 class WorkerController {
   constructor() {
     this.endpoint = '.'
-    this.domController = new DomController(this)
+    this.domController = new WorkerDomController(this)
   }
 
   start() {
     this.domController.start()
     this.loadWorkers()
-    this.loadConfig()
-    this.getHash()
   }
 
   runAction(action, data) {
@@ -164,14 +126,7 @@ class WorkerController {
       })
       .then(() => {
         this.loadWorkers()
-        this.loadConfig()
       })
-  }
-
-  async getHash() {
-    const githash = await fetch(`${this.endpoint}/git`)
-    const text = await githash.text()
-    this.domController.addGitHash(text)
   }
 
   async loadWorkers() {
@@ -254,16 +209,6 @@ class WorkerController {
     domString += '</table>'
     this.domController.writeWorkers(domString)
   }
-
-  async loadConfig() {
-    const response = await fetch(`${this.endpoint}/config`)
-    const data = await response.json()
-    document.getElementById('configTextarea').value = JSON.stringify(
-      data.config,
-      ' ',
-      2
-    )
-  }
 }
-const controller = new WorkerController()
-window.addEventListener('DOMContentLoaded', () => controller.start())
+const workerController = new WorkerController()
+window.addEventListener('DOMContentLoaded', () => workerController.start())

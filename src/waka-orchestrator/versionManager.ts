@@ -1,10 +1,17 @@
+import { ConnectionPool, VarChar } from 'mssql'
 import logger from './logger'
 import KeyvalueLocal from './adaptors/keyvalueLocal'
 import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 import EnvMapper from '../envMapper'
 import GatewayLocal from './adaptors/gatewayLocal'
 import GatewayEcs from './adaptors/gatewayEcs'
-import { WakaConfig, VersionManagerProps, BaseKeyvalue } from '../typings'
+import {
+  DBConfig,
+  WakaConfig,
+  VersionManagerProps,
+  BaseKeyvalue,
+  Version,
+} from '../typings'
 
 class VersionManager {
   config: WakaConfig
@@ -96,7 +103,57 @@ class VersionManager {
   }
 
   async deleteWorker(id: string) {
-    await this.versions.delete(id)
+    const { versions } = this
+
+    const _data = (await versions.get(id)) as unknown
+    const data = _data as Version
+
+    const dbConfig = {
+      server: data.db.server,
+      user: data.db.user,
+      password: data.db.password,
+      database: 'master',
+    } as DBConfig
+
+    return new Promise((resolve, reject) => {
+      logger.info(
+        { server: data.db.server },
+        'Opening connection to database server.'
+      )
+      const connection = new ConnectionPool(dbConfig, async err => {
+        if (err) {
+          return reject(err)
+        }
+        try {
+          const selectRequest = connection.request()
+          selectRequest.input('name', VarChar(50), data.db.database)
+          const databases = await selectRequest.query<{ name: string }>(
+            'SELECT name FROM sys.databases WHERE name = @name'
+          )
+          if (databases.recordset.length === 0) {
+            logger.info(
+              { database: data.db.database },
+              'Could not find database, will not delete.'
+            )
+          } else {
+            // sql injection haha
+            const deleteRequest = connection.request()
+            await deleteRequest.query<{}>(`DROP DATABASE ${data.db.database}`)
+            logger.info({ database: data.db.database }, 'Dropped database.')
+          }
+          connection.close()
+          logger.info(
+            { server: data.db.server },
+            'Closed connection to database server.'
+          )
+
+          await this.versions.delete(id)
+          resolve()
+        } catch (dbError) {
+          return reject(dbError)
+        }
+      })
+    })
   }
 
   async checkVersionExists(prefix, version) {
@@ -105,15 +162,7 @@ class VersionManager {
       .replace(/-/g, '_')
       .replace(/ /g, '_')}`
     const _data = (await versions.get(id)) as unknown
-    const data = _data as {
-      db: { database: string; password: string; server: string; user: string }
-      id: string
-      prefix: string
-      shapesContainer: string
-      shapesRegion: string
-      status: string
-      version: string
-    }
+    const data = _data as Version
 
     return {
       id,
@@ -169,15 +218,7 @@ class VersionManager {
     // the gateway needs some settings from the orchestrator,
     // but also some settings from the worker config
     const _workerConfig = (await versions.get(versionId)) as unknown
-    const workerConfig = _workerConfig as {
-      db: { database: string; password: string; server: string; user: string }
-      id: string
-      prefix: string
-      shapesContainer: string
-      shapesRegion: string
-      status: string
-      version: string
-    }
+    const workerConfig = _workerConfig as Version
     const gatewayConfig = {
       prefix: workerConfig.prefix,
       version: workerConfig.version,
@@ -210,15 +251,7 @@ class VersionManager {
     // empty -> pendingimport-willmap -> importing-willmap -> imported-willmap -> imported
     const { versions } = this
     const _version = (await versions.get(versionId)) as unknown
-    const version = _version as {
-      db: { database: string; password: string; server: string; user: string }
-      id: string
-      prefix: string
-      shapesContainer: string
-      shapesRegion: string
-      status: string
-      version: string
-    }
+    const version = _version as Version
     version.status = status
     await versions.set(versionId, version)
   }

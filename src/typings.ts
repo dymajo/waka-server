@@ -98,6 +98,8 @@ export abstract class BaseKeyvalue {
   abstract set(key: string, value: any): Promise<boolean>
 
   abstract scan(): Promise<any>
+
+  abstract delete(key: string): Promise<any>
 }
 
 export abstract class BaseRealtime {
@@ -273,6 +275,16 @@ export interface LinesAUSYDProps {
 export interface VersionManagerProps {
   gateway: GatewayLocal
   config: WakaConfig
+}
+
+export interface Version {
+  db: { database: string; password: string; server: string; user: string }
+  id: string
+  prefix: string
+  shapesContainer: string
+  shapesRegion: string
+  status: string
+  version: string
 }
 
 export interface LinesNZAKLProps {
