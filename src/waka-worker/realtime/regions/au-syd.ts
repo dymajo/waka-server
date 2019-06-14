@@ -15,7 +15,6 @@ import {
 } from '../../../typings'
 
 const schedulePullTimeout = 20000
-const scheduleLocationPullTimeout = 15000
 
 const modes = [
   'buses',
@@ -166,17 +165,42 @@ class RealtimeAUSYD extends BaseRealtime {
       if (Object.prototype.hasOwnProperty.call(trips, trip)) {
         try {
           const data = this.currentData[trip]
+          if (data !== undefined) {
+            const targetStop = data.stopTimeUpdate.find(stopUpdate => stopUpdate.stopId === stop_id)
+            let currentStop = {
+              stopSequence: -100 // starts off as "indeterminate"
+            }
 
-          if (typeof data !== 'undefined') {
-            const stop = data.stopTimeUpdate.find(stu => stu.stopId === stop_id)
-            const timeUpdate = stop.departure
+            // this array is ordered in the order of stops
+            const currentTime = new Date()
+            for (let i = 0; i < data.stopTimeUpdate.length; i++) {
+              const stopUpdate = data.stopTimeUpdate[i]
+              if (stopUpdate.departure) {
+                // filters out stops that have already passed
+                if (new Date((stopUpdate.departure.time.toNumber() + stopUpdate.departure.delay) * 1000) > currentTime) {
+                  if (currentStop.stopSequence === -100 && stopUpdate.stopSequence !== 0) {
+                    currentStop = stopUpdate
+                  }
+                  break
+                }
+                // keeps setting it until it finds the right one
+                if (stopUpdate.stopSequence) {
+                  currentStop = stopUpdate
+                }
+              }
+            }
+
+            // return values:
+            // delay is added to the scheduled time to figure out the actual stop time
+            // timestamp is epoch scheduled time (according to the GTFS-R API)
+            // stop_sequence is the stop that the vechicle is currently at
             const info = {}
             Object.assign(
               info,
-              stop.stopSequence && { stop_sequence: stop.stopSequence },
-              stop.departure && {
-                delay: stop.departure.delay,
-                timestamp: stop.departure.time.toNumber(),
+              { stop_sequence: currentStop.stopSequence },
+              targetStop.departure && {
+                delay: targetStop.departure.delay,
+                timestamp: targetStop.departure.time.toNumber(),
               }
             )
             realtimeInfo[trip] = info
