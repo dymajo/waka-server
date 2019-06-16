@@ -25,4 +25,5 @@ const listener = app.listen(PORT, () => {
     { port: listener.address()['port'] },
     'waka-worker listening'
   )
+  worker.start()
 })
