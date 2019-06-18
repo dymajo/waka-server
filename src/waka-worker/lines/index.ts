@@ -80,7 +80,7 @@ class Lines {
         ['lineOperators', {}],
       ]
       requiredProps.forEach(prop => {
-        if (Object.prototype.hasOwnProperty.call(lineDataSource, prop[0])) {
+        if (lineDataSource[prop[0]] !== undefined) {
           this.lineData[prop[0]] = lineDataSource[prop[0]]
         } else {
           this.lineData[prop[0]] = prop[1]
@@ -93,10 +93,7 @@ class Lines {
 
   stop() {}
 
-  getColor(agencyId: string, routeShortName: string, routeColor: string) {
-    if (routeColor) {
-      return `#${routeColor}`
-    }
+  getColor(agencyId: string, routeShortName: string) {
     const { lineData } = this
     if (lineData.getColor) {
       return lineData.getColor(agencyId, routeShortName)
