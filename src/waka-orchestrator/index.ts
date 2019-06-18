@@ -78,6 +78,8 @@ class WakaOrchestrator {
           proxyPort,
           '-f',
           path.join(__dirname, '../cityMetadata.json'),
+          '--pathprefix',
+          '/a',
         ])
 
         this.proxy.stdout.on('data', goLogs)
@@ -100,7 +102,11 @@ class WakaOrchestrator {
 
     if (config.gateway === 'local') {
       router.use(gateway.router)
-      router.use(proxy(`localhost:${proxyPort}`))
+      router.use(
+        proxy(`localhost:${proxyPort}/a/`, {
+          proxyReqPathResolver: req => `/a${req.url}`,
+        })
+      )
     } else {
       router.get('/', (req: Request, res: Response) => res.redirect('/private'))
     }
