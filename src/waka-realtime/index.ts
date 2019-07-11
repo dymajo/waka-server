@@ -8,10 +8,12 @@ import { Logger } from '../typings'
 
 import BaseRealtime from './BaseRealtime'
 
+import AucklandRealtime from './regions/nz-akl'
 import SydneyRealtime from './regions/au-syd'
 
 const Regions = {
   'au-syd': SydneyRealtime,
+  'nz-akl': AucklandRealtime,
 }
 
 interface RealtimeConfig {
@@ -44,11 +46,11 @@ class Realtime {
     const apiKey = config.api[this.prefix]
     this.region = isKeyof(Regions, this.prefix)
       ? new Regions[this.prefix]({
-        redis: this.redis,
-        rateLimiter: this.rateLimiter,
-        logger: this.logger,
-        apiKey,
-      })
+          redis: this.redis,
+          rateLimiter: this.rateLimiter,
+          logger: this.logger,
+          apiKey,
+        })
       : null
   }
 
