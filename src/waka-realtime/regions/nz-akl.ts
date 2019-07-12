@@ -2,6 +2,7 @@ import axios from 'axios'
 import SingleEndpoint from '../SingleEndpoint'
 import Redis from '../Redis'
 import { Logger } from '../../typings'
+import CombinedFeed from '../CombinedFeed'
 
 interface AucklandRealtimeProps {
   redis: Redis
@@ -24,6 +25,7 @@ class AucklandRealtime extends SingleEndpoint {
       }),
       vehiclePositionEndpoint: 'vehiclelocations',
       tripUpdateEndpoint: 'tripupdates',
+      serviceAlertEndpoint: 'servicealerts',
       apiKeyRequired: true,
       ...props,
     })

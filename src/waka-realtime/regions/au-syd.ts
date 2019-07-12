@@ -1,7 +1,6 @@
 import axios from 'axios'
-import protobuf from 'protobufjs'
-import MultiEndpoint, { MultiEndpointProps } from '../MultiEndpoint'
-import { PositionFeedMessage, UpdateFeedMessage, Logger } from '../../typings'
+import MultiEndpoint from '../MultiEndpoint'
+import { Logger } from '../../typings'
 import Redis from '../Redis'
 
 const modes = [
@@ -35,6 +34,7 @@ class SydneyRealtime extends MultiEndpoint {
       }),
       vehiclePositionEndpoint: 'vehiclepos',
       tripUpdateEndpoint: 'realtime',
+      serviceAlertEndpoint: 'alerts',
       modes,
       apiKeyRequired: true,
       ...props,
