@@ -41,6 +41,14 @@ export default abstract class BaseRealtime {
       ev: boolean
     }
   }
+  getServiceAlertsEndpoint?(
+    req: WakaRequest<
+    { routeId?: string; stopId?: string; tripId?: string },
+    null
+    >,
+    res: Response
+  ): Promise<Response>
+
   scheduleLocationPull?(): Promise<void>
   scheduleUpdatePull?(): Promise<void>
   getAllVehicleLocations?(
@@ -60,8 +68,8 @@ export default abstract class BaseRealtime {
 
   abstract getTripsEndpoint(
     req: WakaRequest<
-      { trips: string[]; train: boolean; stop_id: string },
-      null
+    { trips: string[]; train: boolean; stop_id: string },
+    null
     >,
     res: Response
   ): Promise<Response>

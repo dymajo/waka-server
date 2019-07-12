@@ -216,9 +216,16 @@ class Realtime {
     })
   }
 
-  all = (req, res) => {
+  serviceAlerts = (
+    req: WakaRequest<
+      { routeId?: string; stopId?: string; tripId?: string },
+      null
+    >,
+    res: Response
+  ) => {
     if (this.fn) {
-      return this.fn.getAllVehicleLocations(req, res)
+      if (this.fn.getServiceAlertsEndpoint)
+        return this.fn.getServiceAlertsEndpoint(req, res)
     }
   }
 
