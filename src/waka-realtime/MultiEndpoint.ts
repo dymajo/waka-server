@@ -1,26 +1,34 @@
 import Protobuf from 'protobufjs'
 import BaseRealtime, { BaseRealtimeProps } from './BaseRealtime'
-import { PositionFeedMessage, UpdateFeedMessage } from '../typings'
+import {
+  PositionFeedMessage,
+  UpdateFeedMessage,
+  AlertFeedMessage,
+} from '../gtfs'
 
 export interface MultiEndpointProps extends BaseRealtimeProps {
   rateLimiter: <T>(fn: () => Promise<T>) => Promise<T>
   modes: string[]
-  vehiclePositionEndpoint: string
   tripUpdateEndpoint: string
+  vehiclePositionEndpoint: string
+  serviceAlertEndpoint: string
 }
 
 abstract class MultiEndpoint extends BaseRealtime {
   rateLimiter: <T>(fn: () => Promise<T>) => Promise<T>
   protobuf: protobuf.Type
   modes: string[]
-  vehiclePositionEndpoint: string
   tripUpdateEndpoint: string
+  vehiclePositionEndpoint: string
+  serviceAlertEndpoint: string
+
   constructor(props: MultiEndpointProps) {
     super(props)
     this.rateLimiter = props.rateLimiter
     this.modes = props.modes
-    this.vehiclePositionEndpoint = props.vehiclePositionEndpoint
     this.tripUpdateEndpoint = props.tripUpdateEndpoint
+    this.vehiclePositionEndpoint = props.vehiclePositionEndpoint
+    this.serviceAlertEndpoint = props.serviceAlertEndpoint
   }
 
   start = async () => {
@@ -32,9 +40,11 @@ abstract class MultiEndpoint extends BaseRealtime {
       const pb = await Protobuf.load('tfnsw-gtfs-realtime.proto')
       const FeedMessage = pb.lookupType('transit_realtime.FeedMessage')
       this.protobuf = FeedMessage
-      this.scheduleUpdatePull()
-      this.scheduleLocationPull()
       logger.info('Realtime Started.')
+
+      this.scheduleAlertPull()
+      this.scheduleUpdatePull()
+      this.scheduleVehiclePositionPull()
     }
   }
 
@@ -42,6 +52,10 @@ abstract class MultiEndpoint extends BaseRealtime {
     const { logger } = this
     clearTimeout(this.tripUpdateTimeout)
     clearTimeout(this.vehiclePositionTimeout)
+    clearTimeout(this.serviceAlertTimeout)
+    this.tripUpdateTimeout = null
+    this.vehiclePositionTimeout = null
+    this.serviceAlertTimeout = null
     logger.info('Realtime Stopped.')
   }
 
@@ -84,13 +98,7 @@ abstract class MultiEndpoint extends BaseRealtime {
           const uInt8 = new Uint8Array(res.data)
           const _feed = protobuf.decode(uInt8) as unknown
           const feed = _feed as UpdateFeedMessage
-          for (const trip of feed.entity) {
-            await redis.setKeyToRedis(
-              trip.tripUpdate.trip.tripId,
-              JSON.stringify(trip.tripUpdate),
-              'trip-update'
-            )
-          }
+          await this.processTripUpdates(feed.entity)
 
           if (res.headers['last-modified']) {
             await redis.setKeyToRedis(
@@ -118,15 +126,15 @@ abstract class MultiEndpoint extends BaseRealtime {
     )
   }
 
-  scheduleLocationPull = async () => {
+  scheduleVehiclePositionPull = async () => {
     const {
       logger,
       modes,
       axios,
       rateLimiter,
       redis,
-      scheduleLocationPull,
-      scheduleLocationPullTimeout,
+      scheduleVehiclePositionPull,
+      scheduleVehiclePositionPullTimeout,
       vehiclePositionEndpoint,
       setupProtobuf,
       protobuf,
@@ -134,7 +142,7 @@ abstract class MultiEndpoint extends BaseRealtime {
     if (!protobuf) {
       await setupProtobuf()
     }
-    logger.info('Starting Vehicle Location Pull')
+    logger.info('Starting Vehicle Position Pull')
     for (const mode of modes) {
       try {
         const res = await rateLimiter(() =>
@@ -142,48 +150,18 @@ abstract class MultiEndpoint extends BaseRealtime {
         )
         const oldModified = await redis.getKeyFromRedis(
           mode,
-          'last-vehicle-position'
+          'last-vehicle-position-update'
         )
         if (res.headers['last-modified'] !== oldModified) {
           const uInt8 = new Uint8Array(res.data)
           const _feed = protobuf.decode(uInt8) as unknown
           const feed = _feed as PositionFeedMessage
-          const routes: { [routeId: string]: string[] } = {}
-          for (const trip of feed.entity) {
-            if (trip.vehicle.trip.tripId) {
-              if (
-                Object.prototype.hasOwnProperty.call(
-                  routes,
-                  trip.vehicle.trip.routeId
-                )
-              ) {
-                routes[trip.vehicle.trip.routeId].push(trip.vehicle.trip.tripId)
-              } else {
-                routes[trip.vehicle.trip.routeId] = [trip.vehicle.trip.tripId]
-              }
-              await redis.setKeyToRedis(
-                trip.vehicle.trip.tripId,
-                JSON.stringify(trip.vehicle),
-                'vehicle-position'
-              )
-            }
-          }
-
-          for (const routeId in routes) {
-            if (Object.prototype.hasOwnProperty.call(routes, routeId)) {
-              await redis.setKeyToRedis(
-                routeId,
-                routes[routeId].toString(),
-                'route-id'
-              )
-            }
-          }
-
+          await this.processVehiclePositions(feed.entity)
           if (res.headers['last-modified']) {
             await redis.setKeyToRedis(
               mode,
               res.headers['last-modified'],
-              'last-vehicle-position'
+              'last-vehicle-position-update'
             )
           }
         }
@@ -194,12 +172,71 @@ abstract class MultiEndpoint extends BaseRealtime {
     await redis.setKeyToRedis(
       'default',
       new Date().toISOString(),
-      'last-vehicle-position'
+      'last-vehicle-position-update'
     )
     logger.info('Pulled Vehicle Locations')
     this.vehiclePositionTimeout = setTimeout(
-      scheduleLocationPull,
-      scheduleLocationPullTimeout
+      scheduleVehiclePositionPull,
+      scheduleVehiclePositionPullTimeout
+    )
+  }
+
+  scheduleAlertPull = async () => {
+    const {
+      logger,
+      modes,
+      axios,
+      serviceAlertEndpoint,
+      redis,
+      rateLimiter,
+      scheduleAlertPull,
+      scheduleAlertPullTimeout,
+      protobuf,
+      setupProtobuf,
+    } = this
+    if (!protobuf) {
+      await setupProtobuf()
+    }
+    logger.info('Starting Service Alert Pull')
+
+    for (const mode of modes) {
+      try {
+        const res = await rateLimiter(() =>
+          axios.get(`${serviceAlertEndpoint}/${mode}`)
+        )
+        const oldModified = await redis.getKeyFromRedis(
+          mode,
+          'last-alert-update'
+        )
+        if (res.headers['last-modified'] !== oldModified) {
+          const uInt8 = new Uint8Array(res.data)
+          const _feed = protobuf.decode(uInt8) as unknown
+          const feed = _feed as AlertFeedMessage
+          await this.processAlerts(feed.entity)
+
+          if (res.headers['last-modified']) {
+            await redis.setKeyToRedis(
+              mode,
+              res.headers['last-modified'],
+              'last-alert-update'
+            )
+          }
+        }
+      } catch (err) {
+        logger.error({ err }, `Failed to pull ${mode} service alert`)
+      }
+    }
+
+    await redis.setKeyToRedis(
+      'default',
+      new Date().toISOString(),
+      'last-trip-update'
+    )
+    logger.info('Pulled Service Alert Updates.')
+
+    this.tripUpdateTimeout = setTimeout(
+      scheduleAlertPull,
+      scheduleAlertPullTimeout
     )
   }
 }

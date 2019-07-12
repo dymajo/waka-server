@@ -9,9 +9,11 @@ import { Logger } from '../typings'
 import BaseRealtime from './BaseRealtime'
 
 import AucklandRealtime from './regions/nz-akl'
+import CanberraRealtime from './regions/au-cbr'
 import SydneyRealtime from './regions/au-syd'
 
 const Regions = {
+  'au-cbr': CanberraRealtime,
   'au-syd': SydneyRealtime,
   'nz-akl': AucklandRealtime,
 }
@@ -35,14 +37,17 @@ class Realtime {
     this.logger = logger
     this.prefix = config.prefix
     this.redis = new Redis({ prefix: this.prefix })
-    if (config.quota) {
-      this.quotaManager = new RedisQuotaManager(
-        config.quota,
-        this.prefix,
-        this.redis.client
-      )
-      this.rateLimiter = pRateLimit(this.quotaManager)
+    const quota: Quota = config.quota || {
+      interval: 1000,
+      rate: 5,
+      concurrency: 5,
     }
+    this.quotaManager = new RedisQuotaManager(
+      quota,
+      this.prefix,
+      this.redis.client
+    )
+    this.rateLimiter = pRateLimit(this.quotaManager)
     const apiKey = config.api[this.prefix]
     this.region = isKeyof(Regions, this.prefix)
       ? new Regions[this.prefix]({

@@ -1,10 +1,15 @@
 import Protobuf from 'protobufjs'
 import BaseRealtime, { BaseRealtimeProps } from './BaseRealtime'
-import { PositionFeedMessage, UpdateFeedMessage } from '../typings'
+import {
+  PositionFeedMessage,
+  UpdateFeedMessage,
+  AlertFeedMessage,
+} from '../gtfs'
 
 export interface SingleEndpointProps extends BaseRealtimeProps {
   vehiclePositionEndpoint: string
   tripUpdateEndpoint: string
+  serviceAlertEndpoint: string
 }
 
 abstract class SingleEndpoint extends BaseRealtime {
@@ -13,10 +18,12 @@ abstract class SingleEndpoint extends BaseRealtime {
   modes: string[]
   vehiclePositionEndpoint: string
   tripUpdateEndpoint: string
+  serviceAlertEndpoint: string
   constructor(props: SingleEndpointProps) {
     super(props)
     this.vehiclePositionEndpoint = props.vehiclePositionEndpoint
     this.tripUpdateEndpoint = props.tripUpdateEndpoint
+    this.serviceAlertEndpoint = props.serviceAlertEndpoint
   }
 
   start = async () => {
@@ -28,8 +35,9 @@ abstract class SingleEndpoint extends BaseRealtime {
       const pb = await Protobuf.load('tfnsw-gtfs-realtime.proto')
       const FeedMessage = pb.lookupType('transit_realtime.FeedMessage')
       this.protobuf = FeedMessage
+      this.scheduleAlertPull()
       this.scheduleUpdatePull()
-      this.scheduleLocationPull()
+      this.scheduleVehiclePositionPull()
       logger.info('Realtime Started.')
     }
   }
@@ -78,13 +86,7 @@ abstract class SingleEndpoint extends BaseRealtime {
         const uInt8 = new Uint8Array(res.data)
         const _feed = protobuf.decode(uInt8) as unknown
         const feed = _feed as UpdateFeedMessage
-        for (const trip of feed.entity) {
-          await redis.setKeyToRedis(
-            trip.tripUpdate.trip.tripId,
-            JSON.stringify(trip.tripUpdate),
-            'trip-update'
-          )
-        }
+        await this.processTripUpdates(feed.entity)
 
         if (res.headers['last-modified']) {
           await redis.setKeyToRedis(
@@ -111,13 +113,13 @@ abstract class SingleEndpoint extends BaseRealtime {
     )
   }
 
-  scheduleLocationPull = async () => {
+  scheduleVehiclePositionPull = async () => {
     const {
       logger,
       axios,
       redis,
-      scheduleLocationPull,
-      scheduleLocationPullTimeout,
+      scheduleVehiclePositionPull,
+      scheduleVehiclePositionPullTimeout,
       vehiclePositionEndpoint,
       setupProtobuf,
       protobuf,
@@ -125,13 +127,13 @@ abstract class SingleEndpoint extends BaseRealtime {
     if (!protobuf) {
       await setupProtobuf()
     }
-    logger.info('Starting Vehicle Location Pull')
+    logger.info('Starting Vehicle VehiclePosition Pull')
     try {
       const res = await axios.get(`${vehiclePositionEndpoint}`)
 
       const oldModified = await redis.getKeyFromRedis(
         'default',
-        'last-vehicle-position'
+        'last-vehicle-position-update'
       )
       if (
         res.headers['last-modified'] !== oldModified ||
@@ -140,58 +142,84 @@ abstract class SingleEndpoint extends BaseRealtime {
         const uInt8 = new Uint8Array(res.data)
         const _feed = protobuf.decode(uInt8) as unknown
         const feed = _feed as PositionFeedMessage
-        const routes: { [routeId: string]: string[] } = {}
-        for (const trip of feed.entity) {
-          if (trip.vehicle.trip.tripId) {
-            if (
-              Object.prototype.hasOwnProperty.call(
-                routes,
-                trip.vehicle.trip.routeId
-              )
-            ) {
-              routes[trip.vehicle.trip.routeId].push(trip.vehicle.trip.tripId)
-            } else {
-              routes[trip.vehicle.trip.routeId] = [trip.vehicle.trip.tripId]
-            }
-            await redis.setKeyToRedis(
-              trip.vehicle.trip.tripId,
-              JSON.stringify(trip.vehicle),
-              'vehicle-position'
-            )
-          }
-        }
-
-        for (const routeId in routes) {
-          if (Object.prototype.hasOwnProperty.call(routes, routeId)) {
-            await redis.setKeyToRedis(
-              routeId,
-              routes[routeId].toString(),
-              'route-id'
-            )
-          }
-        }
+        this.processVehiclePositions(feed.entity)
 
         if (res.headers['last-modified']) {
           await redis.setKeyToRedis(
             'default',
             res.headers['last-modified'],
-            'last-vehicle-position'
+            'last-vehicle-position-update'
           )
         } else {
           await redis.setKeyToRedis(
             'default',
             new Date().toISOString(),
-            'last-vehicle-position'
+            'last-vehicle-position-update'
           )
         }
       }
     } catch (err) {
       logger.error({ err }, 'Failed to pull vehicle positions')
     }
-    logger.info('Pulled Vehicle Locations')
+    logger.info('Pulled Vehicle VehiclePositions')
     this.vehiclePositionTimeout = setTimeout(
-      scheduleLocationPull,
-      scheduleLocationPullTimeout
+      scheduleVehiclePositionPull,
+      scheduleVehiclePositionPullTimeout
+    )
+  }
+
+  scheduleAlertPull = async () => {
+    const {
+      logger,
+      modes,
+      axios,
+      serviceAlertEndpoint,
+      redis,
+      rateLimiter,
+      scheduleAlertPull,
+      scheduleAlertPullTimeout,
+      protobuf,
+      setupProtobuf,
+    } = this
+    if (!protobuf) {
+      await setupProtobuf()
+    }
+    logger.info('Starting Service Alert Pull')
+
+    try {
+      const res = await axios.get(`${serviceAlertEndpoint}`)
+
+      const oldModified = await redis.getKeyFromRedis(
+        'default',
+        'last-alert-update'
+      )
+      if (res.headers['last-modified'] !== oldModified) {
+        const uInt8 = new Uint8Array(res.data)
+        const _feed = protobuf.decode(uInt8) as unknown
+        const feed = _feed as AlertFeedMessage
+        await this.processAlerts(feed.entity)
+        if (res.headers['last-modified']) {
+          await redis.setKeyToRedis(
+            'default',
+            res.headers['last-modified'],
+            'last-alert-update'
+          )
+        }
+      }
+    } catch (err) {
+      logger.error({ err }, 'Failed to pull  service alert')
+    }
+
+    await redis.setKeyToRedis(
+      'default',
+      new Date().toISOString(),
+      'last-trip-update'
+    )
+    logger.info('Pulled Service Alert Updates.')
+
+    this.tripUpdateTimeout = setTimeout(
+      scheduleAlertPull,
+      scheduleAlertPullTimeout
     )
   }
 }
