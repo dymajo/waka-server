@@ -75,10 +75,7 @@ abstract class SingleEndpoint extends BaseRealtime {
 
     try {
       const res = await axios.get(`${tripUpdateEndpoint}`)
-      const oldModified = await redis.getKeyFromRedis(
-        'default',
-        'last-trip-update'
-      )
+      const oldModified = await redis.getKey('default', 'last-trip-update')
       if (
         res.headers['last-modified'] !== oldModified ||
         new Date().toISOString() !== oldModified
@@ -89,13 +86,13 @@ abstract class SingleEndpoint extends BaseRealtime {
         await this.processTripUpdates(feed.entity)
 
         if (res.headers['last-modified']) {
-          await redis.setKeyToRedis(
+          await redis.setKey(
             'default',
             res.headers['last-modified'],
             'last-trip-update'
           )
         } else {
-          await redis.setKeyToRedis(
+          await redis.setKey(
             'default',
             new Date().toISOString(),
             'last-trip-update'
@@ -131,7 +128,7 @@ abstract class SingleEndpoint extends BaseRealtime {
     try {
       const res = await axios.get(`${vehiclePositionEndpoint}`)
 
-      const oldModified = await redis.getKeyFromRedis(
+      const oldModified = await redis.getKey(
         'default',
         'last-vehicle-position-update'
       )
@@ -145,13 +142,13 @@ abstract class SingleEndpoint extends BaseRealtime {
         this.processVehiclePositions(feed.entity)
 
         if (res.headers['last-modified']) {
-          await redis.setKeyToRedis(
+          await redis.setKey(
             'default',
             res.headers['last-modified'],
             'last-vehicle-position-update'
           )
         } else {
-          await redis.setKeyToRedis(
+          await redis.setKey(
             'default',
             new Date().toISOString(),
             'last-vehicle-position-update'
@@ -189,17 +186,14 @@ abstract class SingleEndpoint extends BaseRealtime {
     try {
       const res = await axios.get(`${serviceAlertEndpoint}`)
 
-      const oldModified = await redis.getKeyFromRedis(
-        'default',
-        'last-alert-update'
-      )
+      const oldModified = await redis.getKey('default', 'last-alert-update')
       if (res.headers['last-modified'] !== oldModified) {
         const uInt8 = new Uint8Array(res.data)
         const _feed = protobuf.decode(uInt8) as unknown
         const feed = _feed as AlertFeedMessage
         await this.processAlerts(feed.entity)
         if (res.headers['last-modified']) {
-          await redis.setKeyToRedis(
+          await redis.setKey(
             'default',
             res.headers['last-modified'],
             'last-alert-update'
@@ -210,11 +204,7 @@ abstract class SingleEndpoint extends BaseRealtime {
       logger.error({ err }, 'Failed to pull  service alert')
     }
 
-    await redis.setKeyToRedis(
-      'default',
-      new Date().toISOString(),
-      'last-trip-update'
-    )
+    await redis.setKey('default', new Date().toISOString(), 'last-trip-update')
     logger.info('Pulled Service Alert Updates.')
 
     this.tripUpdateTimeout = setTimeout(

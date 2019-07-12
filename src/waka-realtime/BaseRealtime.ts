@@ -82,7 +82,7 @@ export default abstract class BaseRealtime {
   ) => {
     for (const key in object) {
       if (Object.prototype.hasOwnProperty.call(object, key)) {
-        await this.redis.setKeyToRedis(key, object[key].toString(), type)
+        await this.redis.setKey(key, object[key].toString(), type)
       }
     }
   }
@@ -91,7 +91,7 @@ export default abstract class BaseRealtime {
     tripId: string,
     vehiclePosition: VehiclePosition
   ) => {
-    await this.redis.setKeyToRedis(
+    await this.redis.setKey(
       tripId,
       JSON.stringify(vehiclePosition),
       'vehicle-position'
@@ -118,7 +118,7 @@ export default abstract class BaseRealtime {
 
   processTripUpdates = async (updateFeedEntities: UpdateFeedEntity[]) => {
     for (const trip of updateFeedEntities) {
-      await this.redis.setKeyToRedis(
+      await this.redis.setKey(
         trip.tripUpdate.trip.tripId,
         JSON.stringify(trip.tripUpdate),
         'trip-update'
@@ -134,11 +134,7 @@ export default abstract class BaseRealtime {
     const stops: { [stopId: string]: string[] } = {}
 
     for (const entity of alertFeedEntities) {
-      await this.redis.setKeyToRedis(
-        entity.id,
-        JSON.stringify(entity.alert),
-        'alert'
-      )
+      await this.redis.setKey(entity.id, JSON.stringify(entity.alert), 'alert')
 
       entity.alert.informedEntity.forEach(informed => {
         const { id: alertId } = entity

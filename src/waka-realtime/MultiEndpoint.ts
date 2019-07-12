@@ -90,10 +90,7 @@ abstract class MultiEndpoint extends BaseRealtime {
         const res = await rateLimiter(() =>
           axios.get(`${tripUpdateEndpoint}/${mode}`)
         )
-        const oldModified = await redis.getKeyFromRedis(
-          mode,
-          'last-trip-update'
-        )
+        const oldModified = await redis.getKey(mode, 'last-trip-update')
         if (res.headers['last-modified'] !== oldModified) {
           const uInt8 = new Uint8Array(res.data)
           const _feed = protobuf.decode(uInt8) as unknown
@@ -101,7 +98,7 @@ abstract class MultiEndpoint extends BaseRealtime {
           await this.processTripUpdates(feed.entity)
 
           if (res.headers['last-modified']) {
-            await redis.setKeyToRedis(
+            await redis.setKey(
               mode,
               res.headers['last-modified'],
               'last-trip-update'
@@ -113,11 +110,7 @@ abstract class MultiEndpoint extends BaseRealtime {
       }
     }
 
-    await redis.setKeyToRedis(
-      'default',
-      new Date().toISOString(),
-      'last-trip-update'
-    )
+    await redis.setKey('default', new Date().toISOString(), 'last-trip-update')
     logger.info('Pulled Trip Updates.')
 
     this.tripUpdateTimeout = setTimeout(
@@ -148,7 +141,7 @@ abstract class MultiEndpoint extends BaseRealtime {
         const res = await rateLimiter(() =>
           axios.get(`${vehiclePositionEndpoint}/${mode}`)
         )
-        const oldModified = await redis.getKeyFromRedis(
+        const oldModified = await redis.getKey(
           mode,
           'last-vehicle-position-update'
         )
@@ -158,7 +151,7 @@ abstract class MultiEndpoint extends BaseRealtime {
           const feed = _feed as PositionFeedMessage
           await this.processVehiclePositions(feed.entity)
           if (res.headers['last-modified']) {
-            await redis.setKeyToRedis(
+            await redis.setKey(
               mode,
               res.headers['last-modified'],
               'last-vehicle-position-update'
@@ -169,7 +162,7 @@ abstract class MultiEndpoint extends BaseRealtime {
         logger.error({ err }, 'Failed to pull vehicle positions')
       }
     }
-    await redis.setKeyToRedis(
+    await redis.setKey(
       'default',
       new Date().toISOString(),
       'last-vehicle-position-update'
@@ -204,10 +197,7 @@ abstract class MultiEndpoint extends BaseRealtime {
         const res = await rateLimiter(() =>
           axios.get(`${serviceAlertEndpoint}/${mode}`)
         )
-        const oldModified = await redis.getKeyFromRedis(
-          mode,
-          'last-alert-update'
-        )
+        const oldModified = await redis.getKey(mode, 'last-alert-update')
         if (res.headers['last-modified'] !== oldModified) {
           const uInt8 = new Uint8Array(res.data)
           const _feed = protobuf.decode(uInt8) as unknown
@@ -215,7 +205,7 @@ abstract class MultiEndpoint extends BaseRealtime {
           await this.processAlerts(feed.entity)
 
           if (res.headers['last-modified']) {
-            await redis.setKeyToRedis(
+            await redis.setKey(
               mode,
               res.headers['last-modified'],
               'last-alert-update'
@@ -223,15 +213,11 @@ abstract class MultiEndpoint extends BaseRealtime {
           }
         }
       } catch (err) {
-        logger.error({ err }, `Failed to pull ${mode} service alert`)
+        // logger.error({ err }, `Failed to pull ${mode} service alert`)
       }
     }
 
-    await redis.setKeyToRedis(
-      'default',
-      new Date().toISOString(),
-      'last-trip-update'
-    )
+    await redis.setKey('default', new Date().toISOString(), 'last-trip-update')
     logger.info('Pulled Service Alert Updates.')
 
     this.tripUpdateTimeout = setTimeout(

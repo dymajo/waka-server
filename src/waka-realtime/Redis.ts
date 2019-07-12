@@ -15,7 +15,7 @@ class Redis {
     this.prefix = props.prefix
   }
 
-  setKeyToRedis = (
+  setKey = (
     key: string,
     value: string,
     type:
@@ -43,12 +43,42 @@ class Redis {
     })
   }
 
-  getKeyFromRedis = (
+  getTripUpdate = (tripId: string) => {
+    const { prefix } = this
+    return new Promise<TripUpdate>((resolve, reject) => {
+      const fullKey = `waka-rt:${prefix}:trip-update:${tripId}`
+      this.client.get(fullKey, (err, reply) => {
+        if (err) return reject(err)
+        return resolve(JSON.parse(reply))
+      })
+    })
+  }
+
+  getVehiclePosition = (tripId: string) => {
+    const { prefix } = this
+    return new Promise<VehiclePosition>((resolve, reject) => {
+      const fullKey = `waka-rt:${prefix}:vehicle-position:${tripId}`
+      this.client.get(fullKey, (err, reply) => {
+        if (err) return reject(err)
+        return resolve(JSON.parse(reply))
+      })
+    })
+  }
+
+  getAlert = (alertId: string) => {
+    const { prefix } = this
+    return new Promise<Alert>((resolve, reject) => {
+      const fullKey = `waka-rt:${prefix}:alert:${alertId}`
+      this.client.get(fullKey, (err, reply) => {
+        if (err) return reject(err)
+        return resolve(JSON.parse(reply))
+      })
+    })
+  }
+
+  getKey = (
     key: string,
     type:
-    | 'trip-update'
-    | 'vehicle-position'
-    | 'alert'
     | 'alert-route'
     | 'alert-route-type'
     | 'alert-trip'
@@ -60,31 +90,6 @@ class Redis {
   ) => {
     const { prefix } = this
     switch (type) {
-      case 'trip-update':
-        return new Promise<TripUpdate>((resolve, reject) => {
-          const fullKey = `waka-rt:${prefix}:${type}:${key}`
-          this.client.get(fullKey, (err, reply) => {
-            if (err) return reject(err)
-            return resolve(JSON.parse(reply))
-          })
-        })
-      case 'vehicle-position':
-        return new Promise<VehiclePosition>((resolve, reject) => {
-          const fullKey = `waka-rt:${prefix}:${type}:${key}`
-          this.client.get(fullKey, (err, reply) => {
-            if (err) return reject(err)
-            return resolve(JSON.parse(reply))
-          })
-        })
-      case 'alert':
-        return new Promise<Alert>((resolve, reject) => {
-          const fullKey = `waka-rt:${prefix}:${type}:${key}`
-          this.client.get(fullKey, (err, reply) => {
-            if (err) return reject(err)
-            return resolve(JSON.parse(reply))
-          })
-        })
-
       case 'vehicle-position-route':
       case 'alert-route':
       case 'alert-route-type':
@@ -94,7 +99,10 @@ class Redis {
           const fullKey = `waka-rt:${prefix}:${type}:${key}`
           this.client.get(fullKey, (err, reply) => {
             if (err) return reject(err)
-            return resolve(reply.split(','))
+            if (reply) {
+              return resolve(reply.split(','))
+            }
+            return resolve([])
           })
         })
       case 'last-trip-update':

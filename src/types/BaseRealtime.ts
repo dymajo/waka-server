@@ -41,8 +41,8 @@ export default abstract class BaseRealtime {
       ev: boolean
     }
   }
-  abstract scheduleLocationPull(): Promise<void>
-  abstract scheduleUpdatePull(): Promise<void>
+  scheduleLocationPull?(): Promise<void>
+  scheduleUpdatePull?(): Promise<void>
   getAllVehicleLocations?(
     req: WakaRequest<null, null>,
     res: Response

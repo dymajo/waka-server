@@ -5,7 +5,7 @@ import RealtimeNZAKL from './regions/nz-akl'
 import RealtimeNZWLG from './regions/nz-wlg'
 import Connection from '../db/connection'
 import { WakaRequest } from '../../typings'
-import BaseRealtime from '../../types/BaseRealtime';
+import BaseRealtime from '../../types/BaseRealtime'
 
 const regions = {
   'au-syd': RealtimeAUSYD,
@@ -13,21 +13,30 @@ const regions = {
   'nz-wlg': RealtimeNZWLG,
 }
 
+interface RealtimeProps {
+  connection: Connection
+  logger: Logger
+  prefix: string
+  api: { [prefix: string]: string }
+  newRealtime: boolean
+}
+
 class Realtime {
   connection: Connection
   logger: Logger
   prefix: string
   fn: BaseRealtime
-  constructor(props) {
-    const { connection, logger, prefix, api } = props
+  newRealtime: boolean
+  constructor(props: RealtimeProps) {
+    const { connection, logger, prefix, api, newRealtime } = props
     this.connection = connection
     this.logger = logger
     this.prefix = prefix
-
+    this.newRealtime = newRealtime
     const apiKey = api[prefix]
     this.fn =
       regions[prefix] !== undefined
-        ? new regions[prefix]({ logger, connection, apiKey })
+        ? new regions[prefix]({ logger, connection, apiKey, newRealtime })
         : null
   }
 
@@ -211,9 +220,15 @@ class Realtime {
     if (this.fn) {
       return this.fn.getAllVehicleLocations(req, res)
     }
-    return res.status(400).send({
-      message: 'realtime not available',
-    })
   }
+
+  // all = (req, res) => {
+  //   if (this.fn) {
+  //     return this.fn.getAllVehicleLocations(req, res)
+  //   }
+  //   return res.status(400).send({
+  //     message: 'realtime not available',
+  //   })
+  // }
 }
 export default Realtime

@@ -53,10 +53,7 @@ abstract class CombinedFeed extends BaseRealtime {
 
     try {
       const res = await axios.get('')
-      const oldModified = await redis.getKeyFromRedis(
-        'default',
-        'last-trip-update'
-      )
+      const oldModified = await redis.getKey('default', 'last-trip-update')
       if (
         res.headers['last-modified'] !== oldModified ||
         new Date().toISOString() !== oldModified
@@ -84,13 +81,13 @@ abstract class CombinedFeed extends BaseRealtime {
         await this.processVehiclePositions(vehiclePositions)
 
         if (res.headers['last-modified']) {
-          await redis.setKeyToRedis(
+          await redis.setKey(
             'default',
             res.headers['last-modified'],
             'last-trip-update'
           )
         } else {
-          await redis.setKeyToRedis(
+          await redis.setKey(
             'default',
             new Date().toISOString(),
             'last-trip-update'
