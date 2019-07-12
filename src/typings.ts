@@ -32,8 +32,9 @@ export interface WakaConfig {
       extended: boolean
     }
   }
+  importer: any
   gatewayConfig?: {
-    ecs: EcsGatewayConfig
+    ecs?: EcsGatewayConfig
   }
 }
 

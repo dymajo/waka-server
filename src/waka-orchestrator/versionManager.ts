@@ -6,10 +6,10 @@ import EnvMapper from '../envMapper'
 import GatewayLocal from './adaptors/gatewayLocal'
 import GatewayEcs from './adaptors/gatewayEcs'
 import { DBConfig, WakaConfig, Version } from '../typings'
-import BaseKeyvalue from '../types/BaseKeyvalue';
+import BaseKeyvalue from '../types/BaseKeyvalue'
 
 interface VersionManagerProps {
-  gateway: GatewayLocal,
+  gateway: GatewayLocal
   config: WakaConfig
 }
 
@@ -108,12 +108,12 @@ class VersionManager {
     const _data = (await versions.get(id)) as unknown
     const data = _data as Version
 
-    const dbConfig = {
+    const dbConfig: DBConfig = {
       server: data.db.server,
       user: data.db.user,
       password: data.db.password,
       database: 'master',
-    } as DBConfig
+    }
 
     return new Promise((resolve, reject) => {
       logger.info(
@@ -122,7 +122,7 @@ class VersionManager {
       )
       const connection = new ConnectionPool(dbConfig, async err => {
         if (err) {
-          return reject(err)
+          reject(err)
         }
         try {
           const selectRequest = connection.request()
@@ -150,7 +150,7 @@ class VersionManager {
           await this.versions.delete(id)
           resolve()
         } catch (dbError) {
-          return reject(dbError)
+          reject(dbError)
         }
       })
     })
