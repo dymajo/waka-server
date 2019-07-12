@@ -176,6 +176,7 @@ class VersionManager {
     shapesContainer: string
     shapesRegion: string
     dbconfig: string
+    newRealtime: boolean
   }) {
     const { config, versions } = this
     const {
@@ -184,6 +185,7 @@ class VersionManager {
       shapesContainer,
       shapesRegion,
       dbconfig,
+      newRealtime,
     } = workerConfig
 
     // sanitizes the names
@@ -207,14 +209,13 @@ class VersionManager {
       shapesRegion,
       status: 'empty',
       db,
+      newRealtime,
     }
     await versions.set(id, newConfig)
-    return id
   }
 
   async getVersionConfig(versionId) {
     const { config, versions } = this
-
     // the gateway needs some settings from the orchestrator,
     // but also some settings from the worker config
     const _workerConfig = (await versions.get(versionId)) as unknown
@@ -227,6 +228,7 @@ class VersionManager {
       shapesRegion: workerConfig.shapesRegion,
       status: workerConfig.status,
       api: config.api,
+      newRealtime: workerConfig.newRealtime,
       db: {
         user: workerConfig.db.user,
         password: workerConfig.db.password,

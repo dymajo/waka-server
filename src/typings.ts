@@ -45,6 +45,7 @@ export interface WorkerConfig {
   storageService: string
   shapesContainer: string
   shapesRegion: string
+  newRealtime: boolean
 }
 
 export interface EcsGatewayConfig {
@@ -111,6 +112,7 @@ export interface Version {
   shapesRegion: string
   status: string
   version: string
+  newRealtime: boolean
 }
 
 export type WakaParams<T> = T
