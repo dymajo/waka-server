@@ -19,18 +19,18 @@ class Redis {
     key: string,
     value: string,
     type:
-    | 'trip-update'
-    | 'vehicle-position'
-    | 'alert'
-    | 'alert-route'
-    | 'alert-route-type'
-    | 'alert-route'
-    | 'alert-trip'
-    | 'alert-stop'
-    | 'vehicle-position-route'
-    | 'last-trip-update'
-    | 'last-vehicle-position-update'
-    | 'last-alert-update'
+      | 'trip-update'
+      | 'vehicle-position'
+      | 'alert'
+      | 'alert-route'
+      | 'alert-route-type'
+      | 'alert-route'
+      | 'alert-trip'
+      | 'alert-stop'
+      | 'vehicle-position-route'
+      | 'last-trip-update'
+      | 'last-vehicle-position-update'
+      | 'last-alert-update'
   ) => {
     return new Promise<string>((resolve, reject) => {
       const { prefix } = this
@@ -79,14 +79,14 @@ class Redis {
   getKey = (
     key: string,
     type:
-    | 'alert-route'
-    | 'alert-route-type'
-    | 'alert-trip'
-    | 'alert-stop'
-    | 'vehicle-position-route'
-    | 'last-trip-update'
-    | 'last-vehicle-position-update'
-    | 'last-alert-update'
+      | 'alert-route'
+      | 'alert-route-type'
+      | 'alert-trip'
+      | 'alert-stop'
+      | 'vehicle-position-route'
+      | 'last-trip-update'
+      | 'last-vehicle-position-update'
+      | 'last-alert-update'
   ) => {
     const { prefix } = this
     switch (type) {

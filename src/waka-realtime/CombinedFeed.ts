@@ -5,7 +5,7 @@ import {
   UpdateFeedEntity,
   PositionFeedEntity,
 } from '../gtfs'
-import BaseRealtime from './BaseRealtime'
+import BaseRealtime, { PROTOBUF_PATH } from './BaseRealtime'
 
 abstract class CombinedFeed extends BaseRealtime {
   start = async () => {
@@ -14,7 +14,7 @@ abstract class CombinedFeed extends BaseRealtime {
       logger.warn('No API Key, will not show realtime.')
       throw new Error('API key is required for realtime')
     } else {
-      const pb = await Protobuf.load('tfnsw-gtfs-realtime.proto')
+      const pb = await Protobuf.load(PROTOBUF_PATH)
       const FeedMessage = pb.lookupType('transit_realtime.FeedMessage')
       this.protobuf = FeedMessage
       this.scheduleUpdatePull()
@@ -30,7 +30,7 @@ abstract class CombinedFeed extends BaseRealtime {
 
   setupProtobuf = async () => {
     if (!this.protobuf) {
-      const pb = await Protobuf.load('tfnsw-gtfs-realtime.proto')
+      const pb = await Protobuf.load(PROTOBUF_PATH)
       const FeedMessage = pb.lookupType('transit_realtime.FeedMessage')
       this.protobuf = FeedMessage
     }

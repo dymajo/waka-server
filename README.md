@@ -70,6 +70,12 @@ First, start Microsoft SQL Server. It's recommended that you run it with Docker:
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Str0ngPassword" -p 1433:1433 -d --name="waka-db" microsoft/mssql-server-linux:latest
 ```
 
+We also recommend you run redis, as it's used for the realtime.
+
+```bash
+docker run -p 6379:6379 -d --name="waka-redis" redis:latest
+```
+
 Then, start the orchestrator. The Web UI will be available at <http://localhost:9001/private>. The orchestrator handles the starting of the workers, and proxy when running locally.
 
 ```bash

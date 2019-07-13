@@ -1,3 +1,4 @@
+import path from 'path'
 import { AxiosInstance } from 'axios'
 import Redis from './Redis'
 import { Logger } from '../typings'
@@ -8,6 +9,8 @@ import {
   UpdateFeedEntity,
 } from '../gtfs'
 import { check } from '../utils'
+
+export const PROTOBUF_PATH = path.join(__dirname, 'tfnsw-gtfs-realtime.proto')
 
 export interface BaseRealtimeProps {
   apiKey?: string
@@ -74,11 +77,11 @@ export default abstract class BaseRealtime {
   sendArray = async (
     object: object,
     type:
-    | 'alert-route'
-    | 'alert-route-type'
-    | 'alert-trip'
-    | 'alert-stop'
-    | 'vehicle-position-route'
+      | 'alert-route'
+      | 'alert-route-type'
+      | 'alert-trip'
+      | 'alert-stop'
+      | 'vehicle-position-route'
   ) => {
     for (const key in object) {
       if (Object.prototype.hasOwnProperty.call(object, key)) {
