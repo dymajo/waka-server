@@ -28,11 +28,13 @@ class WakaRedis {
         ...config,
         retryStrategy: () => 30000,
       })
-    console.log(this.client)
     this.client.on('error', err => {})
   }
 
   stop = () => {
+    if (this.client) {
+      this.client.disconnect()
+    }
     this.client = null
   }
 
