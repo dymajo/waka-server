@@ -229,6 +229,7 @@ class VersionManager {
       status: workerConfig.status,
       api: config.api,
       newRealtime: workerConfig.newRealtime,
+      redis: config.redis,
       db: {
         user: workerConfig.db.user,
         password: workerConfig.db.password,

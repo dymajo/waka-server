@@ -1,4 +1,3 @@
-import Long from 'long'
 import * as Logger from 'bunyan'
 import { Request } from 'express'
 import { config as SqlConfig } from 'mssql'
@@ -19,6 +18,8 @@ export interface WakaConfig {
   db: {
     [dbConfig: string]: DBConfig
   }
+  redis: RedisConfig
+
   updaters: {
     [updater: string]: {
       delay: number
@@ -38,6 +39,14 @@ export interface WakaConfig {
   }
 }
 
+export interface RedisConfig {
+  port?: number
+  host?: string
+  family?: 4 | 6
+  password?: string
+  db?: number
+}
+
 export interface WorkerConfig {
   prefix: string
   version: string
@@ -47,6 +56,7 @@ export interface WorkerConfig {
   shapesContainer: string
   shapesRegion: string
   newRealtime: boolean
+  redis: RedisConfig
 }
 
 export interface EcsGatewayConfig {

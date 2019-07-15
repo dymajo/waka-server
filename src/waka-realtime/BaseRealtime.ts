@@ -53,7 +53,7 @@ export default abstract class BaseRealtime {
   apiKey?: string
 
   apiKeyRequired?: boolean
-  abstract start(): void
+  abstract start(rateLimiter?: <T>(fn: () => Promise<T>) => Promise<T>): void
   abstract stop(): void
   constructor(props: BaseRealtimeProps) {
     const { apiKey, apiKeyRequired } = props
@@ -132,7 +132,7 @@ export default abstract class BaseRealtime {
   processAlerts = async (alertFeedEntities: AlertFeedEntity[]) => {
     const routes: { [routeId: string]: string[] } = {}
     const routeTypes: { [routeType: string]: string[] } = {}
-    const agencies: { [agencyId: string]: string[] } = {}
+    // const agencies: { [agencyId: string]: string[] } = {}
     const trips: { [tripId: string]: string[] } = {}
     const stops: { [stopId: string]: string[] } = {}
 

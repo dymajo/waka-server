@@ -1,10 +1,9 @@
-import * as Logger from 'bunyan'
 import { Response } from 'express'
 import RealtimeAUSYD from './regions/au-syd'
 import RealtimeNZAKL from './regions/nz-akl'
 import RealtimeNZWLG from './regions/nz-wlg'
 import Connection from '../db/connection'
-import { WakaRequest } from '../../typings'
+import { WakaRequest, Logger, RedisConfig } from '../../typings'
 import BaseRealtime from '../../types/BaseRealtime'
 
 const regions = {
@@ -19,6 +18,7 @@ interface RealtimeProps {
   prefix: string
   api: { [prefix: string]: string }
   newRealtime: boolean
+  redisConfig: RedisConfig
 }
 
 class Realtime {
@@ -28,7 +28,7 @@ class Realtime {
   fn: BaseRealtime
   newRealtime: boolean
   constructor(props: RealtimeProps) {
-    const { connection, logger, prefix, api, newRealtime } = props
+    const { connection, logger, prefix, api, newRealtime, redisConfig } = props
     this.connection = connection
     this.logger = logger
     this.prefix = prefix
@@ -36,7 +36,13 @@ class Realtime {
     const apiKey = api[prefix]
     this.fn =
       regions[prefix] !== undefined
-        ? new regions[prefix]({ logger, connection, apiKey, newRealtime })
+        ? new regions[prefix]({
+            logger,
+            connection,
+            apiKey,
+            newRealtime,
+            redisConfig,
+          })
         : null
   }
 

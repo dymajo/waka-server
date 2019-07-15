@@ -24,15 +24,19 @@ abstract class MultiEndpoint extends BaseRealtime {
 
   constructor(props: MultiEndpointProps) {
     super(props)
-    this.rateLimiter = props.rateLimiter
     this.modes = props.modes
     this.tripUpdateEndpoint = props.tripUpdateEndpoint
     this.vehiclePositionEndpoint = props.vehiclePositionEndpoint
     this.serviceAlertEndpoint = props.serviceAlertEndpoint
   }
 
-  start = async () => {
+  start = async (rateLimiter: <T>(fn: () => Promise<T>) => Promise<T>) => {
     const { apiKey, logger, apiKeyRequired } = this
+    if (!rateLimiter) {
+      logger.warn('no rate limiter')
+      throw new Error('no rate limiter, rate limiter is required')
+    }
+    this.rateLimiter = rateLimiter
     if (apiKeyRequired && !apiKey) {
       logger.warn('No API Key, will not show realtime.')
       throw new Error('API key is required for realtime')

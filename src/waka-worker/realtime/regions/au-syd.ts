@@ -1,9 +1,8 @@
-import * as Logger from 'bunyan'
-import { Response, Request } from 'express'
+import { Response } from 'express'
 import { VarChar } from 'mssql'
 
 import Connection from '../../db/connection'
-import { WakaRequest } from '../../../typings'
+import { WakaRequest, Logger, RedisConfig } from '../../../typings'
 
 import BaseRealtime from '../../../types/BaseRealtime'
 import Redis from '../../../waka-realtime/Redis'
@@ -13,6 +12,7 @@ interface RealtimeAUSYDProps {
   connection: Connection
   logger: Logger
   newRealtime: boolean
+  redisConfig: RedisConfig
 }
 
 class RealtimeAUSYD extends BaseRealtime {
@@ -21,8 +21,8 @@ class RealtimeAUSYD extends BaseRealtime {
 
   constructor(props: RealtimeAUSYDProps) {
     super()
-    const { connection, logger, newRealtime } = props
-    this.redis = new Redis({ prefix: 'au-syd' })
+    const { connection, logger, newRealtime, redisConfig } = props
+    this.redis = new Redis({ prefix: 'au-syd', logger, config: redisConfig })
     this.newRealtime = newRealtime
     this.connection = connection
     this.logger = logger
@@ -34,6 +34,7 @@ class RealtimeAUSYD extends BaseRealtime {
     if (!newRealtime) {
       logger.error('Must be new realtime')
     } else {
+      this.redis.start()
       logger.info('Realtime Gateway started')
     }
   }
@@ -107,7 +108,10 @@ class RealtimeAUSYD extends BaseRealtime {
       const routeIds = routeIdResult.recordset.map(r => r.route_id)
       let tripIds: string[] = []
       for (const routeId of routeIds) {
-        const t = await this.redis.getKey(routeId, 'vehicle-position-route')
+        const t = await this.redis.getArrayKey(
+          routeId,
+          'vehicle-position-route'
+        )
         tripIds = [...tripIds, ...t]
       }
 
@@ -177,8 +181,8 @@ class RealtimeAUSYD extends BaseRealtime {
 
   getServiceAlertsEndpoint = async (
     req: WakaRequest<
-    { routeId?: string; stopId?: string; tripId?: string },
-    null
+      { routeId?: string; stopId?: string; tripId?: string },
+      null
     >,
     res: Response
   ) => {
@@ -187,17 +191,17 @@ class RealtimeAUSYD extends BaseRealtime {
     } = req
     // const alerts = []
     if (routeId) {
-      const alid = (await this.redis.getKey(routeId, 'alert-route')) as string[]
+      const alid = await this.redis.getArrayKey(routeId, 'alert-route')
       const alerts = await Promise.all(alid.map(id => this.redis.getAlert(id)))
       return res.send(alerts)
     }
     if (tripId) {
-      const alid = (await this.redis.getKey(tripId, 'alert-trip')) as string[]
+      const alid = await this.redis.getArrayKey(tripId, 'alert-trip')
       const alerts = await Promise.all(alid.map(id => this.redis.getAlert(id)))
       return res.send(alerts)
     }
     if (stopId) {
-      const alid = (await this.redis.getKey(stopId, 'alert-stop')) as string[]
+      const alid = await this.redis.getArrayKey(stopId, 'alert-stop')
       const alerts = await Promise.all(alid.map(id => this.redis.getAlert(id)))
       return res.send(alerts)
     }

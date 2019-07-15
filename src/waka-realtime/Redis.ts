@@ -1,18 +1,39 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
-import redis from 'redis'
-import { TripUpdate, VehiclePosition, Alert } from '../gtfs'
+import Redis from 'ioredis'
+import { TripUpdate, VehiclePosition, Alert, CongestionLevel } from '../gtfs'
+import { Logger, RedisConfig } from '../typings'
 
-interface RedisProps {
+interface WakaRedisProps {
   prefix: string
-  redis?: redis.RedisClient
+  logger: Logger
+  config: RedisConfig
 }
 
-class Redis {
-  client: redis.RedisClient
+class WakaRedis {
+  client: Redis.Redis
   prefix: string
-  constructor(props: RedisProps) {
-    this.client = props.redis || redis.createClient()
+  logger: Logger
+  config: RedisConfig
+  constructor(props: WakaRedisProps) {
     this.prefix = props.prefix
+    this.logger = props.logger
+    this.config = props.config
+  }
+
+  start = async (client?: Redis.Redis) => {
+    const { logger, config } = this
+    this.client =
+      client ||
+      new Redis({
+        ...config,
+        retryStrategy: () => 30000,
+      })
+    console.log(this.client)
+    this.client.on('error', err => {})
+  }
+
+  stop = () => {
+    this.client = null
   }
 
   setKey = (
@@ -31,52 +52,35 @@ class Redis {
       | 'last-trip-update'
       | 'last-vehicle-position-update'
       | 'last-alert-update'
-  ) => {
-    return new Promise<string>((resolve, reject) => {
-      const { prefix } = this
-      const fullKey = `waka-rt:${prefix}:${type}:${key}`
-
-      this.client.set(fullKey, value, 'EX', 60, (err, reply) => {
-        if (err) return reject(err)
-        return resolve(reply)
-      })
-    })
-  }
-
-  getTripUpdate = (tripId: string) => {
+  ): Promise<string> => {
     const { prefix } = this
-    return new Promise<TripUpdate>((resolve, reject) => {
-      const fullKey = `waka-rt:${prefix}:trip-update:${tripId}`
-      this.client.get(fullKey, (err, reply) => {
-        if (err) return reject(err)
-        return resolve(JSON.parse(reply))
-      })
-    })
+    const fullKey = `waka-rt:${prefix}:${type}:${key}`
+
+    return this.client.set(fullKey, value, 'EX', 60)
   }
 
-  getVehiclePosition = (tripId: string) => {
+  getTripUpdate = async (tripId: string): Promise<TripUpdate> => {
     const { prefix } = this
-    return new Promise<VehiclePosition>((resolve, reject) => {
-      const fullKey = `waka-rt:${prefix}:vehicle-position:${tripId}`
-      this.client.get(fullKey, (err, reply) => {
-        if (err) return reject(err)
-        return resolve(JSON.parse(reply))
-      })
-    })
+    const fullKey = `waka-rt:${prefix}:trip-update:${tripId}`
+    const res = await this.client.get(fullKey)
+    return JSON.parse(res)
   }
 
-  getAlert = (alertId: string) => {
+  getVehiclePosition = async (tripId: string): Promise<VehiclePosition> => {
     const { prefix } = this
-    return new Promise<Alert>((resolve, reject) => {
-      const fullKey = `waka-rt:${prefix}:alert:${alertId}`
-      this.client.get(fullKey, (err, reply) => {
-        if (err) return reject(err)
-        return resolve(JSON.parse(reply))
-      })
-    })
+    const fullKey = `waka-rt:${prefix}:vehicle-position:${tripId}`
+    const res = await this.client.get(fullKey)
+    return JSON.parse(res)
   }
 
-  getKey = (
+  getAlert = async (alertId: string): Promise<Alert> => {
+    const { prefix } = this
+    const fullKey = `waka-rt:${prefix}:alert:${alertId}`
+    const res = await this.client.get(fullKey)
+    return JSON.parse(res)
+  }
+
+  getArrayKey = async (
     key: string,
     type:
       | 'alert-route'
@@ -84,41 +88,45 @@ class Redis {
       | 'alert-trip'
       | 'alert-stop'
       | 'vehicle-position-route'
-      | 'last-trip-update'
-      | 'last-vehicle-position-update'
-      | 'last-alert-update'
-  ) => {
+  ): Promise<string[]> => {
     const { prefix } = this
     switch (type) {
       case 'vehicle-position-route':
       case 'alert-route':
       case 'alert-route-type':
       case 'alert-trip':
-      case 'alert-stop':
-        return new Promise<string[]>((resolve, reject) => {
-          const fullKey = `waka-rt:${prefix}:${type}:${key}`
-          this.client.get(fullKey, (err, reply) => {
-            if (err) return reject(err)
-            if (reply) {
-              return resolve(reply.split(','))
-            }
-            return resolve([])
-          })
-        })
+      case 'alert-stop': {
+        const fullKey = `waka-rt:${prefix}:${type}:${key}`
+        const res = await this.client.get(fullKey)
+        if (res) {
+          return res.split(',')
+        }
+        return []
+      }
+
+      default:
+        throw Error('unknown type')
+    }
+  }
+  getKey = async (
+    key: string,
+    type:
+      | 'last-trip-update'
+      | 'last-vehicle-position-update'
+      | 'last-alert-update'
+  ): Promise<string> => {
+    const { prefix } = this
+    switch (type) {
       case 'last-trip-update':
       case 'last-vehicle-position-update':
-      case 'last-alert-update':
-        return new Promise<string>((resolve, reject) => {
-          const fullKey = `waka-rt:${prefix}:${type}:${key}`
-          this.client.get(fullKey, (err, reply) => {
-            if (err) return reject(err)
-            return resolve(reply)
-          })
-        })
+      case 'last-alert-update': {
+        const fullKey = `waka-rt:${prefix}:${type}:${key}`
+        return this.client.get(fullKey)
+      }
       default:
         throw Error('unknown type')
     }
   }
 }
 
-export default Redis
+export default WakaRedis

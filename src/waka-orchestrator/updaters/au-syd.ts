@@ -1,9 +1,9 @@
 import axios from 'axios'
-import redis from 'redis'
 import { pRateLimit, RedisQuotaManager } from 'p-ratelimit'
 import logger from '../logger'
 import { TfNSWUpdaterProps } from '../../typings'
 import { isKeyof } from '../../utils'
+import WakaRedis from '../../waka-realtime/Redis'
 
 const tfnswmodes = {
   buses1: { endpoint: 'buses/SMBSC001' },
@@ -48,7 +48,7 @@ class TfNSWUpdater {
   delay: number
   interval: number
   rateLimiter: <T>(fn: () => Promise<T>) => Promise<T>
-  redis: redis.RedisClient
+  redis: WakaRedis
 
   constructor(props: TfNSWUpdaterProps) {
     const { apiKey, callback, delay, interval } = props
@@ -58,22 +58,21 @@ class TfNSWUpdater {
     this.interval = interval || 1440
     this.prefix = 'au-syd'
     this.timeout = null
-    this.redis = redis.createClient()
-    this.rateLimiter = pRateLimit(
-      new RedisQuotaManager(
-        {
-          interval: 1000,
-          rate: 5,
-          concurrency: 5,
-        },
-        this.prefix,
-        this.redis
-      )
-    )
   }
 
-  start = () => {
+  start = async () => {
     const { apiKey, check, delay, prefix } = this
+    this.redis = new WakaRedis({ prefix, logger })
+    await this.redis.start()
+
+    const quota = {
+      interval: 1000,
+      rate: 5,
+      concurrency: 5,
+    }
+    this.rateLimiter = this.redis
+      ? pRateLimit(new RedisQuotaManager(quota, this.prefix, this.redis.client))
+      : pRateLimit(quota)
     if (!apiKey) {
       logger.error({ prefix }, 'API Key must be supplied!')
     }

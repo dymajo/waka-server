@@ -35,6 +35,9 @@ class ConfigManager {
       },
       updaters: {},
       importer: {},
+      redis: {
+        host: 'localhost',
+      },
       gatewayConfig: {
         // local doesn't need config
         ecs: null,
