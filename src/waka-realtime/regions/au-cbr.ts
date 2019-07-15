@@ -1,6 +1,5 @@
 import axios from 'axios'
 import CombinedFeed from '../CombinedFeed'
-import { BaseRealtimeProps } from '../BaseRealtime'
 import Redis from '../Redis'
 import { Logger } from '../../typings'
 

@@ -2,7 +2,6 @@ import axios from 'axios'
 import SingleEndpoint from '../SingleEndpoint'
 import Redis from '../Redis'
 import { Logger } from '../../typings'
-import CombinedFeed from '../CombinedFeed'
 
 interface AucklandRealtimeProps {
   redis: Redis

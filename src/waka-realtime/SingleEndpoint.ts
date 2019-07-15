@@ -168,11 +168,9 @@ abstract class SingleEndpoint extends BaseRealtime {
   scheduleAlertPull = async () => {
     const {
       logger,
-      modes,
       axios,
       serviceAlertEndpoint,
       redis,
-      rateLimiter,
       scheduleAlertPull,
       scheduleAlertPullTimeout,
       protobuf,
