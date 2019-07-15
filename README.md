@@ -83,6 +83,31 @@ npm ci
 npm start
 ```
 
+### waka-realtime
+
+open with the same config as a waka-worker except add the `newRealtime: true` flag
+
+uses protobuf and redis
+
+keeps all parsed trip/route/stop realtime information in redis for 60s
+
+need to create a new class that extends either `MultiEndpoint` / `SingleEndpoint` / `CombinedFeed` depending on what your region requires
+
+#### MultiEndpoint
+
+- has a Trip Update / Vehicle Position / Service Alert endpoint for each mode of transport
+- eg Transport for New South Wales
+
+#### SingleEndpoint
+
+- has a single Trip Update / Vehicle Position / Service Alert endpoint for all modes of transport
+- eg Auckland Transport
+
+#### CombinedFeed
+
+- has a combined feed for all endpoints and all modes of transport
+- eg ACT Transport
+
 ## DYMAJO Specific Implementation Notes
 
 ### ECS
