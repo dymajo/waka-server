@@ -7,8 +7,8 @@ import WakaRedis from '../../src/waka-realtime/Redis'
 
 const testConfig = {
   prefix: 'fake-city',
-  logger: createLogger({name: 'test-logger'}),
-  config: {}
+  logger: createLogger({ name: 'test-logger' }),
+  config: {},
 }
 
 class FakeRedisClient {
@@ -19,11 +19,11 @@ class FakeRedisClient {
       value,
       expiryMode,
       time,
-      setMode
+      setMode,
     })
     return 'done'
-  } 
-  get = async (key) => {
+  }
+  get = async key => {
     return (this.store.get(key) || '').value || ''
   }
   disconnect = () => {
@@ -33,12 +33,12 @@ class FakeRedisClient {
 
 describe('waka-realtime/Redis', () => {
   it('should create a new client on start', () => {
-      const client = new WakaRedis(testConfig)
-      client.start()
-      expect(client.client).to.be.instanceOf(Redis)
+    const client = new WakaRedis(testConfig)
+    client.start()
+    expect(client.client).to.be.instanceOf(Redis)
 
-      // cleanup
-      client.client.disconnect()
+    // cleanup
+    client.client.disconnect()
   })
 
   it('should disconnect and remove the client on close', () => {
@@ -46,7 +46,7 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
+    client.client = fakeRedisClient as any
 
     client.stop()
     expect(client.client).to.be.null
@@ -57,10 +57,12 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
+    client.client = fakeRedisClient as any
 
     await client.setKey('test-id', 'information', 'trip-update')
-    expect(fakeRedisClient.store.get('waka-rt:fake-city:trip-update:test-id').value).to.equal('information')
+    expect(
+      fakeRedisClient.store.get('waka-rt:fake-city:trip-update:test-id').value
+    ).to.equal('information')
   })
 
   it('should get a tripUpdate from the cache', async () => {
@@ -68,11 +70,14 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
-    fakeRedisClient.set('waka-rt:fake-city:trip-update:test-id', '{"data": "information"}')
+    client.client = fakeRedisClient as any
+    fakeRedisClient.set(
+      'waka-rt:fake-city:trip-update:test-id',
+      '{"data": "information"}'
+    )
 
     const update = await client.getTripUpdate('test-id')
-    expect(update).to.deep.equal({data: 'information'})
+    expect(update).to.deep.equal({ data: 'information' })
   })
 
   it('should get a vehiclePosition from the cache', async () => {
@@ -80,11 +85,14 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
-    fakeRedisClient.set('waka-rt:fake-city:vehicle-position:test-id', '{"data": "information"}')
+    client.client = fakeRedisClient as any
+    fakeRedisClient.set(
+      'waka-rt:fake-city:vehicle-position:test-id',
+      '{"data": "information"}'
+    )
 
     const update = await client.getVehiclePosition('test-id')
-    expect(update).to.deep.equal({data: 'information'})
+    expect(update).to.deep.equal({ data: 'information' })
   })
 
   it('should get an alert from the cache', async () => {
@@ -92,11 +100,14 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
-    fakeRedisClient.set('waka-rt:fake-city:alert:test-id', '{"data": "information"}')
+    client.client = fakeRedisClient as any
+    fakeRedisClient.set(
+      'waka-rt:fake-city:alert:test-id',
+      '{"data": "information"}'
+    )
 
     const update = await client.getAlert('test-id')
-    expect(update).to.deep.equal({data: 'information'})
+    expect(update).to.deep.equal({ data: 'information' })
   })
 
   it('should return an array for defined arrayKeys', async () => {
@@ -104,11 +115,11 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
+    client.client = fakeRedisClient as any
     fakeRedisClient.set('waka-rt:fake-city:alert-route:test-id', '1,2,3')
 
     const update = await client.getArrayKey('test-id', 'alert-route')
-    expect(update).to.deep.equal(['1','2','3'])
+    expect(update).to.deep.equal(['1', '2', '3'])
   })
 
   it('should return an empty array for undefined arrayKeys', async () => {
@@ -116,7 +127,7 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
+    client.client = fakeRedisClient as any
 
     const update = await client.getArrayKey('test-id', 'alert-route')
     expect(update).to.deep.equal([])
@@ -124,7 +135,9 @@ describe('waka-realtime/Redis', () => {
 
   it('should throw an error for unknown arrayKeys types', async () => {
     const client = new WakaRedis(testConfig)
-    await client.getArrayKey('test-id', 'not-a-key' as any).catch(err => expect(err).to.not.be.undefined)
+    await client
+      .getArrayKey('test-id', 'not-a-key' as any)
+      .catch(err => expect(err).to.not.be.undefined)
   })
 
   it('should return a value for defined keys', async () => {
@@ -132,8 +145,11 @@ describe('waka-realtime/Redis', () => {
 
     // mock the client
     const fakeRedisClient = new FakeRedisClient()
-    client.client = fakeRedisClient  as any
-    fakeRedisClient.set('waka-rt:fake-city:last-trip-update:test-id', 'information')
+    client.client = fakeRedisClient as any
+    fakeRedisClient.set(
+      'waka-rt:fake-city:last-trip-update:test-id',
+      'information'
+    )
 
     const update = await client.getKey('test-id', 'last-trip-update')
     expect(update).to.equal('information')
@@ -141,6 +157,8 @@ describe('waka-realtime/Redis', () => {
 
   it('should throw an error for unknown key types', async () => {
     const client = new WakaRedis(testConfig)
-    await client.getKey('test-id', 'not-a-key' as any).catch(err => expect(err).to.not.be.undefined)
+    await client
+      .getKey('test-id', 'not-a-key' as any)
+      .catch(err => expect(err).to.not.be.undefined)
   })
 })
