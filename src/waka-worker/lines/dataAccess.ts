@@ -47,5 +47,19 @@ class DataAccess {
     )
     return data
   }
+
+  getColors = async (route: string) => {
+    const { connection } = this
+    const sqlRequest = connection.get().request()
+    sqlRequest.input('route_short_name', sql.VarChar(50), route)
+    const data = await sqlRequest.query<{ route_color: string }>(`
+    SELECT top(1)
+      route_color
+    FROM routes
+    WHERE
+      route_short_name = @route_short_name
+    `)
+    return data
+  }
 }
 export default DataAccess
