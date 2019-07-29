@@ -16,18 +16,19 @@ class GenericLines extends BaseLines {
         routeShortName: string
         routeLongName: string
         agencyId: string
+        routeColor: string
       }[]
     }[] = [
-      { name: 'Tram', items: [] },
-      { name: 'Subway / Metro', items: [] },
-      { name: 'Rail', items: [] },
-      { name: 'Bus', items: [] },
-      { name: 'Ferry', items: [] },
-      { name: 'Cable Car', items: [] },
-      { name: 'Gondola', items: [] },
-      { name: 'Funicular', items: [] },
-      { name: 'Other', items: [] },
-    ]
+        { name: 'Tram', items: [] },
+        { name: 'Subway / Metro', items: [] },
+        { name: 'Rail', items: [] },
+        { name: 'Bus', items: [] },
+        { name: 'Ferry', items: [] },
+        { name: 'Cable Car', items: [] },
+        { name: 'Gondola', items: [] },
+        { name: 'Funicular', items: [] },
+        { name: 'Other', items: [] },
+      ]
 
     const [
       tram,
@@ -77,11 +78,23 @@ class GenericLines extends BaseLines {
 
       // tram
       if (routeType === 0 || (routeType >= 900 && routeType < 1000)) {
-        tram.items.push({ agencyId, routeShortName, routeLongName, routeId })
+        tram.items.push({
+          agencyId,
+          routeColor,
+          routeShortName,
+          routeLongName,
+          routeId,
+        })
       }
       // subway
       else if (routeType === 1 || routeType === 401 || routeType === 402) {
-        subway.items.push({ agencyId, routeShortName, routeLongName, routeId })
+        subway.items.push({
+          agencyId,
+          routeColor,
+          routeShortName,
+          routeLongName,
+          routeId,
+        })
       }
       // rail
       else if (
@@ -90,7 +103,13 @@ class GenericLines extends BaseLines {
         routeType === 400 ||
         (routeType >= 404 && routeType <= 405)
       ) {
-        rail.items.push({ agencyId, routeShortName, routeLongName, routeId })
+        rail.items.push({
+          agencyId,
+          routeColor,
+          routeShortName,
+          routeLongName,
+          routeId,
+        })
       }
       // bus
       else if (
@@ -98,16 +117,29 @@ class GenericLines extends BaseLines {
         (routeType >= 700 && routeType < 712) ||
         (routeType > 712 && routeType <= 717)
       ) {
-        bus.items.push({ agencyId, routeShortName, routeLongName, routeId })
+        bus.items.push({
+          agencyId,
+          routeColor,
+          routeShortName,
+          routeLongName,
+          routeId,
+        })
       }
       // ferry
       else if (routeType === 4 || routeType === 1000 || routeType === 1200) {
-        ferry.items.push({ agencyId, routeShortName, routeLongName, routeId })
+        ferry.items.push({
+          agencyId,
+          routeColor,
+          routeShortName,
+          routeLongName,
+          routeId,
+        })
       }
       // cable car
       else if (routeType === 5 || routeType === 907) {
         cableCar.items.push({
           agencyId,
+          routeColor,
           routeShortName,
           routeLongName,
           routeId,
@@ -117,6 +149,7 @@ class GenericLines extends BaseLines {
       else if (routeType === 6 || routeType === 1100 || routeType === 1300) {
         gondola.items.push({
           agencyId,
+          routeColor,
           routeShortName,
           routeLongName,
           routeId,
@@ -126,6 +159,7 @@ class GenericLines extends BaseLines {
       else if (routeType === 7 || routeType === 1400) {
         funicular.items.push({
           agencyId,
+          routeColor,
           routeShortName,
           routeLongName,
           routeId,
@@ -133,7 +167,13 @@ class GenericLines extends BaseLines {
       }
       // undefined other????
       else {
-        other.items.push({ agencyId, routeShortName, routeLongName, routeId })
+        other.items.push({
+          agencyId,
+          routeColor,
+          routeShortName,
+          routeLongName,
+          routeId,
+        })
       }
     })
     this.lineGroupsV2 = lineGroups.filter(group => group.items.length !== 0)
