@@ -17,7 +17,7 @@ import BaseLines from '../../types/BaseLines'
 import WakaRedis from '../../waka-realtime/Redis'
 
 const regions = {
-  // 'au-syd': SydneyLines,
+  'au-syd': SydneyLines,
   'nz-akl': AucklandLines,
   'nz-chc': ChristchurchLines,
   'nz-wlg': WellingtonLines,
@@ -117,7 +117,7 @@ class Lines {
     }
   }
 
-  stop = () => {}
+  stop = () => { }
 
   getColor = (agencyId: string, routeShortName: string) => {
     const { lineDataSource } = this
