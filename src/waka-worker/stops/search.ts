@@ -1,7 +1,6 @@
 import * as sql from 'mssql'
 import * as Logger from 'bunyan'
 import { Response } from 'express'
-import { oc } from 'ts-optchain'
 import Connection from '../db/connection'
 import { WakaRequest, StopRouteType } from '../../typings'
 import BaseStops from '../../types/BaseStops'
@@ -38,7 +37,7 @@ class Search {
   stopsFilter = (recordset: { stop_id: string }[], mode?: string) => {
     const { prefix, regionSpecific } = this
     if (prefix === 'nz-wlg') {
-      const filter = oc(regionSpecific).filter()
+      const { filter } = regionSpecific
       if (filter) {
         return filter(recordset, mode)
       }
@@ -202,14 +201,12 @@ class Search {
 
       // the database is the default source
       let sources = [stopsFromDb(lat, lon, dist)]
+      const { extraSources } = regionSpecific
       if (prefix === 'nz-wlg') {
-        const extraSources = oc(regionSpecific).extraSources()
         if (extraSources) {
           sources = sources.concat(extraSources(lat, lon, dist))
         }
       } else if (prefix === 'nz-akl') {
-        const extraSources = oc(regionSpecific).extraSources()
-
         if (extraSources) {
           sources = sources.concat(extraSources(lat, lon, dist))
         }

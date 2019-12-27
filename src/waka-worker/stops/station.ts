@@ -1,7 +1,6 @@
 import moment from 'moment-timezone'
 import { Response } from 'express'
 import * as Logger from 'bunyan'
-import { oc } from 'ts-optchain'
 import StopsDataAccess from './dataAccess'
 import Connection from '../db/connection'
 import { WakaRequest, DBStopTime, WakaTripUpdate } from '../../typings'
@@ -153,9 +152,7 @@ class Station {
     let override = ''
     if (
       prefix === 'nz-wlg' &&
-      oc(regionSpecific)
-        .badStops([])
-        .indexOf(stopCode) > -1
+      (regionSpecific?.badStops?.indexOf(stopCode) ?? -1 > -1)
     ) {
       override = stopCode
       stopCode = `${stopCode}1`
@@ -176,9 +173,9 @@ class Station {
       // TODO: make this more generic
       if (prefix === 'nz-akl') {
         try {
-          const getSingle = oc(regionSpecific).getSingle()
+          const getSingle = regionSpecific?.getSingle
           if (getSingle) {
-            const data = await getSingle(stopCode)
+            const data = getSingle(stopCode)
             return res.send(data)
           }
         } catch (err) {
@@ -281,7 +278,7 @@ class Station {
 
     // carparks
     if (prefix === 'nz-akl') {
-      const getTimes = oc(regionSpecific).getTimes()
+      const getTimes = regionSpecific?.getTimes
       if (getTimes) {
         const data = getTimes(station)
         if (data !== null) {

@@ -1,6 +1,5 @@
 import path from 'path'
 import { AxiosInstance } from 'axios'
-import { oc } from 'ts-optchain'
 import WakaRedis from './Redis'
 import { Logger } from '../typings'
 import {
@@ -116,7 +115,7 @@ export default abstract class BaseRealtime {
   ) => {
     const routes: { [routeId: string]: string[] } = {}
     for (const trip of vehiclePositionEntities) {
-      if (oc(trip).vehicle.trip.tripId()) {
+      if (trip?.vehicle?.trip?.tripId) {
         check<string>(
           routes,
           trip.vehicle.trip.routeId || 'route_id_unknown',
