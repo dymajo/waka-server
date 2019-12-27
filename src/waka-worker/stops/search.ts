@@ -1,9 +1,9 @@
-import * as sql from 'mssql'
 import * as Logger from 'bunyan'
 import { Response } from 'express'
-import Connection from '../db/connection'
-import { WakaRequest, StopRouteType } from '../../typings'
+import * as sql from 'mssql'
+import { StopRouteType, WakaRequest } from '../../types'
 import BaseStops from '../../types/BaseStops'
+import Connection from '../db/connection'
 
 interface SearchProps {
   logger: Logger

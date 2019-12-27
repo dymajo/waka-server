@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { AklTimes } from '../../../typings'
+import { AklTimes } from '../../../types'
 import BaseStops, { BaseStopsProps } from '../../../types/BaseStops'
 
 const pricingHtml = `

@@ -1,19 +1,14 @@
 /* eslint-disable no-labels */
 import { Response } from 'express'
 import { VarChar } from 'mssql'
-import Connection from '../../db/connection'
-import {
-  WakaRequest,
-  Logger,
-  WakaTripUpdate,
-  WakaVehicleInfo,
-  StopTime,
-} from '../../../typings'
-
+import { StopTimeUpdate } from '../../../gtfs'
+import { Logger, StopTime, WakaRequest, WakaTripUpdate, WakaVehicleInfo } from '../../../types'
 import BaseRealtime from '../../../types/BaseRealtime'
 import WakaRedis from '../../../waka-realtime/Redis'
+import Connection from '../../db/connection'
 import StopsDataAccess from '../../stops/dataAccess'
-import { StopTimeUpdate } from '../../../gtfs'
+
+
 
 interface RealtimeAUSYDProps {
   connection: Connection

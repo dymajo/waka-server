@@ -1,14 +1,9 @@
-import path from 'path'
 import { AxiosInstance } from 'axios'
-import WakaRedis from './Redis'
-import { Logger } from '../typings'
-import {
-  VehiclePosition,
-  AlertFeedEntity,
-  PositionFeedEntity,
-  UpdateFeedEntity,
-} from '../gtfs'
+import path from 'path'
+import { AlertFeedEntity, PositionFeedEntity, UpdateFeedEntity, VehiclePosition } from '../gtfs'
+import { Logger } from '../types'
 import { check } from '../utils'
+import WakaRedis from './Redis'
 
 export const PROTOBUF_PATH = [
   path.join(__dirname, 'protos', 'gtfs-realtime.proto'),

@@ -1,12 +1,12 @@
 import { ConnectionPool, VarChar } from 'mssql'
-import logger from './logger'
-import KeyvalueLocal from './adaptors/keyvalueLocal'
-import KeyvalueDynamo from './adaptors/keyvalueDynamo'
 import EnvMapper from '../envMapper'
-import GatewayLocal from './adaptors/gatewayLocal'
-import GatewayEcs from './adaptors/gatewayEcs'
-import { DBConfig, WakaConfig, Version } from '../typings'
+import { DBConfig, Version, WakaConfig } from '../types'
 import BaseKeyvalue from '../types/BaseKeyvalue'
+import GatewayEcs from './adaptors/gatewayEcs'
+import GatewayLocal from './adaptors/gatewayLocal'
+import KeyvalueDynamo from './adaptors/keyvalueDynamo'
+import KeyvalueLocal from './adaptors/keyvalueLocal'
+import logger from './logger'
 
 interface VersionManagerProps {
   gateway: GatewayLocal
@@ -283,16 +283,6 @@ class VersionManager {
       '" -e "'
     )}" --network="container:waka-db" dymajo/waka-importer`
     return command
-  }
-
-  getFargateVariables = async (versionId: string) => {
-    const config = await this.getVersionConfig(versionId)
-    const env = this.envMapper.toEnvironmental(config, 'importer')
-    const envArray = Object.keys(env).map(name => ({
-      name,
-      value: (env[name] || '').toString(),
-    }))
-    return envArray
   }
 }
 
