@@ -1,8 +1,9 @@
+import { WakaConfig } from '../../types'
 import logger from '../logger'
+import VersionManager from '../versionManager'
 import BasicUpdater from './basic'
 import ATUpdater from './nz-akl'
 import TfNSWUpdater from './au-syd'
-import VersionManager from '../versionManager'
 import Fargate from './fargate'
 import Kubernetes from './kubernetes'
 import { WakaConfig, EnvironmentConfig } from '../../typings'
@@ -35,7 +36,7 @@ class UpdateManager {
         this.importer = new Fargate(importer)
       } else if (importer.provider === 'kubernetes') {
         this.importer = new Kubernetes(importer)
-      } 
+      }
     }
 
     this.updaters = {}
@@ -174,7 +175,10 @@ class UpdateManager {
         } else {
           logger.info({ prefix, version: version.version }, 'Starting Import')
           const config = await versionManager.getVersionConfig(id)
-          const env = versionManager.envMapper.toEnvironmental(config, 'importer')
+          const env = versionManager.envMapper.toEnvironmental(
+            config,
+            'importer'
+          )
           await importer.startTask(env)
         }
       } else if (version.status === 'imported-willmap') {
