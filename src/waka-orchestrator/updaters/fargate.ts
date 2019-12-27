@@ -1,7 +1,7 @@
 /* eslint-disable promise/prefer-await-to-callbacks */
 import AWS from 'aws-sdk'
+import { EnvironmentImporterConfig } from '../../types'
 import logger from '../logger'
-import { EnvironmentImporterConfig } from '../../typings'
 
 class Fargate {
   cluster: string
@@ -33,7 +33,7 @@ class Fargate {
     const ecsEnvironment = Object.keys(env).map(name => ({
       name,
       value: (env[name] || '').toString(),
-    }))  
+    }))
 
     const { cluster, taskDefinition, securityGroups, subnets, ecs } = this
     const params: AWS.ECS.RunTaskRequest = {

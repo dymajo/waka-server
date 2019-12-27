@@ -1,12 +1,11 @@
-import { WakaConfig } from '../../types'
+import { EnvironmentConfig, WakaConfig } from '../../types'
 import logger from '../logger'
 import VersionManager from '../versionManager'
-import BasicUpdater from './basic'
-import ATUpdater from './nz-akl'
 import TfNSWUpdater from './au-syd'
+import BasicUpdater from './basic'
 import Fargate from './fargate'
 import Kubernetes from './kubernetes'
-import { WakaConfig, EnvironmentConfig } from '../../typings'
+import ATUpdater from './nz-akl'
 
 interface UpdateManagerProps {
   config: WakaConfig

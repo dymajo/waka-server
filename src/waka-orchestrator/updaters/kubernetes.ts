@@ -1,14 +1,19 @@
+import { BatchV1Api, KubeConfig } from '@kubernetes/client-node'
+import { EnvironmentImporterConfig } from '../../types'
 import logger from '../logger'
-import { KubeConfig, BatchV1Api } from '@kubernetes/client-node'
-import { EnvironmentImporterConfig } from '../../typings'
-import { SecretsManager } from 'aws-sdk'
 
-class Kubernetes {
+interface KubernetesImporterConfig {
+  namespace: string,
+  image: string,
+  secret: string,
+}
+
+class KubernetesImporter {
   namespace: string
   image: string
   secret: String
 
-  constructor(config) {
+  constructor(config: KubernetesImporterConfig) {
     logger.info('Using Kubernetes Importer')
 
     this.namespace = config.namespace || 'default'
@@ -39,7 +44,7 @@ class Kubernetes {
     }))
 
     // gross way of doing cross cloud
-    const secrets = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
+    const secrets = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION']
     secrets.forEach(key => {
       k8sEnvironment.push({
         name: key,
@@ -52,7 +57,7 @@ class Kubernetes {
         }
       })
     })
-     
+
     try {
       await k8sApi.createNamespacedJob(namespace, {
         metadata: {
@@ -89,4 +94,4 @@ class Kubernetes {
     }
   }
 }
-export default Kubernetes
+export default KubernetesImporter
