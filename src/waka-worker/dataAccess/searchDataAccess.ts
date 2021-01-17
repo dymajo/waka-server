@@ -8,7 +8,16 @@ interface SearchDataAccessProps {
   logger: Logger
 }
 
-type RouteTypes = { [stop_id: string]: number }
+type Stop = {
+  stop_id: string,
+  stop_name: string
+  stop_lat: number
+  stop_lon: number
+  location_type: number
+  route_type: number
+}
+
+type RouteTypes = { [stop_id: string]: Stop }
 
 export default class SearchDataAccess {
   connection: Connection
@@ -41,7 +50,7 @@ export default class SearchDataAccess {
 
   async getStopsRouteType() {
     const recordset = await this.searchSqlRepository.getStopsRouteType()
-    const routeTypes: RouteTypes = {}
+    const routeTypes = {}
     recordset.forEach(stop => {
       routeTypes[stop.stop_id] = stop
     })

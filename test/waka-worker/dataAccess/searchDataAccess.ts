@@ -31,7 +31,10 @@ describe('waka-worker/dataAccess/searchDataAccess', () => {
 
     const result = await searchDataAccess.getStopsRouteType()
     expect(result['0']).to.be.undefined
-    expect(result['1']).to.equal(2)
+    expect(result['1']).to.deep.equal({
+      stop_id: '1',
+      route_type: 2,
+    })
   })
 
   it('should cache route types on start', async () => {
@@ -60,7 +63,10 @@ describe('waka-worker/dataAccess/searchDataAccess', () => {
 
     // should get an object now
     await searchDataAccess.start()
-    expect(searchDataAccess.routeTypesCache).to.deep.equal({ '1': 2 })
+    expect(searchDataAccess.routeTypesCache).to.deep.equal({ '1': {
+      stop_id: '1',
+      route_type: 2,
+    }})
   })
 
 

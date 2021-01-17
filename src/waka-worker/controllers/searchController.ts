@@ -17,7 +17,16 @@ interface SearchProps {
   redis: WakaRedis
 }
 
-type RouteTypes = { [stop_id: string]: number }
+type Stop = {
+  stop_id: string,
+  stop_name: string
+  stop_lat: number
+  stop_lon: number
+  location_type: number
+  route_type: number
+}
+
+type RouteTypes = { [stop_id: string]: Stop }
 
 class Search {
   logger: Logger

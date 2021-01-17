@@ -55,7 +55,7 @@ export default class SearchSqlRepository {
     latLessThan: number,
     lonGreaterThan: number,
     lonlessThan: number,
-    locationFilter: 0
+    locationFilter: number = 0,
   ) {
     const { connection } = this
     const sqlRequest = connection.get().request()
