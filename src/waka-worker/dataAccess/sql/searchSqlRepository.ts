@@ -15,14 +15,19 @@ export default class SearchSqlRepository {
       stop_id: string
       route_type: number
     }>(`
-      SELECT DISTINCT stops.stop_code AS stop_id, routes.route_type
+      SELECT DISTINCT 
+        stops.stop_code AS stop_id,
+        stop_name,
+        stop_lat,
+        stop_lon,
+        location_type,
+        routes.route_type
       FROM stops
       JOIN stop_times ON stop_times.stop_id = stops.stop_id
       JOIN trips ON trips.trip_id = stop_times.trip_id
       JOIN routes ON routes.route_id = trips.route_id
       WHERE route_type <> 3 and route_type <> 700 and route_type <> 712
-      ORDER BY stop_code`
-    )
+      ORDER BY stop_code`)
     return Array.from(result.recordset)
   }
 
@@ -45,7 +50,13 @@ export default class SearchSqlRepository {
     return Array.from(result.recordset)
   }
 
-  async getStops(latGreaterThan: number, latLessThan: number, lonGreaterThan: number, lonlessThan: number, locationFilter: number = 0) {
+  async getStops(
+    latGreaterThan: number,
+    latLessThan: number,
+    lonGreaterThan: number,
+    lonlessThan: number,
+    locationFilter: 0
+  ) {
     const { connection } = this
     const sqlRequest = connection.get().request()
     sqlRequest.input('stop_lat_gt', sql.Decimal(10, 6), latGreaterThan)

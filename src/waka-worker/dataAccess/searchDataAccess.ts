@@ -43,7 +43,7 @@ export default class SearchDataAccess {
     const recordset = await this.searchSqlRepository.getStopsRouteType()
     const routeTypes: RouteTypes = {}
     recordset.forEach(stop => {
-      routeTypes[stop.stop_id] = stop.route_type
+      routeTypes[stop.stop_id] = stop
     })
     return routeTypes
   }
@@ -57,7 +57,7 @@ export default class SearchDataAccess {
         stop_id,
         stop_name,
         // it's a bus if it's not in the cache
-        route_type: routeTypesCache[stop_id] || 3,
+        route_type: routeTypesCache[stop_id]?.route_type ?? 3,
       }
     })
     return { items }
@@ -72,13 +72,19 @@ export default class SearchDataAccess {
     const stopLngGt = lon - lonDist
     const stopLngLt = lon + lonDist
 
-    const locationFilter = (prefix === 'au-syd' ? 1 : 0)
-    const recordset = await this.searchSqlRepository.getStops(stopLatGt, stopLatLt, stopLngGt, stopLngLt, locationFilter)
+    const locationFilter = prefix === 'au-syd' ? 1 : 0
+    const recordset = await this.searchSqlRepository.getStops(
+      stopLatGt,
+      stopLatLt,
+      stopLngGt,
+      stopLngLt,
+      locationFilter
+    )
 
     const items = recordset.map(item => ({
       ...item,
       stop_region: prefix,
-      route_type: routeTypesCache[item.stop_id] || 3,
+      route_type: routeTypesCache[item.stop_id]?.route_type ?? 3,
     }))
     return { items }
   }

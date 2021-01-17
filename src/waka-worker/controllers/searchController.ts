@@ -47,7 +47,7 @@ class Search {
     this.stopsRouteType = this.searchDataAccess.routeTypesCache
   }
 
-  stop = () => { }
+  stop = () => {}
 
   stopsFilter = (recordset: { stop_id: string }[], mode?: string) => {
     const { prefix, regionSpecific } = this
@@ -96,7 +96,9 @@ class Search {
       res.send(data)
     } catch (err) {
       logger.error({ err })
-      res.status(500).send({ message: 'Could not get all stops from the database.' })
+      res
+        .status(500)
+        .send({ message: 'Could not get all stops from the database.' })
     }
   }
 
@@ -134,7 +136,7 @@ class Search {
    *         "stop_region": "nz-wlg",
    *         "route_type": 2,
    *         "lines": [
-   *            { 
+   *            {
    *              agency_id: "RAIL",
    *              route_short_name: "HVL",
    *              route_color: "#e52f2b"
@@ -146,7 +148,14 @@ class Search {
    */
   getStopsLatLon = async (req: WakaRequest<null, null>, res: Response) => {
     // no caching here, maybe we need it?
-    const { logger, prefix, regionSpecific, stopsFilter, searchDataAccess, lines } = this
+    const {
+      logger,
+      prefix,
+      regionSpecific,
+      stopsFilter,
+      searchDataAccess,
+      lines,
+    } = this
     const { lat, lon, distance } = req.query
 
     if (!(lat && lon && distance)) {
@@ -156,19 +165,11 @@ class Search {
       return
     }
 
-    // limit of the distance value
-    if (distance > 1250) {
-      res.status(400).send({
-        message: 'please request less than 1250 distance',
-      })
-      return
-    }
-
     const latFloat = parseFloat(lat)
     const lonFloat = parseFloat(lon)
     if (Number.isNaN(latFloat) || Number.isNaN(lonFloat)) {
       res.status(400).send({
-        message: 'please send lat & lon as numbers'
+        message: 'please send lat & lon as numbers',
       })
       return
     }
@@ -176,28 +177,41 @@ class Search {
     // the database is the default source
     // gross wrapper because gross reasons
     const dbWrapper = async (latFloat, lonFloat, dist) => {
-      const stops = await searchDataAccess.getStops(latFloat, lonFloat, dist)
-      const stopsWithTransfers = await Promise.all(stops.items.map(async stop => {
-        try {
-          const linesObject = await this.redisDataAccess.getLinesForStop(stop.stop_id)
-          return {
-            ...stop,
-            lines: linesObject.map(l => ({
-              ...l,
-              route_color: this.lines.getColor(l.agency_id, l.route_short_name)
-            })),
+      let stops = null
+      if (distance > 1250) {
+        stops = { items: Object.values(searchDataAccess.routeTypesCache) }
+      } else {
+        stops = await searchDataAccess.getStops(latFloat, lonFloat, dist)
+      }
+      const stopsWithTransfers = await Promise.all(
+        stops.items.map(async stop => {
+          try {
+            const linesObject = await this.redisDataAccess.getLinesForStop(
+              stop.stop_id
+            )
+            return {
+              ...stop,
+              stop_region: prefix,
+              lines: linesObject.map(l => ({
+                ...l,
+                route_color: this.lines.getColor(
+                  l.agency_id,
+                  l.route_short_name
+                ),
+              })),
+            }
+          } catch (err) {
+            logger.warn({ err })
+            return stop
           }
-        } catch (err) {
-          logger.warn({ err })
-          return stop
-        }
-      }))
+        })
+      )
       return stopsFilter(stopsWithTransfers)
     }
 
     let sources = [dbWrapper(latFloat, lonFloat, distance)]
     const extraSources = regionSpecific?.extraSources
-    if (prefix === 'nz-akl' && extraSources) {
+    if (distance <= 1250 && prefix === 'nz-akl' && extraSources) {
       sources = sources.concat(extraSources(latFloat, lonFloat, distance))
     }
 
