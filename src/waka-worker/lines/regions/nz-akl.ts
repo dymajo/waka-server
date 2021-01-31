@@ -23,7 +23,7 @@ class LinesNZAKL extends BaseLines {
     CTY: 'CityLink',
     INN: 'InnerLink',
     OUT: 'OuterLink',
-    '380': 'Airporter',
+    AIR: 'AirportLink',
     MTIA: 'Auckland to Waiheke Island',
     SKY: 'SkyBus',
     TMK: 'TāmakiLink',
@@ -108,7 +108,11 @@ class LinesNZAKL extends BaseLines {
           ['CTY', 'INN', 'OUT', 'TMK', 'SKY'].includes(routeShortName)
         ) {
           central.items.push(routeItem)
-        } else if (routeShortName[0] === '3' || routeShortName === 'N10') {
+        } else if (
+          routeShortName[0] === '3' ||
+          routeShortName === 'N10' ||
+          routeShortName === 'AIR'
+        ) {
           // only one night bus in auckland left!
           south.items.push(routeItem)
         } else if (routeShortName[0] === '7') {
