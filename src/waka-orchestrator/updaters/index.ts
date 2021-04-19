@@ -117,8 +117,7 @@ class UpdateManager {
         shapesContainer,
         shapesRegion,
         dbconfig,
-        // this is shit
-        newRealtime: prefix !== 'nz-wlg',
+        newRealtime: true,
       })
       logger.info({ prefix, version, status: 'empty' }, 'Created empty worker.')
     }

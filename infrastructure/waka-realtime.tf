@@ -108,12 +108,12 @@ resource "kubernetes_deployment" "waka-realtime" {
           // TODO: liveness & readiness probes
           resources {
             limits {
-              cpu    = "200m"
+              cpu    = "100m"
               memory = "96Mi"
             }
             requests {
-              cpu    = "100m"
-              memory = "64Mi"
+              cpu    = "20m"
+              memory = "50Mi"
             }
           }
         }
