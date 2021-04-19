@@ -4,6 +4,7 @@ variable "realtime_regions" {
     "au-syd" = 0
     "nz-akl" = 1
     "nz-chc" = 1
+    "nz-wlg" = 1
   }
 }
 
