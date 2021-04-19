@@ -3,13 +3,16 @@ import moment from 'moment-timezone'
 import { VarChar } from 'mssql'
 import { TripUpdate } from '../../../gtfs'
 import BaseRealtime from '../../../types/BaseRealtime'
-import { Logger, WakaRequest, WakaTripUpdate, WakaVehicleInfo } from '../../../typings'
+import {
+  Logger,
+  WakaRequest,
+  WakaTripUpdate,
+  WakaVehicleInfo,
+} from '../../../typings'
 import { prefixToTimezone } from '../../../utils'
 import WakaRedis from '../../../waka-realtime/Redis'
 import Connection from '../../db/connection'
 import StopsDataAccess from '../../dataAccess/stopsDataAccess'
-
-
 
 interface GenericRealtimeProps {
   connection: Connection
@@ -73,55 +76,59 @@ class GenericRealtime extends BaseRealtime {
       }
     }
 
-    const dbQuery = realtimeTripData.map(trip => {
-      const stopTimeUpdates = trip.stopTimeUpdate.map(stopTimeUpdate => {
-        const requiredData = {
-          tripId: trip.trip.tripId,
-          stopSequence: null,
-          stopId: null,
-        }
-        // grab the stop time update if there's no stop id or stop sequence
-        if (stopTimeUpdate.stopId === undefined) {
-          requiredData.stopSequence = stopTimeUpdate.stopSequence
-        } else if (stopTimeUpdate.stopSequence === undefined) {
-          requiredData.stopId = stopTimeUpdate.stopId
-        } else {
-          // likewise, if there's no delay or time, grab it from the db so we can interpolate
-          if (stopTimeUpdate.departure) {
-            const { delay, time } = stopTimeUpdate.departure
-            if (delay === undefined || time === undefined) {
-              requiredData.stopId = stopTimeUpdate.stopId
+    const dbQuery = realtimeTripData
+      .map(trip => {
+        const stopTimeUpdates = trip.stopTimeUpdate.map(stopTimeUpdate => {
+          const requiredData = {
+            tripId: trip.trip.tripId,
+            stopSequence: null,
+            stopId: null,
+          }
+          // grab the stop time update if there's no stop id or stop sequence
+          if (stopTimeUpdate.stopId === undefined) {
+            requiredData.stopSequence = stopTimeUpdate.stopSequence
+          } else if (stopTimeUpdate.stopSequence === undefined) {
+            requiredData.stopId = stopTimeUpdate.stopId
+          } else {
+            // likewise, if there's no delay or time, grab it from the db so we can interpolate
+            if (stopTimeUpdate.departure) {
+              const { delay, time } = stopTimeUpdate.departure
+              if (delay === undefined || time === undefined) {
+                requiredData.stopId = stopTimeUpdate.stopId
+              }
+            }
+            if (stopTimeUpdate.arrival) {
+              const { delay, time } = stopTimeUpdate.arrival
+              if (delay === undefined || time === undefined) {
+                requiredData.stopId = stopTimeUpdate.stopId
+              }
             }
           }
-          if (stopTimeUpdate.arrival) {
-            const { delay, time } = stopTimeUpdate.arrival
-            if (delay === undefined || time === undefined) {
-              requiredData.stopId = stopTimeUpdate.stopId
-            }
-          }
-        }
-        return requiredData
-      })
-      const stopSequences = stopTimeUpdates
-        .map(t => t.stopSequence)
-        .filter(t => t !== null)
-      const stopIds = stopTimeUpdates
-        .map(t => t.stopSequence)
-        .filter(t => t !== null)
+          return requiredData
+        })
 
-      // TODO: this is hot garbage
-      let query
-      if (stopSequences.length > 0) {
-        query = `(trip_id = '${
-          trip.trip.tripId
+        const stopSequences = stopTimeUpdates
+          .map(t => t.stopSequence)
+          .filter(t => t !== null)
+        const stopIds = stopTimeUpdates
+          .map(t => t.stopSequence)
+          .filter(t => t !== null)
+
+        // TODO: this is hot garbage
+        let query = null
+        if (stopSequences.length > 0) {
+          query = `(trip_id = '${
+            trip.trip.tripId
           }' AND stop_sequence in (${stopSequences.join(',')}))`
-      } else if (stopIds.length > 0) {
-        query = `(trip_id = '${
-          trip.trip.tripId
+        } else if (stopIds.length > 0) {
+          query = `(trip_id = '${
+            trip.trip.tripId
           }' AND stop_sequence in ('${stopIds.join("' , '")}'))`
-      }
-      return query
-    })
+        }
+
+        return query
+      })
+      .filter(query => query != null)
 
     let results = []
     if (dbQuery.length > 0) {
@@ -168,11 +175,17 @@ class GenericRealtime extends BaseRealtime {
           )
         }
 
-        update.stopId = update.stopId || timetabledTrip.stop_id
-        update.stopSequence =
-          update.stopSequence || timetabledTrip.stop_sequence
+        if (update.stopId == null)
+          update.stopId = update.stopId || timetabledTrip.stop_id
+        if (update.stopSequence == null)
+          update.stopSequence =
+            update.stopSequence || timetabledTrip.stop_sequence
 
-        if (update.departure) {
+        if (
+          update.departure &&
+          (update.departure.delay === undefined ||
+            update.departure.time === undefined)
+        ) {
           const { delay, time } = update.departure
           const scheduledDeparture =
             now.unix() +
@@ -184,7 +197,11 @@ class GenericRealtime extends BaseRealtime {
           }
         }
 
-        if (update.arrival) {
+        if (
+          update.arrival &&
+          (update.arrival.delay === undefined ||
+            update.arrival.time === undefined)
+        ) {
           const { delay, time } = update.arrival
           const scheduledArrival =
             now.unix() + moment(timetabledTrip.arrival_time, 'HH:mm:ss').unix()
@@ -275,7 +292,6 @@ class GenericRealtime extends BaseRealtime {
         FROM trips
         WHERE trip_id IN (${escapedTripIds})
       `)
-      // console.log(tripIdRequest.recordset)
 
       const tripIdsMap: {
         [tripId: string]: {

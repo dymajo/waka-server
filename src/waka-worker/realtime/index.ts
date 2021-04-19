@@ -7,12 +7,10 @@ import Connection from '../db/connection'
 import RealtimeAUSYD from './regions/au-syd'
 import GenericRealtime from './regions/generic'
 import RealtimeNZAKL from './regions/nz-akl'
-import RealtimeNZWLG from './regions/nz-wlg'
 
 const regions = {
   'au-syd': RealtimeAUSYD,
   'nz-akl': RealtimeNZAKL,
-  'nz-wlg': RealtimeNZWLG,
   // 'au-cbr': CanberraRealtime,
 }
 
@@ -49,19 +47,19 @@ class Realtime {
     const apiKey = api[prefix]
     this.fn = isKeyof(regions, prefix)
       ? new regions[prefix]({
-        logger,
-        connection,
-        apiKey,
-        newRealtime,
-        wakaRedis,
-      })
+          logger,
+          connection,
+          apiKey,
+          newRealtime,
+          wakaRedis,
+        })
       : new GenericRealtime({
-        connection,
-        logger,
-        newRealtime,
-        wakaRedis,
-        prefix,
-      })
+          connection,
+          logger,
+          newRealtime,
+          wakaRedis,
+          prefix,
+        })
   }
 
   start = async () => {

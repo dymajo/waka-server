@@ -8,6 +8,7 @@ import CanberraRealtime from './regions/au-cbr'
 import SydneyRealtime from './regions/au-syd'
 import AucklandRealtime from './regions/nz-akl'
 import ChristchurchRealtime from './regions/nz-chc'
+import WellingtonRealtime from './regions/nz-wlg'
 import BostonRealtime from './regions/us-bos'
 import NYCRealtime from './regions/us-nyc'
 import SanFranciscoRealtime from './regions/us-sfo'
@@ -17,6 +18,7 @@ const Regions = {
   'au-syd': SydneyRealtime,
   'nz-akl': AucklandRealtime,
   'nz-chc': ChristchurchRealtime,
+  'nz-wlg': WellingtonRealtime,
   'us-bos': BostonRealtime,
   'us-nyc': NYCRealtime,
   'us-sfo': SanFranciscoRealtime,

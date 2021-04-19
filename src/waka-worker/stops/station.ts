@@ -427,7 +427,13 @@ class Station {
       }
       return record
     })
-    const realtime = await realtimeTimes(realtimeTrips, station, false)
+
+    let realtime = {}
+    try {
+      realtime = await realtimeTimes(realtimeTrips, station, false)
+    } catch (err) {
+      logger.error({ err }, 'Could not get realtime')
+    }
 
     const sending: {
       provider: string
