@@ -28,6 +28,7 @@ class LinesNZAKL extends BaseLines {
     SKY: 'SkyBus',
     TMK: 'TāmakiLink',
     MEX: 'Mahu City Express',
+    HUIA: 'Te Huia',
   }
 
   async getLines() {
