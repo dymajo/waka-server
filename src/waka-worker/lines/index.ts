@@ -14,7 +14,6 @@ import AucklandLines from './regions/nz-akl'
 import ChristchurchLines from './regions/nz-chc'
 import WellingtonLines from './regions/nz-wlg'
 
-
 const regions = {
   'au-syd': SydneyLines,
   'nz-akl': AucklandLines,
@@ -113,7 +112,7 @@ class Lines {
     }
   }
 
-  stop = () => { }
+  stop = () => {}
 
   getColor = (agencyId: string, routeShortName: string) => {
     const { lineDataSource } = this
@@ -366,7 +365,7 @@ class Lines {
         stops.stop_code as first_stop_id,
         count(trips.shape_id) as shape_score
       FROM routes
-      LEFT JOIN trips ON
+      INNER JOIN trips ON
         trips.route_id = routes.route_id
       CROSS APPLY ( SELECT TOP 1 stop_id FROM stop_times WHERE trip_id = trips.trip_id ORDER BY stop_sequence) stop_times2
       INNER JOIN stops on stop_times2.stop_id = stops.stop_id

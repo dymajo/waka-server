@@ -63,7 +63,7 @@ export default class StopsSqlRepostory {
         routes.route_type
       FROM
         stops
-      LEFT JOIN
+      INNER JOIN
         stop_times
       ON stop_times.id = (
           SELECT TOP 1 id
@@ -71,8 +71,8 @@ export default class StopsSqlRepostory {
           WHERE
           stop_times.stop_id = stops.stop_id
       )
-      LEFT JOIN trips ON trips.trip_id = stop_times.trip_id
-      LEFT JOIN routes on routes.route_id = trips.route_id
+      INNER JOIN trips ON trips.trip_id = stop_times.trip_id
+      INNER JOIN routes on routes.route_id = trips.route_id
       WHERE
         stops.stop_code = @stop_code
     `)
@@ -92,19 +92,21 @@ export default class StopsSqlRepostory {
       route_desc: string
       route_type: number
       route_color: string
-      route_text_color: string,
-      shape_id: string,
+      route_text_color: string
+      shape_id: string
     }>(`
       SELECT agency_id, route_short_name, route_long_name, route_desc, route_type, route_color, route_text_color, shape_id from routes
       INNER JOIN trips on routes.route_id = trips.route_id
       WHERE trip_id = @trip_id
     `)
     // only exception for transformations here, because it's stored in the db wrong
-    return Array.from(data.recordset.map(record => ({
-      ...record,
-      route_color: `#${record.route_color || '000000'}`,
-      route_text_color: `#${record.route_text_color || 'ffffff'}`,
-    })))
+    return Array.from(
+      data.recordset.map(record => ({
+        ...record,
+        route_color: `#${record.route_color || '000000'}`,
+        route_text_color: `#${record.route_text_color || 'ffffff'}`,
+      }))
+    )
   }
 
   async getStopTimes(
@@ -175,7 +177,7 @@ export default class StopsSqlRepostory {
     }
     const { connection } = this
     const sqlRequest = connection.get().request()
-    const escapedTripIds = `('${tripIds.join('\', \'')}')`
+    const escapedTripIds = `('${tripIds.join("', '")}')`
     const data = await sqlRequest.query<{
       trip_id: string
       direction_id: number
@@ -204,11 +206,13 @@ export default class StopsSqlRepostory {
         AND stop_times.stop_sequence = (SELECT MIN(stop_sequence) FROM stop_times where trip_id = trips.trip_id)
       ORDER BY trip_id
     `)
-    return Array.from(data.recordset.map(record => ({
-      ...record,
-      route_color: `#${record.route_color || '000000'}`,
-      route_text_color: `#${record.route_text_color || 'ffffff'}`,
-    })))
+    return Array.from(
+      data.recordset.map(record => ({
+        ...record,
+        route_color: `#${record.route_color || '000000'}`,
+        route_text_color: `#${record.route_text_color || 'ffffff'}`,
+      }))
+    )
   }
 
   async getTimetable(
