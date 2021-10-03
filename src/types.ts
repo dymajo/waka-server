@@ -13,6 +13,7 @@ export interface WakaConfig {
   connectionTimeout: number
   requestTimeout: number
   transactionLimit: number
+  deleteOldVersions: boolean
   api: {
     [api: string]: string | null
   }

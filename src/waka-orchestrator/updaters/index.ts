@@ -21,6 +21,7 @@ class UpdateManager {
   versionManager: VersionManager
   updaters: { [prefix: string]: {} }
   interval: NodeJS.Timeout
+  oldInterval: NodeJS.Timeout
   importer: Importer
 
   constructor(props: UpdateManagerProps) {
@@ -84,9 +85,13 @@ class UpdateManager {
       }
     })
 
-    // check the versions for remappings
+    // check the versions for remappings, this code is a bit gross i think
+    logger.info('Checking versions in 30 seconds...')
     setTimeout(this.checkVersions, 1 * 30 * 1000) // initially after 30 seconds
     this.interval = setInterval(this.checkVersions, 10 * 60 * 1000) // then every 10 mins
+
+    logger.info('Checking old versions in 5 minutes')
+    this.oldInterval = setInterval(this.checkOldVersions, 5 * 60 * 1000) // every 5 minutes, this is a less expensive operation
   }
 
   stop = () => {
@@ -186,6 +191,41 @@ class UpdateManager {
         )
         versionManager.updateMapping(prefix, id)
         versionManager.updateVersionStatus(id, 'imported')
+      }
+    })
+  }
+
+  checkOldVersions = async () => {
+    const { versionManager, config } = this
+    if (!config.deleteOldVersions) {
+      logger.info('Old versions deletion disabled, set deleteOldVersions to true to enable')
+      return
+    }
+    logger.info('Checking old versions...')
+    const allMappings = await versionManager.allMappings()
+    const allVersions = await versionManager.allVersions()
+    Object.keys(allVersions).forEach(async id => {
+      const version = allVersions[id]
+      const activeVersionId = (allMappings[version.prefix] || {}).value
+      if (activeVersionId == null) {
+        logger.info({ prefix: version.prefix, version: id }, 'No active version for region, skipping checks for version.')
+        return
+      }
+
+      const activeVersion = allVersions[activeVersionId]
+      // makes sure the versions are imported, aren't active
+      if (version.status === 'imported' && activeVersionId !== id) {
+        const activeDate = new Date(new Date(activeVersion.createdAt).getTime() - 1000 * 60 * 60 * 24 * 7)
+        const testDate = new Date(version.createdAt)
+        // and they're older than a new version
+        if (testDate < activeDate) {
+          logger.info({ prefix: version.prefix, version: id, activeVersion: activeVersionId }, 'Version is at least 1 week older than active version, deleting')
+          try {
+            await this.versionManager.deleteWorker(id)
+          } catch(err) {
+            logger.error(err, 'Error deleting worker.')
+          }
+        }
       }
     })
   }

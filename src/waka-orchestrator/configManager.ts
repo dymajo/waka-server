@@ -19,6 +19,7 @@ class ConfigManager {
       transactionLimit: 50000,
       connectionTimeout: 60000,
       requestTimeout: 60000,
+      deleteOldVersions: false,
 
       api: {
         'nz-akl': undefined, // dev-portal.at.govt.nz
