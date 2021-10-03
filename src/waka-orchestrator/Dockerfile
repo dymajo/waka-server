@@ -1,4 +1,4 @@
-FROM node:alpine as build
+FROM node:14-alpine as build
 WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
@@ -9,7 +9,7 @@ COPY . ./
 RUN npm test
 RUN npm run build:js
 
-FROM node:alpine as runtime
+FROM node:14-alpine as runtime
 ENV NODE_ENV=production
 ENV PORT=80
 EXPOSE 80
