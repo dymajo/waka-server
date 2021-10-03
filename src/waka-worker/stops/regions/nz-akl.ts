@@ -76,6 +76,7 @@ const agenda21mapper: { [carpark: string]: string } = {
   Downtown: 'downtown-carpark',
   Civic: 'civic-carpark',
   'Victoria St': 'victoria-st-carpark',
+  'Toka Puia': 'toka-puia-carpark',
   Ronwood: 'ronwood-ave-carpark',
 }
 
@@ -152,6 +153,19 @@ class StopsNZAKL extends BaseStops {
         availableSpaces: 0,
         maxSpaces: 678,
       },
+      'toka-puia-carpark': {
+        stop_id: 'toka-puia-carpark',
+        stop_lat: -36.79,
+        stop_lon: 174.770403,
+        stop_lng: 174.770403, // lng is deprecated
+        stop_region: 'nz-akl',
+        route_type: -1,
+        stop_name: 'Toka Puia Carpark',
+        stop_desc: 'Unknown Occupancy',
+        timestamp: new Date(0),
+        availableSpaces: 0,
+        maxSpaces: 420,
+      },
     }
   }
 
@@ -189,6 +203,10 @@ class StopsNZAKL extends BaseStops {
       const { data } = res
       data.forEach(carpark => {
         const cacheObj = this.carparks[agenda21mapper[carpark.name]]
+        if (cacheObj === undefined) {
+          logger.warn('Could not find carpark', carpark.name)
+          return
+        }
         cacheObj.availableSpaces = carpark.availableSpaces
         cacheObj.timestamp = new Date(carpark.timestamp)
         cacheObj.stop_desc = `${carpark.availableSpaces} spaces currently available`
