@@ -6,6 +6,7 @@ import SingleEndpoint from '../SingleEndpoint'
 interface ChristchurchRealtimeProps {
   wakaRedis: Redis
   logger: Logger
+  apiKey: string
   scheduleUpdatePullTimeout?: number
   scheduleLocationPullTimeout?: number
 }
@@ -15,17 +16,18 @@ class ChristchurchRealtime extends SingleEndpoint {
     super({
       axios: axios.create({
         baseURL:
-          'http://rtt.metroinfo.org.nz/rtt/public/utility/gtfsrealtime.aspx/',
+          'https://apis.metroinfo.co.nz/rti/gtfsrt/v1/',
         headers: {
+          'Ocp-Apim-Subscription-Key': props.apiKey,
           Accept: 'application/x-protobuf',
         },
         responseType: 'arraybuffer',
         timeout: 5000,
       }),
-      vehiclePositionEndpoint: 'vehicleposition',
-      tripUpdateEndpoint: 'tripupdate',
-      serviceAlertEndpoint: 'alert',
-      apiKeyRequired: false,
+      vehiclePositionEndpoint: 'vehicle-positions.pb',
+      tripUpdateEndpoint: 'trip-updates.pb',
+      serviceAlertEndpoint: 'service-alerts.pb',
+      apiKeyRequired: true,
       scheduleAlertPullTimeout: 60000,
       ...props,
     })

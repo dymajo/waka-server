@@ -35,6 +35,7 @@ class EnvMapper {
 
       // needed in importer & worker
       TFNSW_API_KEY: config.api['au-syd'],
+      NZCHC_API_KEY: config.api['nz-chc'],
     }
 
     if (subset === 'importer' || subset === 'importer-local') {
@@ -45,6 +46,9 @@ class EnvMapper {
       }
       if (config.prefix !== 'au-syd') {
         delete base.TFNSW_API_KEY
+      }
+      if (config.prefix !== 'nz-chc') {
+        delete base.NZCHC_API_KEY
       }
     } else {
       delete base.SHAPES_SKIP

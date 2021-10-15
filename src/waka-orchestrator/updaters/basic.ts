@@ -22,14 +22,18 @@ class BasicUpdater {
   url: string
   timeout: NodeJS.Timeout
   fallback: string
+  apiKey: string
+  apiKeyHeader: string
   constructor(props: BasicUpdaterProps) {
-    const { prefix, callback, delay, interval, url } = props
+    const { prefix, callback, delay, interval, url, apiKey, apiKeyHeader } = props
     this.prefix = prefix
     this.callback = callback
     this.delay = delay || 5
     this.interval = interval || 1440
     this.url = url
     this.timeout = null
+    this.apiKey = apiKey
+    this.apiKeyHeader = apiKeyHeader
   }
 
   start = async () => {
@@ -92,7 +96,11 @@ class BasicUpdater {
 
   download = async () => {
     const { prefix, url } = this
-    const res = await axios.get(url, { responseType: 'stream' })
+    let requestHeaders = {}
+    if (this.apiKeyHeader != null) {
+      requestHeaders[this.apiKeyHeader] = this.apiKey
+    }
+    const res = await axios.get(url, { responseType: 'stream', headers: requestHeaders })
     const { headers } = res
     if (res.headers['last-modified']) {
       const newest = new Date(headers['last-modified'])

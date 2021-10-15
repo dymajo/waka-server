@@ -33,6 +33,7 @@ export interface WakaConfig {
       shapesRegion: string
       url: string
       extended: boolean
+      apiKeyHeader: string
     }
   }
   importer: any
@@ -157,6 +158,8 @@ export interface BasicUpdaterProps {
   interval: number
   delay: number
   url: string
+  apiKey: string
+  apiKeyHeader: string
 }
 
 export interface ATUpdaterProps {

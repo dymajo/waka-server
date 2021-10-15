@@ -77,6 +77,10 @@ class UpdateManager {
           updater = new TfNSWUpdater(params)
         } else {
           const params = { prefix, url, delay, interval, callback, extended }
+          if (updaterConfig.apiKeyHeader) {
+            params.apiKey = config.api[prefix]
+            params.apiKeyHeader = updaterConfig.apiKeyHeader
+          }
           updater = new BasicUpdater(params)
         }
 
