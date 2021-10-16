@@ -7,7 +7,7 @@ ENV GOBIN=$GOPATH/bin
 RUN go get -v ./
 RUN go build -o waka-go-proxy
 
-FROM node:12 as docs
+FROM node:14 as docs
 WORKDIR /app
 COPY . ./
 RUN npm install apidoc
