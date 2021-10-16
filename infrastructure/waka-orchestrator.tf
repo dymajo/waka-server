@@ -144,7 +144,7 @@ resource "kubernetes_deployment" "waka-orchestrator" {
         service_account_name            = kubernetes_service_account.waka-orchestrator.metadata.0.name
 
         container {
-          image = "dymajo/waka-server:orchestrator-${jsondecode(data.http.git_sha.body).commit.sha}"
+          image = "ghcr.io/dymajo/waka-server/orchestrator:${jsondecode(data.http.git_sha.body).commit.sha}"
           name  = "waka-orchestrator"
 
           env {

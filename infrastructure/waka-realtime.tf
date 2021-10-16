@@ -81,7 +81,7 @@ resource "kubernetes_deployment" "waka-realtime" {
       spec {
         automount_service_account_token = "true"
         container {
-          image = "dymajo/waka-server:realtime-${jsondecode(data.http.git_sha.body).commit.sha}"
+          image = "ghcr.io/dymajo/waka-server/realtime:${jsondecode(data.http.git_sha.body).commit.sha}"
           name  = "waka-realtime"
 
           env {

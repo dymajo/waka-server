@@ -29,7 +29,7 @@ resource "kubernetes_deployment" "waka-proxy" {
       spec {
         automount_service_account_token = "true"
         container {
-          image = "dymajo/waka-server:proxy-${jsondecode(data.http.git_sha.body).commit.sha}"
+          image = "ghcr.io/dymajo/waka-server/proxy:${jsondecode(data.http.git_sha.body).commit.sha}"
           name  = "waka-proxy"
 
           env {

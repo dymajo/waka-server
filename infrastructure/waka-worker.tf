@@ -101,7 +101,7 @@ resource "kubernetes_deployment" "waka-worker" {
       spec {
         automount_service_account_token = "true"
         container {
-          image = "dymajo/waka-server:worker-${jsondecode(data.http.git_sha.body).commit.sha}"
+          image = "ghcr.io/dymajo/waka-server/worker:${jsondecode(data.http.git_sha.body).commit.sha}"
           name  = "waka-worker"
 
           env_from {
