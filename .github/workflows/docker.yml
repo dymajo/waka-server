@@ -27,31 +27,39 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run: docker build . --file Dockerfile --tag image
+        run: |
+          docker build . --file src/waka-go-proxy/Dockerfile --tag proxy
+          docker build . --file src/waka-orchestrator/Dockerfile --tag orchestrator
+          docker build . --file src/waka-realtime/Dockerfile --tag realtime
+          docker build . --file src/waka-worker/Dockerfile --tag worker
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}
+          SHA=$(git rev-parse HEAD)
 
           echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+          echo SHA=$SHA
 
-          docker tag image $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker tag proxy $IMAGE_ID/proxy:latest
+          docker tag proxy $IMAGE_ID/proxy:$SHA
+          docker push $IMAGE_ID/proxy:latest
+          docker push $IMAGE_ID/proxy:$SHA
 
-          # Also upload with git hash
-          SHA=$(git rev-parse HEAD)
-          docker tag image $IMAGE_ID:$SHA
-          docker push $IMAGE_ID:$SHA
+          docker tag orchestrator $IMAGE_ID/orchestrator:latest
+          docker tag orchestrator $IMAGE_ID/orchestrator:$SHA
+          docker push $IMAGE_ID/orchestrator:latest
+          docker push $IMAGE_ID/orchestrator:$SHA
+
+          docker tag realtime $IMAGE_ID/realtime:latest
+          docker tag realtime $IMAGE_ID/realtime:$SHA
+          docker push $IMAGE_ID/realtime:latest
+          docker push $IMAGE_ID/realtime:$SHA
+
+          docker tag worker $IMAGE_ID/worker:latest
+          docker tag worker $IMAGE_ID/worker:$SHA
+          docker push $IMAGE_ID/worker:latest
+          docker push $IMAGE_ID/worker:$SHA
