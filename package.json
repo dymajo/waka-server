@@ -89,7 +89,7 @@
     "morgan": "^1.10.0",
     "mssql": "^6.3.2",
     "p-ratelimit": "^0.11.0",
-    "protobufjs": "^6.11.2",
+    "protobufjs": "^6.11.3",
     "redis": "^2.8.0",
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.20",
