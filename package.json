@@ -79,7 +79,7 @@
     "colors": "^1.4.0",
     "csv-parse": "^4.16.3",
     "dotenv": "^8.6.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-http-proxy": "^1.6.2",
     "extract-zip": "^1.7.0",
     "ioredis": "^4.27.9",
