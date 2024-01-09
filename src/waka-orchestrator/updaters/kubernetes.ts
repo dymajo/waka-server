@@ -35,7 +35,7 @@ class KubernetesImporter {
     // regex is to make it DNS-1123 compliant
     const jobName = `waka-importer-${prefix}-${version
       .replace(/[_\. ]/g, '-')
-      .toLowerCase()}`
+      .toLowerCase().slice(0, 62)}`
 
     const k8sEnvironment = Object.keys(env).map(name => ({
       name,
