@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine as build
+FROM golang:1.22-alpine as build
 RUN apk update && apk add --no-cache git
 WORKDIR /app
 COPY src/waka-go-proxy ./
