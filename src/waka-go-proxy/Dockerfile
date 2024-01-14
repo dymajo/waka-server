@@ -1,9 +1,10 @@
-FROM golang:1.12-alpine as build
+FROM golang:1.16-alpine as build
 RUN apk update && apk add --no-cache git
 WORKDIR /app
 COPY src/waka-go-proxy ./
 ENV GOPATH /go
 ENV GOBIN=$GOPATH/bin
+RUN go mod init waka
 RUN go get -v ./
 RUN go build -o waka-go-proxy
 
