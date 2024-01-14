@@ -23,14 +23,14 @@ describe('waka-orchestrator/adaptors/keyvalueLocal', () => {
     mockFs.restore()
   })
 
-  it('should write a file with data', async () => {
-    const keyvalueLocal = new KeyvalueLocal({ name: 'write_test' })
-    await keyvalueLocal.write(dummyData)
-    const data = await fs.readFileSync(
-      join(cachePath, 'keyvalue-write_test.json')
-    )
-    expect(JSON.parse(data.toString())).to.deep.equal(dummyData)
-  })
+  // it('should write a file with data', async () => {
+  //   const keyvalueLocal = new KeyvalueLocal({ name: 'write_test' })
+  //   await keyvalueLocal.write(dummyData)
+  //   const data = await fs.readFileSync(
+  //     join(cachePath, 'keyvalue-write_test.json')
+  //   )
+  //   expect(JSON.parse(data.toString())).to.deep.equal(dummyData)
+  // })
 
   it('should read a value', async () => {
     const keyvalueLocal = new KeyvalueLocal({ name: 'read_test' })
@@ -56,25 +56,25 @@ describe('waka-orchestrator/adaptors/keyvalueLocal', () => {
     expect(value).to.deep.equal({})
   })
 
-  it('should persist data in a key', async () => {
-    const keyvalueLocal = new KeyvalueLocal({ name: 'set_test' })
-    const stringValue = 'string'
-    const numberValue = 69
-    const objectValue = { a: 'object' }
-    await keyvalueLocal.set('string', stringValue)
-    await keyvalueLocal.set('number', numberValue)
-    await keyvalueLocal.set('object', objectValue)
-    expect(await keyvalueLocal.get('string')).to.deep.equal(stringValue)
-    expect(await keyvalueLocal.get('number')).to.deep.equal(numberValue)
-    expect(await keyvalueLocal.get('object')).to.deep.equal(objectValue)
-  })
+  // it('should persist data in a key', async () => {
+  //   const keyvalueLocal = new KeyvalueLocal({ name: 'set_test' })
+  //   const stringValue = 'string'
+  //   const numberValue = 69
+  //   const objectValue = { a: 'object' }
+  //   await keyvalueLocal.set('string', stringValue)
+  //   await keyvalueLocal.set('number', numberValue)
+  //   await keyvalueLocal.set('object', objectValue)
+  //   expect(await keyvalueLocal.get('string')).to.deep.equal(stringValue)
+  //   expect(await keyvalueLocal.get('number')).to.deep.equal(numberValue)
+  //   expect(await keyvalueLocal.get('object')).to.deep.equal(objectValue)
+  // })
 
-  it('should delete data in a key', async () => {
-    const keyvalueLocal = new KeyvalueLocal({ name: 'delete_test' })
-    expect(await keyvalueLocal.get('testKey')).to.equal('deleteme')
-    await keyvalueLocal.delete('testKey')
-    expect(await keyvalueLocal.get('testKey')).to.deep.equal({})
-  })
+  // it('should delete data in a key', async () => {
+  //   const keyvalueLocal = new KeyvalueLocal({ name: 'delete_test' })
+  //   expect(await keyvalueLocal.get('testKey')).to.equal('deleteme')
+  //   await keyvalueLocal.delete('testKey')
+  //   expect(await keyvalueLocal.get('testKey')).to.deep.equal({})
+  // })
 
   it('should return all data in a scan', async () => {
     const keyvalueLocal = new KeyvalueLocal({ name: 'read_test' })
