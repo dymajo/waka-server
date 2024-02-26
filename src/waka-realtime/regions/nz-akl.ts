@@ -15,7 +15,7 @@ class AucklandRealtime extends SingleEndpoint {
   constructor(props: AucklandRealtimeProps) {
     super({
       axios: axios.create({
-        baseURL: 'https://api.at.govt.nz/v2/public/realtime/',
+        baseURL: 'https://api.at.govt.nz/realtime/legacy/',
         headers: {
           'Ocp-Apim-Subscription-Key': props.apiKey,
           Accept: 'application/x-protobuf',
